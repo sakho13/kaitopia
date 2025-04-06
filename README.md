@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# About KAITOPIA
 
-## Getting Started
+## 用語
 
-First, run the development server:
+- ユーザ ... このアプリを使用できる対象
+- ユーザロール ... ユーザの種類 [here](#ユーザロール)
+- スクール ... ユーザが所属している区分 [here](#スクール)
+  - セルフスクール ... ユーザがデフォルトで所属しているスクール
+- 問題 ... テストの各問題
+- テスト ... 1 つ以上の問題の集まり
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 機能
+
+### ユーザ管理
+
+Firebase Auth を使った認証機能を実装する。
+
+#### ユーザロール
+
+ユーザはいずれかのユーザロールを持つ。
+
+| role      | explain                                |
+| --------- | -------------------------------------- |
+| USER      | アカウントを作成した時のデフォルト     |
+| MODERATOR | 問題とテストを作成し自分で利用できる   |
+| TEACHER   | 問題とテストを作成し全体に公開できる　 |
+| ADMIN     | 開発者(最上位権限を持つロール)         |
+
+#### スクール
+
+ユーザを作成すると、固有のスクール(セルフスクール)が作成される。
+
+TEACHER 以上のロールを持つユーザは 2 つ以上のスクールを作成(最大 5 つ)できる。
+
+問題とテストは、いずれかのスクールに所属している。
+
+### テスト
+
+テストは下記のデータ構造を持つ。
+
+```plain
+テスト1
+ - 問題A
+ - 問題B
+ - 問題C
+テスト2
+ - 問題B // 別のテストに設定している問題をコピーできる
+ - 問題D
+ - 問題E
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### 問題種類
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+問題は、下記の種類の出題、回答形式がある
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 出題
+  - 文章題（短文）
+  - 文章題（長文） ... 1.1.0 リリース
+- 回答
+  - 選択式（単一、複数）
 
-## Learn More
+## ページ
 
-To learn more about Next.js, take a look at the following resources:
+### パス
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```plain
+(root)/ ... トップページ (LP)
+  p/ ...
+    login/
+    signup/
+  user/ ... ログイン後のトップページ
+  manage/ ... 管理者用のトップページ (MODERATOR以上のユーザがアクセスできる)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 開発
 
-## Deploy on Vercel
+### ブランチルール
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- main ... production ブランチ
+- develop ... 次回リリースブランチ (main からの派生)
+- (IssueNo)-(fix|refactor)/(label) ... 修正ブランチ (develop からの派生)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### CI/CD
+
+#### テスト実行
+
+Github Actions にて、PR 単位で自動テストを実行する。
+テストが全て成功しなければ、PR をマージできない。
+
+#### リリース
+
+main へ `cX.X.X` 形式のタグがプッシュされたタイミングで、DB マイグレーションを行い、GCP へのリリースを行う。
