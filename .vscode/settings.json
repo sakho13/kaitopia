@@ -27,5 +27,5 @@
     "editor.defaultFormatter": "Prisma.prisma"
   },
   "biome.enabled": false,
-  "cSpell.words": ["joincn"]
+  "cSpell.words": ["joincn", "Kaitopia"]
 }
