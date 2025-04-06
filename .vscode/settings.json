@@ -26,5 +26,6 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "biome.enabled": false
+  "biome.enabled": false,
+  "cSpell.words": ["joincn"]
 }
