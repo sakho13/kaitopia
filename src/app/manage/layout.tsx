@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { joincn } from "@/functions/joincn"
+import { joincn } from "@/lib/functions/joincn"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 
 type Props = {

@@ -1,4 +1,4 @@
-import { joincn } from "@/functions/joincn"
+import { joincn } from "@/lib/functions/joincn"
 
 type Props = {
   children: React.ReactNode
