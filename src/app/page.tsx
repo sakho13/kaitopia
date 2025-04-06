@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 export default function Home() {
   return (
     <div className='bg-background text-text font-sans'>
@@ -9,9 +11,13 @@ export default function Home() {
         <p className='text-lg md:text-xl mb-8'>
           Kaitopiaは、学習者と教育者のためのe-learningプラットフォームです。
         </p>
-        <button className='bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition'>
+
+        <Link
+          href={"/public/login"}
+          className='bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition'
+        >
           無料で始める
-        </button>
+        </Link>
       </section>
 
       {/* Features */}
