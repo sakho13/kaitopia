@@ -1,103 +1,93 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className='bg-background text-text font-sans'>
+      {/* Hero */}
+      <section className='bg-primary text-text-on-color py-20 px-4 text-center'>
+        <h1 className='text-4xl md:text-5xl font-bold mb-4'>
+          学びの未来を、もっと楽しくスマートに。
+        </h1>
+        <p className='text-lg md:text-xl mb-8'>
+          Kaitopiaは、学習者と教育者のためのe-learningプラットフォームです。
+        </p>
+        <button className='bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition'>
+          無料で始める
+        </button>
+      </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Features */}
+      <section className='py-16 px-6 max-w-6xl mx-auto'>
+        <h2 className='text-3xl font-bold text-center mb-12'>主な機能</h2>
+        <div className='grid md:grid-cols-2 gap-10'>
+          <div className='bg-background-subtle p-6 rounded-2xl shadow hover:shadow-lg'>
+            <h3 className='text-xl font-semibold mb-2'>🧠 自動問題生成</h3>
+            <p>
+              OpenAI API
+              を活用し、スキルやテーマに応じた問題を自動で生成します。
+            </p>
+          </div>
+          <div className='bg-background-subtle p-6 rounded-2xl shadow hover:shadow-lg'>
+            <h3 className='text-xl font-semibold mb-2'>
+              📊 スキル評価と進捗確認
+            </h3>
+            <p>
+              回答データをもとに学習者のスキルを見える化。モチベーションアップにも貢献。
+            </p>
+          </div>
+          <div className='bg-background-subtle p-6 rounded-2xl shadow hover:shadow-lg'>
+            <h3 className='text-xl font-semibold mb-2'>
+              👥 ユーザー・グループ管理
+            </h3>
+            <p>
+              管理者は学習グループの作成、進捗管理、レポート出力が可能です。
+            </p>
+          </div>
+          <div className='bg-background-subtle p-6 rounded-2xl shadow hover:shadow-lg'>
+            <h3 className='text-xl font-semibold mb-2'>
+              📝 テスト・模試モード
+            </h3>
+            <p>試験前対策にぴったりの模擬テスト機能を用意しています。</p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* Use Case */}
+      <section className='bg-white py-16 px-6'>
+        <div className='max-w-5xl mx-auto text-center'>
+          <h2 className='text-3xl font-bold mb-6'>こんな場面で活躍！</h2>
+          <div className='grid md:grid-cols-3 gap-8 mt-8'>
+            <div>
+              <h3 className='text-xl font-semibold mb-2'>🏫 小・中・高校</h3>
+              <p>教科別の反復問題で基礎力を強化。</p>
+            </div>
+            <div>
+              <h3 className='text-xl font-semibold mb-2'>🎓 大学・資格試験</h3>
+              <p>AIが弱点を分析し、個別対策を提供。</p>
+            </div>
+            <div>
+              <h3 className='text-xl font-semibold mb-2'>🏢 企業研修</h3>
+              <p>業務スキルの確認やeラーニング教材として活用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className='bg-smart text-white py-20 px-4 text-center'>
+        <h2 className='text-3xl md:text-4xl font-bold mb-6'>
+          今すぐKaitopiaを使ってみよう！
+        </h2>
+        <p className='mb-6'>
+          最初の30日間は無料。法人・個人問わずご利用いただけます。
+        </p>
+        <button className='bg-white text-smart font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition'>
+          サインアップする
+        </button>
+      </section>
+
+      {/* Footer */}
+      <footer className='bg-primary text-text-on-color text-center p-6 mt-10'>
+        <p>© 2025 Kaitopia Inc. All rights reserved.</p>
       </footer>
     </div>
-  );
+  )
 }
