@@ -7,6 +7,7 @@
   --primary-hover: #02a7bd;
   --fun: #ff6b6b;
   --smart: #7d6eff;
+  --smart-hover: #6b5bf8;
   --highlight: #ffe066;
   --background: #f9f9fb;
   --background-subtle: #e5faff;
@@ -25,6 +26,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-fun: var(--fun);
   --color-smart: var(--smart);
+  --color-smart-hover: var(--smart-hover);
   --color-highlight: var(--highlight);
   --color-background-subtle: var(--background-subtle);
   --color-text: var(--text);

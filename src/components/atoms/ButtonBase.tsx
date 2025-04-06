@@ -3,14 +3,14 @@ import { joincn } from "@/functions/joincn"
 type Props = {
   children: React.ReactNode
   sizeMode?: "fit" | "full"
-  colorMode?: "primary" | "secondary" | "tertiary" | "outline"
+  colorMode?: "primary" | "smart" | "ghost" | "outline"
   onClick?: () => void
 } & React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export function ButtonBase({
   children,
   sizeMode = "fit",
-  colorMode = "primary",
+  colorMode = "smart",
   onClick,
   className,
   ...args
@@ -19,8 +19,8 @@ export function ButtonBase({
 
   const colorMap = {
     primary: "bg-primary text-text-on-color hover:bg-primary-hover",
-    secondary: "bg-secondary text-text-on-color hover:bg-secondary-hover",
-    tertiary: "bg-tertiary text-text-on-color hover:bg-tertiary-hover",
+    smart: "bg-smart text-text-on-color hover:bg-smart-hover",
+    ghost: "bg-gray-200 hover:bg-gray-300",
     outline: "border border-gray-300 hover:bg-gray-50",
   }
 

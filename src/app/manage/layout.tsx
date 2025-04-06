@@ -1,9 +1,10 @@
 "use client"
 
+import { useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { joincn } from "@/functions/joincn"
-import { useMemo } from "react"
+import { ButtonBase } from "@/components/atoms/ButtonBase"
 
 type Props = {
   children: React.ReactNode
@@ -47,7 +48,7 @@ export default function Layout({ children }: Props) {
     <div
       className={joincn(`min-h-screen flex bg-background text-text font-sans`)}
     >
-      <aside className='w-64 bg-primary text-white p-6 space-y-4'>
+      <aside className='w-64 bg-primary text-white p-6 space-y-4 flex flex-col'>
         <h1 className='text-2xl font-bold'>KAITOPIA</h1>
 
         <nav className='space-y-2 mt-6'>
@@ -63,15 +64,28 @@ export default function Layout({ children }: Props) {
             </Link>
           ))}
         </nav>
+
+        <nav className='space-y-2 mt-auto'>
+          <Link
+            href={"/user"}
+            className={`block w-full text-left px-4 py-2 rounded-md hover:bg-primary-hover`}
+          >
+            ユーザ画面
+          </Link>
+        </nav>
       </aside>
 
       <main className='flex-1 p-8'>
         <div className='flex justify-between items-center mb-6'>
           <h2 className='text-2xl font-semibold'>{pageTitle}</h2>
 
-          <button className='bg-gray-200 text-sm px-4 py-2 rounded hover:bg-gray-300 transition'>
+          <ButtonBase
+            colorMode='ghost'
+            sizeMode='fit'
+            className='px-4 py-2 text-sm'
+          >
             ログアウト
-          </button>
+          </ButtonBase>
         </div>
 
         {children}
