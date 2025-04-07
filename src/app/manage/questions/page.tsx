@@ -1,4 +1,7 @@
+"use client"
+
 import { ButtonBase } from "@/components/atoms/ButtonBase"
+import { redirect } from "next/navigation"
 
 export default function Page() {
   return (
@@ -8,7 +11,12 @@ export default function Page() {
       <div className='flex justify-between mb-4'>
         <h3 className='text-lg font-semibold'>登録済みの問題</h3>
 
-        <ButtonBase colorMode='smart' sizeMode='fit' className='px-4'>
+        <ButtonBase
+          onClick={() => redirect("/manage/questions/new")}
+          colorMode='smart'
+          sizeMode='fit'
+          className='px-4'
+        >
           新しい問題を追加
         </ButtonBase>
       </div>
