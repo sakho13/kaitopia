@@ -4,14 +4,12 @@ type Props = {
   children: React.ReactNode
   sizeMode?: "fit" | "full"
   colorMode?: "primary" | "smart" | "ghost" | "outline"
-  onClick?: () => void
 } & React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export function ButtonBase({
   children,
   sizeMode = "fit",
   colorMode = "smart",
-  onClick,
   className,
   ...args
 }: Props) {
@@ -36,7 +34,6 @@ export function ButtonBase({
         `flex items-center justify-center gap-2`,
         className ?? "",
       )}
-      onClick={onClick}
     >
       {children}
     </button>
