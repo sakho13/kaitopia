@@ -13,6 +13,7 @@ type Props = {
 type NaviType = {
   label: string
   href: string
+  showNavBar: boolean
 }
 
 export default function Layout({ children }: Props) {
@@ -21,18 +22,33 @@ export default function Layout({ children }: Props) {
       {
         label: "ダッシュボード",
         href: "/manage/overview",
+        showNavBar: true,
       },
       {
         label: "問題管理",
         href: "/manage/questions",
+        showNavBar: true,
+      },
+      {
+        label: "問題作成",
+        href: "/manage/questions/new",
+        showNavBar: false,
+      },
+
+      {
+        label: "問題集管理",
+        href: "/manage/exercises",
+        showNavBar: true,
       },
       {
         label: "テスト管理",
         href: "/manage/question-tests",
+        showNavBar: true,
       },
       {
         label: "ユーザー管理",
         href: "/manage/users",
+        showNavBar: true,
       },
     ],
     [],
@@ -52,12 +68,12 @@ export default function Layout({ children }: Props) {
         <h1 className='text-2xl font-bold'>KAITOPIA</h1>
 
         <nav className='space-y-2 mt-6'>
-          {NAVI.map((item) => (
+          {NAVI.filter((item) => item.showNavBar).map((item) => (
             <Link
               key={item.label}
               href={item.href}
               className={`block w-full text-left px-4 py-2 rounded-md hover:bg-primary-hover ${
-                path === item.href ? "bg-primary-hover" : ""
+                path.startsWith(item.href) ? "bg-primary-hover" : ""
               }`}
             >
               {item.label}
