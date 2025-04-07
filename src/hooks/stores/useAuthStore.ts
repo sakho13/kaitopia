@@ -1,11 +1,9 @@
+import { User } from "firebase/auth"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
 type AuthState = {
-  user: {
-    uid: string
-    email: string
-  } | null
+  user: User | null
   idToken: string | null
   setAuth: (user: AuthState["user"], idToken: string) => void
   clearAuth: () => void
