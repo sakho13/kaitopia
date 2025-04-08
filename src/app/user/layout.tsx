@@ -1,3 +1,4 @@
+import { KaitopiaTitle } from "@/components/atoms/KaitopiaTitle"
 import UserPopover from "@/components/molecules/UserPopover"
 
 export default function Layout({
@@ -8,7 +9,7 @@ export default function Layout({
   return (
     <div className='bg-background text-text min-h-screen'>
       <header className='bg-primary text-text-on-color p-4 flex justify-between items-center shadow'>
-        <h1 className='text-2xl font-bold'>Kaitopia</h1>
+        <KaitopiaTitle />
 
         <UserPopover />
       </header>
