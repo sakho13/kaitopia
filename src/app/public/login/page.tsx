@@ -1,7 +1,8 @@
 "use client"
 
-import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { useState } from "react"
+import { redirect } from "next/navigation"
+import { ButtonBase } from "@/components/atoms/ButtonBase"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -11,6 +12,7 @@ export default function LoginPage() {
     e.preventDefault()
     // ここでFirebase AuthやAPI呼び出し
     console.log("ログイン", { email, password })
+    redirect("/user")
   }
 
   return (
@@ -55,7 +57,12 @@ export default function LoginPage() {
             />
           </div>
 
-          <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
+          <ButtonBase
+            type='submit'
+            sizeMode='full'
+            className='font-semibold'
+            onClick={handleLogin}
+          >
             ログイン
           </ButtonBase>
         </form>
