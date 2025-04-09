@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function Page() {
-  redirect("/manage/overview")
+  redirect("/v1/manage/overview")
 }

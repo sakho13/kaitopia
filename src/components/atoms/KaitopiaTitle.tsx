@@ -7,7 +7,7 @@ type Props = {
 }
 
 export function KaitopiaTitle({
-  href = "/user",
+  href = "/v1/user",
   className = "text-2xl",
 }: Props) {
   return (

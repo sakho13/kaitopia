@@ -12,7 +12,7 @@ export default function Page() {
         <h3 className='text-lg font-semibold'>登録済みの問題</h3>
 
         <ButtonBase
-          onClick={() => redirect("/manage/questions/new")}
+          onClick={() => redirect("/v1/manage/questions/new")}
           colorMode='smart'
           sizeMode='fit'
           className='px-4'

@@ -12,7 +12,7 @@ export default function LoginPage() {
     e.preventDefault()
     // ここでFirebase AuthやAPI呼び出し
     console.log("ログイン", { email, password })
-    redirect("/user")
+    redirect("/v1/user")
   }
 
   return (
