@@ -129,7 +129,7 @@ export default function Layout({ children }: Props) {
 
         <nav className='space-y-2 mt-auto'>
           <Link
-            href={"/user"}
+            href={"/v1/user"}
             className={`block w-full text-left px-4 py-2 rounded-md hover:bg-primary-hover`}
           >
             ユーザ画面
