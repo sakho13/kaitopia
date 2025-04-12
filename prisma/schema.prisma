@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ************ MODELS ************
+
+model User {
+  id String @id @default(cuid(2))
+
+  firebaseUid String @unique @map("firebase_uid")
+
+  role Role @default(USER) @map("role")
+
+  name         String   @map("name")
+  birthDayDate DateTime @map("birch_day_date")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  ownerSchools SchoolOwner[]
+  // memberSchools SchoolMember[]
+}
+
+model School {
+  id String @id @default(cuid(2))
+
+  name         String  @map("name")
+  description  String  @map("description")
+  // isSelfSchool ユーザが必ず所属するSchoolを識別する
+  isSelfSchool Boolean @default(false) @map("is_self_school")
+  // isPublic 公開しているがどうが(条件有無は無関係)
+  isPublic     Boolean @default(false) @map("is_public")
+  // isGlobal グローバルな学校(全ユーザが参加できる)
+  isGlobal     Boolean @default(false) @map("is_global")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  question Question[]
+  exercise Exercise[]
+
+  owners SchoolOwner[]
+  // members SchoolMember[]
+}
+
+model SchoolOwner {
+  schoolId String @map("school_id")
+  userId   String @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  // priority 学校のオーナーの優先度(0が一番高い)
+  priority  Int      @default(0) @map("priority")
+
+  school School @relation(fields: [schoolId], references: [id])
+  owner  User   @relation(fields: [userId], references: [id])
+
+  @@id([schoolId, userId])
+}
+
+// model SchoolMember {
+//   schoolId String @map("school_id")
+//   userId   String @map("user_id")
+
+//   createdAt DateTime @default(now()) @map("created_at")
+
+//   school School @relation(fields: [schoolId], references: [id])
+//   member User   @relation(fields: [userId], references: [id])
+
+//   @@id([schoolId, userId])
+// }
+
+model Question {
+  id       String @id @default(cuid(2))
+  schoolId String @map("school_id")
+
+  title        String       @map("title")
+  questionType QuestionType @map("question_type")
+  // answerType   AnswerType   @map("answer_type")
+
+  currentVersionId String? @unique @map("current_version") // 現在公開中のバージョン
+  draftVersionId   String? @unique @map("draft_version") // 編集中のバージョン
+
+  isPublished Boolean  @default(false) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  school         School            @relation(fields: [schoolId], references: [id])
+  versions       QuestionVersion[]
+  currentVersion QuestionVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  draftVersion   QuestionVersion?  @relation("DraftVersion", fields: [draftVersionId], references: [id])
+}
+
+model QuestionVersion {
+  id         String @id @default(cuid(2))
+  questionId String @map("question_id")
+  version    Int    @default(1) @map("version")
+
+  content String @map("content")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  question Question @relation(fields: [questionId], references: [id])
+
+  currentQuestion Question? @relation("CurrentVersion")
+  draftQuestion   Question? @relation("DraftVersion")
+
+  @@unique([questionId, version])
+}
+
+model Exercise {
+  id       String @id @default(cuid(2))
+  schoolId String @map("school_id")
+
+  title String @map("title")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  school School @relation(fields: [schoolId], references: [id])
+}
+
+model AnswerLog {
+  schoolId          String @map("school_id")
+  questionId        String @map("question_id")
+  questionVersionId Int    @map("question_version_id")
+  userId            String @map("user_id")
+
+  exerciseId String? @map("exercise_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([schoolId, questionId, questionVersionId])
+}
+
+// ************ MODELS ************
+
+// ************ ENUMS ************
+
+enum Role {
+  USER // default
+  MODERATOR // upgrade from USER
+  TEACHER // upgrade from MODERATOR
+
+  ADMIN // developer
+}
+
+/**
+ * 問題の種類
+ * TEXT: 文章題 (文章がメインの問題)
+ * IMAGE: 画像問題 (画像がメインの問題 説明用の文章もある)
+ * VIDEO: 動画問題 (動画がメインの問題 説明用の文章もある)
+ * AUDIO: 音声問題 (音声がメインの問題 説明用の文章もある)
+ * XXXXX: 虫食い問題
+ */
+enum QuestionType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+/**
+ * 回答の種類
+ * TEXT: 文章回答 (文章がメインの回答)
+ * SELECT: 選択肢回答 (選択肢から1つ選ぶ)
+ * MULTI_SELECT: 複数選択肢回答 (選択肢から複数選ぶ)
+ */
+enum AnswerType {
+  TEXT
+  SELECT
+  MULTI_SELECT
+}
+
+// ************ ENUMS ************
