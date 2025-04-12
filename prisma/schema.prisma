@@ -88,23 +88,27 @@ model Question {
 
   title        String       @map("title")
   questionType QuestionType @map("question_type")
-  // answerType   AnswerType   @map("answer_type")
+  answerType   AnswerType   @map("answer_type")
 
-  currentVersionId String? @unique @map("current_version") // 現在公開中のバージョン
-  draftVersionId   String? @unique @map("draft_version") // 編集中のバージョン
+  currentVersionId Int? @unique @map("current_version") // 現在公開中のバージョン
+  draftVersionId   Int? @unique @map("draft_version") // 編集中のバージョン
 
-  isPublished Boolean  @default(false) @map("is_published")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  isPublished Boolean   @default(false) @map("is_published")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  school         School            @relation(fields: [schoolId], references: [id])
-  versions       QuestionVersion[]
-  currentVersion QuestionVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
-  draftVersion   QuestionVersion?  @relation("DraftVersion", fields: [draftVersionId], references: [id])
+  school            School             @relation(fields: [schoolId], references: [id])
+  versions          QuestionVersion[]
+  currentVersion    QuestionVersion?   @relation("CurrentVersion", fields: [id, currentVersionId], references: [questionId, version])
+  draftVersion      QuestionVersion?   @relation("DraftVersion", fields: [id, draftVersionId], references: [questionId, version])
+  exerciseQuestions ExerciseQuestion[]
+
+  @@unique([id, currentVersionId], name: "question_current_version")
+  @@unique([id, draftVersionId], name: "question_draft_version")
 }
 
 model QuestionVersion {
-  id         String @id @default(cuid(2))
   questionId String @map("question_id")
   version    Int    @default(1) @map("version")
 
@@ -117,7 +121,7 @@ model QuestionVersion {
   currentQuestion Question? @relation("CurrentVersion")
   draftQuestion   Question? @relation("DraftVersion")
 
-  @@unique([questionId, version])
+  @@id([questionId, version])
 }
 
 model Exercise {
@@ -131,7 +135,8 @@ model Exercise {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  school School @relation(fields: [schoolId], references: [id])
+  school            School             @relation(fields: [schoolId], references: [id])
+  exerciseQuestions ExerciseQuestion[]
 }
 
 model AnswerLog {
@@ -145,6 +150,18 @@ model AnswerLog {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@id([schoolId, questionId, questionVersionId])
+}
+
+model ExerciseQuestion {
+  exerciseId String @map("exercise_id")
+  questionId String @map("question_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@id([exerciseId, questionId])
 }
 
 // ************ MODELS ************
@@ -176,14 +193,14 @@ enum QuestionType {
 
 /**
  * 回答の種類
- * TEXT: 文章回答 (文章がメインの回答)
  * SELECT: 選択肢回答 (選択肢から1つ選ぶ)
  * MULTI_SELECT: 複数選択肢回答 (選択肢から複数選ぶ)
+ * TEXT: 文章回答 (文章がメインの回答)
  */
 enum AnswerType {
-  TEXT
   SELECT
   MULTI_SELECT
+  TEXT
 }
 
 // ************ ENUMS ************
