@@ -50,11 +50,13 @@ async function transferExcises() {
         id: "intro_programming_1",
         title: "プログラミング入門",
         schoolId: "kaitopia_1",
+        description: "プログラミングの基礎を学ぶための問題集です。",
       },
       {
         id: "fundamental_information_technology_engineer_exam_1",
         title: "基本情報技術者試験 問題集1",
         schoolId: "kaitopia_1",
+        description: "基本情報技術者試験の過去問を集めた問題集です。",
       },
     ],
   })
