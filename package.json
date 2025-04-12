@@ -15,7 +15,9 @@
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:seed": "npx prisma db seed",
     "prisma:init": "npm run prisma:generate && npm run prisma:deploy && npm run prisma:seed",
-    "prisma:studio": "npx prisma studio"
+    "prisma:studio": "npx prisma studio",
+    "test": "jest",
+    "test:cov": "jest --coverage"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
