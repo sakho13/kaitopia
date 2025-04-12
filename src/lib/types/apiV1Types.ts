@@ -1,3 +1,5 @@
+import { UserBaseDate, UserBaseInfo } from "./base/userTypes"
+
 export type ApiV1OutBase<R> =
   | {
       success: true
@@ -54,4 +56,13 @@ export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
   key: K
   params: ApiV1ErrorMap[K] extends { params: infer P } ? P : null
   columnName?: string
+}
+
+export type ApiV1OutTypeMap = {
+  GetUser: {
+    user: UserBaseInfo & UserBaseDate
+  }
+  RegisterUser: {
+    user: UserBaseInfo & UserBaseDate
+  }
 }

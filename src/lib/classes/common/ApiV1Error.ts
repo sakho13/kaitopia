@@ -6,11 +6,16 @@ import {
 
 export class ApiV1Error<K extends keyof ApiV1ErrorMap> extends Error {
   private errors: ApiV1ErrorInput<K>[]
+  private option: { [key: string]: string }
 
-  constructor(errors: ApiV1ErrorInput<K>[]) {
+  constructor(
+    errors: ApiV1ErrorInput<K>[],
+    option: { [key: string]: string } = {},
+  ) {
     super("API V1 Error")
 
     this.errors = errors
+    this.option = option
   }
 
   public getError(): {
