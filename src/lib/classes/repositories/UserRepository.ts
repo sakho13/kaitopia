@@ -8,6 +8,13 @@ export class UserRepository {
 
   public async findUserByFirebaseUid(firebaseUid: string) {
     return await this.dbConnection.user.findFirst({
+      select: {
+        id: true,
+        name: true,
+        birthDayDate: true,
+        role: true,
+        ownerSchools: true,
+      },
       where: {
         firebaseUid: firebaseUid,
       },
