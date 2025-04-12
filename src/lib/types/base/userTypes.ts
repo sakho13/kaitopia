@@ -1,13 +1,11 @@
 import { School } from "./schoolTypes"
 
-export type User = UserBase &
+export type User = UserBaseInfo &
   UserBaseIdentity &
   UserBaseDate &
   UserRelationSchools
 
-export type UserBase = {
-  id: string
-
+export type UserBaseInfo = {
   name: string
   birthDayDate: Date
 
@@ -15,6 +13,8 @@ export type UserBase = {
 }
 
 export type UserBaseIdentity = {
+  id: string
+
   firebaseUid: string
 }
 
