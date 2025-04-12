@@ -2,20 +2,15 @@ import { UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
 
 export class UserService {
-  private static instance: UserService | null = null
-
   private _userId: string | null = null
   private _userRole: UserRoleType | null = null
 
-  private constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository) {}
 
   public static getInstance(
     ...args: ConstructorParameters<typeof UserRepository>
   ): UserService {
-    if (this.instance === null) {
-      this.instance = new UserService(new UserRepository(...args))
-    }
-    return this.instance
+    return new UserService(new UserRepository(...args))
   }
 
   public async getUserInfo(firebaseUid: string) {
