@@ -65,4 +65,15 @@ export type ApiV1OutTypeMap = {
   RegisterUser: {
     user: UserBaseInfo & UserBaseDate
   }
+
+  GetGlobalSchool: {
+    schools: {}[]
+  }
+  GetRecommendExercise: {
+    recommendExercises: {
+      id: string
+      title: string
+      description: string
+    }[]
+  }
 }
