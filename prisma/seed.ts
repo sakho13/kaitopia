@@ -47,8 +47,13 @@ async function transferExcises() {
     skipDuplicates: true,
     data: [
       {
-        id: "intro_programming",
+        id: "intro_programming_1",
         title: "プログラミング入門",
+        schoolId: "kaitopia_1",
+      },
+      {
+        id: "fundamental_information_technology_engineer_exam_1",
+        title: "基本情報技術者試験 問題集1",
         schoolId: "kaitopia_1",
       },
     ],
