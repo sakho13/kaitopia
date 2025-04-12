@@ -1,5 +1,6 @@
 "use client"
 
+import { RoundedFrame } from "@/components/atoms/RoundedFrame"
 import { useState } from "react"
 
 export default function Page() {
@@ -22,7 +23,7 @@ export default function Page() {
 
   return (
     <div className='bg-background min-h-screen text-text font-sans p-8'>
-      <div className='max-w-xl mx-auto bg-white p-6 rounded-2xl shadow'>
+      <RoundedFrame>
         <h1 className='text-2xl font-bold mb-6'>プロフィール</h1>
 
         {/* 名前 */}
@@ -83,7 +84,7 @@ export default function Page() {
             </button>
           )}
         </div>
-      </div>
+      </RoundedFrame>
     </div>
   )
 }
