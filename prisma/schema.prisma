@@ -113,8 +113,10 @@ model QuestionVersion {
   version    Int    @default(1) @map("version")
 
   content String @map("content")
+  hint    String @default("") @map("hint") // ヒント
 
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   question Question @relation(fields: [questionId], references: [id])
 
@@ -124,6 +126,23 @@ model QuestionVersion {
   @@id([questionId, version])
 }
 
+model QuestionAnswer {
+  questionId String @map("question_id")
+  version    Int    @map("version")
+  // QuestionTypeがTEXTの場合は1のみ
+  answerId   Int    @default(1) @map("answer_id")
+
+  // QuestionTypeがSELECT/MULTI_SELECTの場合
+  selectContent String?  @map("select_content") // 選択肢の内容
+  isCorrect     Boolean? @default(false) @map("is_correct") // 正解かどうか
+
+  // QuestionTypeがTEXTの場合
+  minLength Int? @map("min_length") // 最小文字数
+  maxLength Int? @map("max_length") // 最大文字数
+
+  @@id([questionId, version, answerId])
+}
+
 model Exercise {
   id       String @id @default(cuid(2))
   schoolId String @map("school_id")
@@ -131,25 +150,16 @@ model Exercise {
   title       String @map("title")
   description String @default("") @map("description")
 
+  isCanSkip      Boolean @default(false) @map("is_can_skip") // スキップ可能かどうか
+  isScoringBatch Boolean @default(false) @map("is_scoring_batch") // 一括採点可能かどうか
+
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   school            School             @relation(fields: [schoolId], references: [id])
   exerciseQuestions ExerciseQuestion[]
-}
-
-model AnswerLog {
-  schoolId          String @map("school_id")
-  questionId        String @map("question_id")
-  questionVersionId Int    @map("question_version_id")
-  userId            String @map("user_id")
-
-  exerciseId String? @map("exercise_id")
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@id([schoolId, questionId, questionVersionId])
+  AnswerLogSheet    AnswerLogSheet[]
 }
 
 model ExerciseQuestion {
@@ -162,6 +172,58 @@ model ExerciseQuestion {
   question Question @relation(fields: [questionId], references: [id])
 
   @@id([exerciseId, questionId])
+}
+
+// AnswerLogSheet あらゆるQuestionの回答記録のマスター
+model AnswerLogSheet {
+  userId String @map("user_id")
+  id     String @default(cuid(2))
+
+  // 合計正解数
+  // QuestionTypeがSELECT/MULTI_SELECTのみ集計
+  totalCorrectCount    Int @default(0) @map("total_correct_count")
+  // 合計不正解数
+  // QuestionTypeがSELECT/MULTI_SELECTのみ集計
+  totalIncorrectCount  Int @default(0) @map("total_incorrect_count")
+  // 合計未回答数
+  totalUnansweredCount Int @default(0) @map("total_unanswered_count")
+
+  // 問題集から回答された時
+  exerciseId String? @map("exercise_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  exercise Exercise? @relation(fields: [exerciseId], references: [id])
+  // answerLogs AnswerLog[]
+
+  @@id([userId, id])
+}
+
+model AnswerLog {
+  userId           String @map("user_id")
+  answerLogSheetId String @map("answer_log_sheet_id")
+  questionId       String @map("question_id")
+  version          Int    @map("version")
+
+  wasSkipped Boolean @default(false) @map("was_skipped") // スキップされたかどうか
+
+  // QuestionTypeがSELECT/MULTI_SELECTの場合
+  selectContent String?  @map("select_content") // 選択肢の answerId (MULTI_SELECTの場合はカンマ区切り)
+  isCorrect     Boolean? @default(false) @map("is_correct") // 正解かどうか
+
+  // QuestionTypeがTEXTの場合
+  textContent String? @map("text_content") // 回答の内容
+
+  // スコア
+  // QuestionTypeがSELECT/MULTI_SELECTの場合は正解が100点
+  // QuestionTypeがTEXTの場合は内容によって変わる
+  // 0点から100点の間でスコアをつける
+  score Int @default(0) @map("score")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([userId, answerLogSheetId, questionId, version])
 }
 
 // ************ MODELS ************
