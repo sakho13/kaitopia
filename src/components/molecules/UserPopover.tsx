@@ -35,18 +35,19 @@ export default function UserPopover() {
 
       {open && (
         <div className='absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50'>
-          <button
+          {/* <button
             onClick={() => handleNavigate("/v1/manage")}
             className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
           >
             管理画面
-          </button>
+          </button> */}
           <button
             onClick={() => handleNavigate("/v1/user/profile")}
             className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
           >
             ユーザ情報
           </button>
+
           <button
             onClick={() => {
               setOpen(false)
