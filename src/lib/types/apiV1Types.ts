@@ -1,4 +1,10 @@
-import { UserBaseDate, UserBaseInfo } from "./base/userTypes"
+import {
+  SchoolBase,
+  SchoolBaseDate,
+  SchoolBaseIdentity,
+} from "./base/schoolTypes"
+import { UserBaseInfo } from "./base/userTypes"
+import { ReplacedDateToString } from "./common/ReplacedDateToString"
 
 export type ApiV1OutBase<R> =
   | {
@@ -60,14 +66,11 @@ export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
 
 export type ApiV1OutTypeMap = {
   GetUser: {
-    user: Omit<UserBaseInfo, "birthDayDate"> & {
-      birthDayDate: string
-    }
+    user: ReplacedDateToString<UserBaseInfo>
   }
   RegisterUser: {
-    user: Omit<UserBaseInfo, "birthDayDate"> & {
-      birthDayDate: string
-    }
+    state: "register" | "login"
+    user: ReplacedDateToString<UserBaseInfo>
   }
 
   GetGlobalSchool: {
@@ -79,5 +82,10 @@ export type ApiV1OutTypeMap = {
       title: string
       description: string
     }[]
+  }
+  GetManageOwnSchools: {
+    schools: (SchoolBaseIdentity &
+      SchoolBase &
+      ReplacedDateToString<SchoolBaseDate>)[]
   }
 }

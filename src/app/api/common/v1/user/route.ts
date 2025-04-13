@@ -34,5 +34,15 @@ export async function POST(request: NextRequest) {
 
   return await api.execute("RegisterUser", async () => {
     await api.authorize(request)
+
+    return {
+      state: "register",
+      user: {
+        id: "",
+        name: "ユーザ名",
+        birthDayDate: new Date().toISOString(),
+        role: "USER",
+      },
+    }
   })
 }
