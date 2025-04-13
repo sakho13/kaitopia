@@ -2,6 +2,7 @@ import useSwr from "swr"
 import useSWRImmutable from "swr/immutable"
 import { useAuth } from "./useAuth"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
+import { useState } from "react"
 
 const fetcher = async <T extends keyof ApiV1OutTypeMap>(
   _label: T,
@@ -19,6 +20,13 @@ const fetcher = async <T extends keyof ApiV1OutTypeMap>(
     return res.json()
   }) as Promise<ApiV1OutBase<ApiV1OutTypeMap[T]>>
 
+// *******************
+//      common
+// *******************
+
+/**
+ * GET: `/api/common/v1/recommend-exercise`
+ */
 export function useGetRecommendExercises() {
   const { idToken } = useAuth()
 
@@ -34,4 +42,37 @@ export function useGetRecommendExercises() {
   } as const
 }
 
-export function useGetExercises() {}
+// *******************
+//      manage
+// *******************
+
+/**
+ * GET: `/api/manage/v1/exercises`
+ */
+export function useGetManageExercises() {
+  const { idToken } = useAuth()
+
+  const { data, isLoading } = useSwr(
+    ["/api/manage/v1/exercises", idToken],
+    async ([url, token]) =>
+      token ? fetcher("GetManageExercises", "GET", url, token) : null,
+  )
+
+  return {
+    dataTooGetManageExercises: data,
+    isLoadingToGetManageExercises: isLoading,
+  }
+}
+
+// *******************
+//      user
+// *******************
+
+export function useGetExercise(exerciseId: string) {
+  const { idToken } = useAuth()
+  const [loading, setLoading] = useState(true)
+
+  return {
+    isLoadingToGetExercise: loading,
+  }
+}

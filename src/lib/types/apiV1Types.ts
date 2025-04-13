@@ -1,4 +1,10 @@
 import {
+  ExerciseBase,
+  ExerciseBaseDate,
+  ExerciseBaseIdentifier,
+  ExerciseBaseProperty,
+} from "./base/exerciseTypes"
+import {
   SchoolBase,
   SchoolBaseDate,
   SchoolBaseIdentity,
@@ -85,4 +91,16 @@ export type ApiV1OutTypeMap = {
       SchoolBase &
       ReplacedDateToString<SchoolBaseDate>)[]
   }
+  GetManageExercises: {
+    exercises: (ExerciseBaseIdentifier &
+      ExerciseBase &
+      ReplacedDateToString<ExerciseBaseDate>)[]
+  }
+
+  GetUserExerciseInfo: {
+    exercise: ExerciseBase
+    property: ExerciseBaseProperty
+    questions: []
+  }
+  PostUserExerciseAnswer: {}
 }
