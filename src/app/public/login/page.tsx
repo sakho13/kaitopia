@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { redirect } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { handleGuestLoginByFirebase } from "@/lib/functions/firebaseActions"
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
     handleGuestLoginByFirebase()
       .then(() => {
-        redirect("/v1/user")
+        router.replace("/v1/user")
       })
       .catch(() => {
         alert(
