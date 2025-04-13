@@ -60,10 +60,14 @@ export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
 
 export type ApiV1OutTypeMap = {
   GetUser: {
-    user: UserBaseInfo & UserBaseDate
+    user: Omit<UserBaseInfo, "birthDayDate"> & {
+      birthDayDate: string
+    }
   }
   RegisterUser: {
-    user: UserBaseInfo & UserBaseDate
+    user: Omit<UserBaseInfo, "birthDayDate"> & {
+      birthDayDate: string
+    }
   }
 
   GetGlobalSchool: {

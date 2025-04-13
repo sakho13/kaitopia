@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
+import { DecodedIdToken } from "firebase-admin/auth"
 import { ApiV1Error } from "./ApiV1Error"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { verifyIdToken } from "@/lib/functions/firebaseAdmin"
 
 export class ApiV1Wrapper {
+  private decodedToken: DecodedIdToken | null = null
+
   constructor(private apiName: string) {}
 
   public async execute<R extends keyof ApiV1OutTypeMap>(
@@ -51,5 +54,17 @@ export class ApiV1Wrapper {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
     return decodedToken
+  }
+
+  public async isGuest() {
+    if (!this.decodedToken)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    return this.decodedToken.firebase?.sign_in_provider === "anonymous"
+  }
+
+  public getFirebaseUid() {
+    if (!this.decodedToken)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    return this.decodedToken.uid
   }
 }
