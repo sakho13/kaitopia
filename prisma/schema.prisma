@@ -91,8 +91,8 @@ model Question {
   questionType QuestionType @map("question_type")
   answerType   AnswerType   @map("answer_type")
 
-  currentVersionId Int? @unique @map("current_version") // 現在公開中のバージョン
-  draftVersionId   Int? @unique @map("draft_version") // 編集中のバージョン
+  currentVersionId Int? @map("current_version") // 現在公開中のバージョン
+  draftVersionId   Int? @map("draft_version") // 編集中のバージョン
 
   isPublished Boolean   @default(false) @map("is_published")
   createdAt   DateTime  @default(now()) @map("created_at")
