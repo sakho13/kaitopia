@@ -1,6 +1,10 @@
+import { UserRecommendExerciseSection } from "@/components/organisms/UserRecommendExerciseSection"
+
 export default function Page() {
   return (
     <div className='p-6 max-w-6xl mx-auto'>
+      <UserRecommendExerciseSection />
+
       <section className='mb-8'>
         <h2 className='text-xl font-semibold mb-4'>今日の学習</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
