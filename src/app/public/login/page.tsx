@@ -3,16 +3,38 @@
 import { useState } from "react"
 import { redirect } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
+import { handleGuestLoginByFirebase } from "@/lib/functions/firebaseActions"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     // ここでFirebase AuthやAPI呼び出し
     console.log("ログイン", { email, password })
     redirect("/v1/user")
+  }
+
+  const handleGuestLogin = () => {
+    if (loading) return
+
+    setLoading(true)
+
+    handleGuestLoginByFirebase()
+      .then(() => {
+        redirect("/v1/user")
+      })
+      .catch(() => {
+        alert(
+          "認証システムに問題が発生しました。公式アナウンスを確認してください。",
+        )
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (
@@ -68,6 +90,15 @@ export default function LoginPage() {
         </form>
 
         <div className='mt-6 text-center text-sm text-gray-500'>または</div>
+
+        <ButtonBase
+          colorMode='ghost'
+          sizeMode='full'
+          className='mt-4'
+          onClick={handleGuestLogin}
+        >
+          ゲストでログイン
+        </ButtonBase>
 
         <ButtonBase colorMode='outline' sizeMode='full' className='mt-4'>
           <img src='/google-logo.svg' alt='Google' className='w-5 h-5' />
