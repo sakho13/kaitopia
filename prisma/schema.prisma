@@ -121,8 +121,9 @@ model QuestionVersion {
 
   question Question @relation(fields: [questionId], references: [id])
 
-  currentQuestion Question? @relation("CurrentVersion")
-  draftQuestion   Question? @relation("DraftVersion")
+  currentQuestion Question?        @relation("CurrentVersion")
+  draftQuestion   Question?        @relation("DraftVersion")
+  questionAnswers QuestionAnswer[]
 
   @@id([questionId, version])
 }
@@ -140,6 +141,8 @@ model QuestionAnswer {
   // QuestionTypeがTEXTの場合
   minLength Int? @map("min_length") // 最小文字数
   maxLength Int? @map("max_length") // 最大文字数
+
+  questionVersion QuestionVersion @relation(fields: [questionId, version], references: [questionId, version])
 
   @@id([questionId, version, answerId])
 }
