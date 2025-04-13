@@ -1,10 +1,22 @@
 import { PrismaClient } from "@prisma/client"
+import { SeedDataIntroProgramming1 } from "./seedData/SeedDataIntroProgramming1"
 const prisma = new PrismaClient()
 
 async function main() {
   console.log(`Start seeding ...`)
 
-  await Promise.all([transferSchools(), transferExcises()])
+  await transferSchools()
+  await Promise.all([transferExcises(), transferQuestions()])
+
+  await prisma.question.updateMany({
+    data: { currentVersionId: 1 },
+    where: {
+      id: {
+        in: SeedDataIntroProgramming1.questions.map((q) => q.id),
+      },
+      schoolId: SeedDataIntroProgramming1.exercise.schoolId,
+    },
+  })
 
   console.log(`Seeding finished.`)
 }
@@ -46,18 +58,36 @@ async function transferExcises() {
   return await prisma.exercise.createMany({
     skipDuplicates: true,
     data: [
-      {
-        id: "intro_programming_1",
-        title: "プログラミング入門",
-        schoolId: "kaitopia_1",
-        description: "プログラミングの基礎を学ぶための問題集です。",
-      },
+      SeedDataIntroProgramming1.exercise,
       {
         id: "fundamental_information_technology_engineer_exam_1",
         title: "基本情報技術者試験 問題集1",
         schoolId: "kaitopia_1",
         description: "基本情報技術者試験の過去問を集めた問題集です。",
       },
+      {
+        id: "moped_license_1",
+        title: "原付免許問題集1",
+        schoolId: "kaitopia_1",
+        description: "原付免許の問題集です。",
+      },
     ],
+  })
+}
+
+async function transferQuestions() {
+  await prisma.question.createMany({
+    skipDuplicates: true,
+    data: SeedDataIntroProgramming1.questions,
+  })
+
+  await prisma.questionVersion.createMany({
+    skipDuplicates: true,
+    data: SeedDataIntroProgramming1.questionVersions,
+  })
+
+  await prisma.questionAnswer.createMany({
+    skipDuplicates: true,
+    data: SeedDataIntroProgramming1.questionAnswers,
   })
 }
