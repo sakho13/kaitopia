@@ -3,6 +3,8 @@ import { DecodedIdToken } from "firebase-admin/auth"
 import { ApiV1Error } from "./ApiV1Error"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { verifyIdToken } from "@/lib/functions/firebaseAdmin"
+import { UserService } from "../services/UserService"
+import { prisma } from "@/lib/prisma"
 
 export class ApiV1Wrapper {
   private decodedToken: DecodedIdToken | null = null
@@ -54,6 +56,26 @@ export class ApiV1Wrapper {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
     return decodedToken
+  }
+
+  /**
+   * 管理者ページのアクセス権限を確認する
+   * @param request
+   * @returns
+   */
+  public async checkAccessManagePage(request: NextRequest) {
+    await this.authorize(request)
+
+    const userService = UserService.getInstance(prisma)
+    const user = await userService.getUserInfo(this.getFirebaseUid())
+
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    if (!userService.canAccessManagePage)
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+
+    return { userService }
   }
 
   public async isGuest() {

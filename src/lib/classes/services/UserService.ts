@@ -26,6 +26,14 @@ export class UserService {
     return this._userId
   }
 
+  public get canAccessManagePage() {
+    return (
+      this._userRole === "ADMIN" ||
+      this._userRole === "TEACHER" ||
+      this._userRole === "MODERATOR"
+    )
+  }
+
   public get isAdmin() {
     return this._userRole === "ADMIN"
   }
