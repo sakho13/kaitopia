@@ -75,6 +75,14 @@ export type QuestionAnswerProperty = {
   }
 }
 
+/**
+ * 問題の回答を表す型
+ */
+export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
+  type: T
+  properties: QuestionAnswerProperty[T]
+}
+
 export type QuestionAnswerContent = {
   SELECT: {
     answerId: string
@@ -87,6 +95,9 @@ export type QuestionAnswerContent = {
   }
 }
 
+/**
+ * ユーザが選択/入力した回答を表す型
+ */
 export type UserAnswer<T extends QuestionAnswerTypeType> = {
   type: T
   answer: QuestionAnswerContent[T]
