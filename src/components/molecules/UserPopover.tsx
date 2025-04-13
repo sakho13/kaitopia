@@ -2,32 +2,15 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
 
 export default function UserPopover() {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-
-  // outside click handler
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  const handleNavigate = (path: string) => {
-    setOpen(false)
-    router.push(path)
-  }
+  const { open, ref, handleNavigate, signOut, toggleOpen } = useUserPopover()
 
   return (
     <div className='relative' ref={ref}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={toggleOpen}
         className='w-10 h-10 rounded-full bg-smart flex items-center justify-center text-white hover:opacity-90 hover:cursor-pointer'
       >
         👤
@@ -49,12 +32,7 @@ export default function UserPopover() {
           </button>
 
           <button
-            onClick={() => {
-              setOpen(false)
-              // ログアウト処理（FirebaseやAuth API連携予定）
-              alert("ログアウトしました")
-              router.push("/login")
-            }}
+            onClick={signOut}
             className='w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500'
           >
             ログアウト
@@ -63,4 +41,37 @@ export default function UserPopover() {
       )}
     </div>
   )
+}
+
+function useUserPopover() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleNavigate = (path: string) => {
+    setOpen(false)
+    router.push(path)
+  }
+
+  const signOut = () => {
+    handleLogoutByFirebase()
+    setOpen(false)
+    router.push("/public/login")
+  }
+
+  const toggleOpen = () => {
+    setOpen((prev) => !prev)
+  }
+
+  return { open, ref, handleNavigate, signOut, toggleOpen }
 }
