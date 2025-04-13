@@ -73,9 +73,6 @@ export type ApiV1OutTypeMap = {
     user: ReplacedDateToString<UserBaseInfo>
   }
 
-  GetGlobalSchool: {
-    schools: {}[]
-  }
   GetRecommendExercise: {
     recommendExercises: {
       id: string

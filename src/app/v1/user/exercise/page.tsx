@@ -1,30 +1,29 @@
 "use client"
 
-import { UserLayoutSection } from "../molecules/UserLayoutSection"
+import { InfoArea } from "@/components/atoms/InfoArea"
+import { SectionTitle } from "@/components/atoms/SectionTitle"
+import { useGetRecommendExercises } from "@/hooks/useApiV1"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
-import { useRouter } from "next/navigation"
-import { useGetRecommendExercises } from "@/hooks/useApiV1"
-import { InfoArea } from "../atoms/InfoArea"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect } from "react"
 
-export function UserRecommendExerciseSection() {
+export default function Page() {
   const router = useRouter()
+  const param = useParams<{ eid?: string }>()
+
   const { dataTooGetRecommendExercises } = useGetRecommendExercises()
 
+  useEffect(() => {
+    //
+  }, [param.eid])
+
   return (
-    <UserLayoutSection
-      title='おすすめの問題集'
-      action={
-        <button
-          className='text-sm text-primary hover:text-primary-hover font-bold cursor-pointer'
-          onClick={() => router.push(`/v1/user/exercise`)}
-        >
-          もっと見る
-        </button>
-      }
-    >
-      <div className='flex gap-x-3'>
-        {dataTooGetRecommendExercises?.success
+    <div className='p-6 max-w-6xl mx-auto'>
+      <SectionTitle title='おすすめの問題集' />
+
+      <section className='mb-6 flex gap-x-3'>
+        {dataTooGetRecommendExercises && dataTooGetRecommendExercises.success
           ? dataTooGetRecommendExercises.data.recommendExercises.map(
               (exercise) => (
                 <InfoArea
@@ -36,7 +35,9 @@ export function UserRecommendExerciseSection() {
                   )}
                   onClick={() =>
                     router.push(
-                      `/v1/user/exercise?eid=${encodeBase64(exercise.id)}`,
+                      `/v1/user/exercise/venue?eid=${encodeBase64(
+                        exercise.id,
+                      )}`,
                     )
                   }
                 >
@@ -46,7 +47,7 @@ export function UserRecommendExerciseSection() {
               ),
             )
           : null}
-      </div>
-    </UserLayoutSection>
+      </section>
+    </div>
   )
 }
