@@ -1,3 +1,4 @@
+import { getAnalytics } from "firebase/analytics"
 import { initializeApp, getApps } from "firebase/app"
 import { getAuth } from "firebase/auth"
 
@@ -10,6 +11,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 }
 
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
+const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig)
 
 export const firebaseAuthClient = getAuth(app)
+export const analytics = getAnalytics(app)
