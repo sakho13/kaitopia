@@ -1,7 +1,13 @@
 import { PrismaClient } from "@prisma/client"
 
 export class QuestionRepository {
-  constructor(private dbConnection: PrismaClient) {}
+  private dbConnection: PrismaClient
 
-  //
+  constructor(dbConnection: PrismaClient) {
+    this.dbConnection = dbConnection
+  }
+
+  public set resetDbConnection(dbConnection: PrismaClient) {
+    this.dbConnection = dbConnection
+  }
 }

@@ -10,7 +10,8 @@ export function GET(request: NextRequest) {
   return api.execute("GetRecommendExercise", async () => {
     await api.authorize(request)
 
-    const exerciseService = ExerciseService.getInstance(prisma)
+    const exerciseService = new ExerciseService()
+    exerciseService.resetExerciseRepository(prisma)
 
     const recommendExercises = await exerciseService.getRecommendExercises()
 

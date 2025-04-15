@@ -1,7 +1,15 @@
 import { PrismaClient } from "@prisma/client"
 
 export class ExerciseRepository {
-  constructor(private dbConnection: PrismaClient) {}
+  private dbConnection: PrismaClient
+
+  constructor(dbConnection: PrismaClient) {
+    this.dbConnection = dbConnection
+  }
+
+  public set resetDbConnection(dbConnection: PrismaClient) {
+    this.dbConnection = dbConnection
+  }
 
   public async findExerciseInGlobalSchool(count?: number) {
     return await this.dbConnection.exercise.findMany({
@@ -44,4 +52,44 @@ export class ExerciseRepository {
       },
     })
   }
+
+  public async findExerciseBySchoolId(schoolId?: string) {
+    return await this.dbConnection.exercise.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        schoolId: true,
+        createdAt: true,
+        updatedAt: true,
+        isCanSkip: true,
+        isScoringBatch: true,
+      },
+      where: {
+        schoolId,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    })
+  }
+
+  public async createExercise(
+    schoolId: string,
+    property: {
+      title: string
+      description: string
+      isCanSkip: boolean
+      isScoringBatch: boolean
+    },
+  ) {
+    return await this.dbConnection.exercise.create({
+      data: {
+        schoolId,
+        ...property,
+      },
+    })
+  }
+
+  // public async insertLogs() {}
 }
