@@ -6,11 +6,6 @@ describe("lib/classes/services/UserService", () => {
     jest.clearAllMocks()
   })
 
-  test("インスタンス化できること", () => {
-    const userService = UserService.getInstance({} as PrismaClient)
-    expect(userService).toBeInstanceOf(UserService)
-  })
-
   describe("getUserInfo", () => {
     test("通常のユーザ情報が取得できる", async () => {
       const connection = {
@@ -24,9 +19,8 @@ describe("lib/classes/services/UserService", () => {
           }),
         },
       }
-      const userService = UserService.getInstance(
-        connection as unknown as PrismaClient,
-      )
+      const userService = new UserService()
+      userService.resetUserRepository(connection as unknown as PrismaClient)
       const userInfo = await userService.getUserInfo("testId")
       expect(userInfo).toEqual({
         id: "testId",
