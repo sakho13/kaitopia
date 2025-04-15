@@ -66,8 +66,21 @@ export class ExerciseService {
     return exercise
   }
 
+  /**
+   * 問題集を作成する
+   *
+   * @description スキップ無効、一括採点有効で作成する
+   */
   public async createExercise(schoolId: string, property: ExerciseBase) {
-    //
+    if (!this._exerciseRepository)
+      throw new Error("ExerciseRepository is not set")
+
+    return await this._exerciseRepository.createExercise(schoolId, {
+      title: property.title,
+      description: property.description,
+      isCanSkip: false,
+      isScoringBatch: true,
+    })
   }
 
   public async updateExercise() {}
@@ -86,4 +99,8 @@ export class ExerciseService {
       answerLogSheetId: "answerLogSheetId",
     }
   }
+
+  // ************************
+  //       validate
+  // ************************
 }
