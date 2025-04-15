@@ -4,7 +4,15 @@ import { UserBaseInfo } from "@/lib/types/base/userTypes"
 import { PrismaClient } from "@prisma/client"
 
 export class UserRepository {
-  constructor(private dbConnection: PrismaClient) {}
+  private dbConnection: PrismaClient
+
+  constructor(dbConnection: PrismaClient) {
+    this.dbConnection = dbConnection
+  }
+
+  public set resetDbConnection(dbConnection: PrismaClient) {
+    this.dbConnection = dbConnection
+  }
 
   public async findUserByFirebaseUid(firebaseUid: string) {
     return await this.dbConnection.user.findFirst({

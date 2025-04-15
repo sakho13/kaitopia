@@ -2,19 +2,23 @@ import { UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
 
 export class UserService {
+  private _userRepository: UserRepository | null = null
+
   private _userId: string | null = null
   private _userRole: UserRoleType | null = null
 
-  constructor(private userRepository: UserRepository) {}
+  constructor() {}
 
-  public static getInstance(
+  public resetUserRepository(
     ...args: ConstructorParameters<typeof UserRepository>
-  ): UserService {
-    return new UserService(new UserRepository(...args))
+  ) {
+    this._userRepository = new UserRepository(...args)
   }
 
   public async getUserInfo(firebaseUid: string) {
-    const user = await this.userRepository.findUserByFirebaseUid(firebaseUid)
+    if (!this._userRepository) throw new Error("UserRepository is not set")
+
+    const user = await this._userRepository.findUserByFirebaseUid(firebaseUid)
     if (user) {
       this._userId = user.id
       this._userRole = user.role

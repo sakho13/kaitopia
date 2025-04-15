@@ -66,7 +66,8 @@ export class ApiV1Wrapper {
   public async checkAccessManagePage(request: NextRequest) {
     await this.authorize(request)
 
-    const userService = UserService.getInstance(prisma)
+    const userService = new UserService()
+    userService.resetUserRepository(prisma)
     const user = await userService.getUserInfo(this.getFirebaseUid())
 
     if (!user)
