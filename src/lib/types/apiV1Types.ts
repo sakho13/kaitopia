@@ -1,3 +1,4 @@
+import { ApiV1Error } from "../classes/common/ApiV1Error"
 import {
   ExerciseBase,
   ExerciseBaseDate,
@@ -66,8 +67,28 @@ export type ApiV1ErrorMap = {
 
 export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
   key: K
-  params: ApiV1ErrorMap[K] extends { params: infer P } ? P : null
+  params: ApiV1ErrorMap[K]["params"] extends infer P
+    ? P extends readonly string[]
+      ? { [K in P[number]]: string }
+      : null
+    : null
   columnName?: string
+}
+
+export type ApiV1InTypeMap = {
+  GetManageExercises: {
+    // クエリパラメータ
+    schoolId?: string
+  }
+
+  PostManageExercise: {
+    schoolId: string
+    property: ExerciseBase
+  }
+
+  PostUserExerciseAnswer: {
+    exerciseId: string
+  }
 }
 
 export type ApiV1OutTypeMap = {
@@ -96,6 +117,11 @@ export type ApiV1OutTypeMap = {
       ExerciseBase &
       ReplacedDateToString<ExerciseBaseDate>)[]
   }
+  PostManageExercise: {
+    exercise: ExerciseBaseIdentifier &
+      ExerciseBase &
+      ReplacedDateToString<ExerciseBaseDate>
+  }
 
   GetUserExerciseInfo: {
     exercise: ExerciseBase
@@ -104,3 +130,13 @@ export type ApiV1OutTypeMap = {
   }
   PostUserExerciseAnswer: {}
 }
+
+export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =
+  | {
+      error: ApiV1Error<E>
+      result: null
+    }
+  | {
+      error: null
+      result: S
+    }

@@ -19,6 +19,6 @@ export type ExerciseBaseProperty = {
 }
 
 export type ExerciseBaseDate = {
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
