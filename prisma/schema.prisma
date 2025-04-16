@@ -124,6 +124,7 @@ model QuestionVersion {
   currentQuestion Question?        @relation("CurrentVersion")
   draftQuestion   Question?        @relation("DraftVersion")
   questionAnswers QuestionAnswer[]
+  answerLogs      AnswerLog[]
 
   @@id([questionId, version])
 }
@@ -163,7 +164,7 @@ model Exercise {
 
   school            School             @relation(fields: [schoolId], references: [id])
   exerciseQuestions ExerciseQuestion[]
-  AnswerLogSheet    AnswerLogSheet[]
+  answerLogSheet    AnswerLogSheet[]
 }
 
 model ExerciseQuestion {
@@ -179,9 +180,12 @@ model ExerciseQuestion {
 }
 
 // AnswerLogSheet あらゆるQuestionの回答記録のマスター
+// いわゆる回答用紙
 model AnswerLogSheet {
-  userId String @map("user_id")
-  id     String @default(cuid(2))
+  userId           String @map("user_id")
+  answerLogSheetId String @default(cuid(2))
+
+  isInProgress Boolean @default(false) @map("is_in_progress") // 回答途中かどうか
 
   // 合計正解数
   // QuestionTypeがSELECT/MULTI_SELECTのみ集計
@@ -198,10 +202,10 @@ model AnswerLogSheet {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  exercise Exercise? @relation(fields: [exerciseId], references: [id])
-  // answerLogs AnswerLog[]
+  exercise   Exercise?   @relation(fields: [exerciseId], references: [id])
+  answerLogs AnswerLog[]
 
-  @@id([userId, id])
+  @@id([userId, answerLogSheetId])
 }
 
 model AnswerLog {
@@ -226,6 +230,9 @@ model AnswerLog {
   score Int @default(0) @map("score")
 
   createdAt DateTime @default(now()) @map("created_at")
+
+  questionVersion QuestionVersion @relation(fields: [questionId, version], references: [questionId, version])
+  answerLogSheet  AnswerLogSheet  @relation(fields: [userId, answerLogSheetId], references: [userId, answerLogSheetId])
 
   @@id([userId, answerLogSheetId, questionId, version])
 }
