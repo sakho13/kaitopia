@@ -1,16 +1,6 @@
-import { PrismaClient } from "@prisma/client"
+import { RepositoryBase } from "../common/RepositoryBase"
 
-export class ExerciseRepository {
-  private dbConnection: PrismaClient
-
-  constructor(dbConnection: PrismaClient) {
-    this.dbConnection = dbConnection
-  }
-
-  public set resetDbConnection(dbConnection: PrismaClient) {
-    this.dbConnection = dbConnection
-  }
-
+export class ExerciseRepository extends RepositoryBase {
   public async findExerciseInGlobalSchool(count?: number) {
     return await this.dbConnection.exercise.findMany({
       select: {
@@ -99,5 +89,26 @@ export class ExerciseRepository {
     })
   }
 
-  // public async insertLogs() {}
+  /**
+   * 進行中の問題集を取得/登録する
+   */
+  public async getLogSheetInProgress(userId: string, exerciseId: string) {
+    // return await this.dbConnection.$transaction(async (tx) => {
+    //   const logSheetInProgress = await tx.answerLogSheet.findFirst({
+    //     where: {
+    //       isInProgress: true,
+    //       userId,
+    //       exerciseId,
+    //     },
+    //   })
+    //   if (logSheetInProgress) return logSheetInProgress
+    //   return await tx.answerLogSheet.create({
+    //     data: {
+    //       userId,
+    //       exerciseId,
+    //       isInProgress: true,
+    //     },
+    //   })
+    // })
+  }
 }

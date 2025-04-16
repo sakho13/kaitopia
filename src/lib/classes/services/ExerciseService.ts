@@ -2,29 +2,14 @@ import { ExerciseBase } from "@/lib/types/base/exerciseTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { UserRepository } from "../repositories/UserRepository"
+import { ServiceBase } from "../common/ServiceBase"
 
-export class ExerciseService {
-  private _exerciseRepository: ExerciseRepository | null = null
-  private _userRepository: UserRepository | null = null
-
-  public resetExerciseRepository(
-    ...args: ConstructorParameters<typeof ExerciseRepository>
-  ) {
-    this._exerciseRepository = new ExerciseRepository(...args)
-  }
-
-  public resetUserRepository(
-    ...args: ConstructorParameters<typeof UserRepository>
-  ) {
-    this._userRepository = new UserRepository(...args)
-  }
-
+export class ExerciseService extends ServiceBase {
   public async getRecommendExercises() {
-    if (!this._exerciseRepository)
-      throw new Error("ExerciseRepository is not set")
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
     const recommendExercises =
-      await this._exerciseRepository.findExerciseInGlobalSchool(10)
+      await exerciseRepository.findExerciseInGlobalSchool(10)
     return recommendExercises.map((exercise) => {
       return {
         id: exercise.id,
@@ -35,12 +20,9 @@ export class ExerciseService {
   }
 
   public async getExercisesForManage(schoolId?: string) {
-    if (!this._exerciseRepository)
-      throw new Error("ExerciseRepository is not set")
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
-    const exercises = await this._exerciseRepository.findExerciseBySchoolId(
-      schoolId,
-    )
+    const exercises = await exerciseRepository.findExerciseBySchoolId(schoolId)
     return exercises.map((exercise) => {
       return {
         schoolId: exercise.schoolId,
@@ -56,10 +38,9 @@ export class ExerciseService {
   }
 
   public async getExerciseById(exerciseId: string) {
-    if (!this._exerciseRepository)
-      throw new Error("ExerciseRepository is not set")
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
-    const exercise = await this._exerciseRepository.findExerciseById(exerciseId)
+    const exercise = await exerciseRepository.findExerciseById(exerciseId)
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
@@ -72,10 +53,9 @@ export class ExerciseService {
    * @description スキップ無効、一括採点有効で作成する
    */
   public async createExercise(schoolId: string, property: ExerciseBase) {
-    if (!this._exerciseRepository)
-      throw new Error("ExerciseRepository is not set")
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
-    return await this._exerciseRepository.createExercise(schoolId, {
+    return await exerciseRepository.createExercise(schoolId, {
       title: property.title,
       description: property.description,
       isCanSkip: false,
@@ -87,11 +67,13 @@ export class ExerciseService {
 
   public async deleteExercise(exerciseId: string) {}
 
+  /**
+   * 問題集の回答を開始する
+   * @param exerciseId
+   * @returns
+   */
   public async startExercise(exerciseId: string) {
-    if (!this._userRepository)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-
-    // const userId = this._userRepository.userId
+    const userRepository = new UserRepository(this.dbConnection)
 
     //
 

@@ -8,13 +8,12 @@ describe("lib/classes/services/ExerciseService", () => {
 
   describe("getRecommendExercises", () => {
     test("おすすめ問題集なし", async () => {
-      const exerciseService = new ExerciseService()
       const connection = {
         exercise: {
           findMany: jest.fn().mockResolvedValueOnce([]),
         },
       }
-      exerciseService.resetExerciseRepository(
+      const exerciseService = new ExerciseService(
         connection as unknown as PrismaClient,
       )
 
@@ -23,7 +22,6 @@ describe("lib/classes/services/ExerciseService", () => {
     })
 
     test("おすすめ問題集あり", async () => {
-      const exerciseService = new ExerciseService()
       const connection = {
         exercise: {
           findMany: jest.fn().mockResolvedValueOnce([
@@ -35,7 +33,7 @@ describe("lib/classes/services/ExerciseService", () => {
           ]),
         },
       }
-      exerciseService.resetExerciseRepository(
+      const exerciseService = new ExerciseService(
         connection as unknown as PrismaClient,
       )
 
