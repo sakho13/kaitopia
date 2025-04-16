@@ -11,13 +11,16 @@ export type QuestionBaseIdentifier = {
 
 export type QuestionBase = {
   title: string
-  currentVersion: number
   questionType: QuestionTypeType
   answerType: QuestionAnswerTypeType
 }
 
 export type QuestionBaseStatus = {
   isPublished: boolean
+}
+
+export type QuestionBasePublishedState = {
+  currentVersion: number
 }
 
 export type QuestionBaseEditState = {
@@ -83,25 +86,27 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
   properties: QuestionAnswerProperty[T]
 }
 
-export type QuestionAnswerContent = {
-  SELECT: {
-    answerId: string
-  }
-  MULTI_SELECT: {
-    answerId: string[]
-  }
-  TEXT: {
-    content: string
-  }
-}
-
-/**
- * ユーザが選択/入力した回答を表す型
- */
-export type UserAnswer<T extends QuestionAnswerTypeType> = {
-  type: T
-  answer: QuestionAnswerContent[T]
-}
+export type QuestionAnswerContent = Omit<
+  QuestionAnswerBaseIdentifier,
+  "exerciseId"
+> &
+  (
+    | {
+        type: "SKIP"
+      }
+    | {
+        type: "SELECT"
+        answerId: string
+      }
+    | {
+        type: "MULTI_SELECT"
+        answerIds: string[]
+      }
+    | {
+        type: "TEXT"
+        content: string
+      }
+  )
 
 export const QuestionType = {
   TEXT: "TEXT",
