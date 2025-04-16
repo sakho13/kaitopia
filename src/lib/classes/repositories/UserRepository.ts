@@ -1,17 +1,11 @@
 // API Route 内で使用するリポジトリクラスを定義する
 
 import { UserBaseInfo } from "@/lib/types/base/userTypes"
-import { PrismaClient } from "@prisma/client"
+import { RepositoryBase } from "../common/RepositoryBase"
 
-export class UserRepository {
-  private dbConnection: PrismaClient
-
-  constructor(dbConnection: PrismaClient) {
-    this.dbConnection = dbConnection
-  }
-
-  public set resetDbConnection(dbConnection: PrismaClient) {
-    this.dbConnection = dbConnection
+export class UserRepository extends RepositoryBase {
+  constructor(...base: ConstructorParameters<typeof RepositoryBase>) {
+    super(...base)
   }
 
   public async findUserByFirebaseUid(firebaseUid: string) {

@@ -1,24 +1,17 @@
 import { UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
+import { PrismaClient } from "@prisma/client"
 
 export class UserService {
-  private _userRepository: UserRepository | null = null
-
   private _userId: string | null = null
   private _userRole: UserRoleType | null = null
 
-  constructor() {}
-
-  public resetUserRepository(
-    ...args: ConstructorParameters<typeof UserRepository>
-  ) {
-    this._userRepository = new UserRepository(...args)
-  }
+  constructor(private readonly dbConnection: PrismaClient) {}
 
   public async getUserInfo(firebaseUid: string) {
-    if (!this._userRepository) throw new Error("UserRepository is not set")
+    const userRepository = new UserRepository(this.dbConnection)
 
-    const user = await this._userRepository.findUserByFirebaseUid(firebaseUid)
+    const user = await userRepository.findUserByFirebaseUid(firebaseUid)
     if (user) {
       this._userId = user.id
       this._userRole = user.role
