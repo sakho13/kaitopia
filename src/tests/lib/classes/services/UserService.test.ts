@@ -19,8 +19,7 @@ describe("lib/classes/services/UserService", () => {
           }),
         },
       }
-      const userService = new UserService()
-      userService.resetUserRepository(connection as unknown as PrismaClient)
+      const userService = new UserService(connection as unknown as PrismaClient)
       const userInfo = await userService.getUserInfo("testId")
       expect(userInfo).toEqual({
         id: "testId",
