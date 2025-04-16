@@ -1,12 +1,10 @@
 import { UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
-import { PrismaClient } from "@prisma/client"
+import { ServiceBase } from "../common/ServiceBase"
 
-export class UserService {
+export class UserService extends ServiceBase {
   private _userId: string | null = null
   private _userRole: UserRoleType | null = null
-
-  constructor(private readonly dbConnection: PrismaClient) {}
 
   public async getUserInfo(firebaseUid: string) {
     const userRepository = new UserRepository(this.dbConnection)
