@@ -115,6 +115,9 @@ export type ApiV1OutTypeMap = {
     canAccessManagePage: boolean
     isGuest: boolean
   }
+  /**
+   * GET /api/manage/v1/own-schools
+   */
   GetManageOwnSchools: {
     schools: (SchoolBaseIdentity &
       SchoolBase &
