@@ -6,5 +6,24 @@
   ],
   "settings": {
     "biome.enabled": false
+  },
+  "extensions": {
+    "recommendations": [
+      "seatonjiang.gitmoji-vscode",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "firsttris.vscode-jest-runner",
+      "Prisma.prisma",
+      "OfHumanBondage.react-proptypes-intellisense",
+      "bradlc.vscode-tailwindcss",
+      "bierner.markdown-mermaid",
+      "shd101wyy.markdown-preview-enhanced",
+      "yzhang.markdown-all-in-one",
+      "wix.vscode-import-cost",
+      "donjayamanne.githistory",
+      "mhutchie.git-graph",
+      "dsznajder.es7-react-js-snippets",
+      "streetsidesoftware.code-spell-checker"
+    ]
   }
 }

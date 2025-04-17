@@ -68,6 +68,25 @@ export function useGetManageExercises() {
 //      user
 // *******************
 
+/**
+ * GET: `/api/user/v1/user-config`
+ */
+export function useGetUserConfig() {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/user-config", idToken],
+    async ([url, token]) =>
+      token ? fetcher("GetUserConfig", "GET", url, token) : null,
+  )
+
+  return {
+    dataTooGetUserConfig: data,
+    isLoadingToGetUserConfig: isLoading,
+    refetchUserConfig: mutate,
+  } as const
+}
+
 export function useGetExercise(exerciseId: string) {
   const { idToken } = useAuth()
   const [loading, setLoading] = useState(true)

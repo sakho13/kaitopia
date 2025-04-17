@@ -107,6 +107,17 @@ export type ApiV1OutTypeMap = {
       description: string
     }[]
   }
+  /**
+   * GET /api/user/v1/user-info
+   */
+  GetUserConfig: {
+    baseInfo: ReplacedDateToString<UserBaseInfo>
+    canAccessManagePage: boolean
+    isGuest: boolean
+  }
+  /**
+   * GET /api/manage/v1/own-schools
+   */
   GetManageOwnSchools: {
     schools: (SchoolBaseIdentity &
       SchoolBase &
