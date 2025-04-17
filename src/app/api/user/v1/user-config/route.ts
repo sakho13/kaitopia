@@ -19,6 +19,7 @@ export function GET(request: NextRequest) {
         role: userInfo.role,
       },
       canAccessManagePage: userService.canAccessManagePage,
+      isGuest: api.isGuest(),
     }
   })
 }

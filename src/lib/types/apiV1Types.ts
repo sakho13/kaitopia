@@ -113,6 +113,7 @@ export type ApiV1OutTypeMap = {
   GetUserConfig: {
     baseInfo: ReplacedDateToString<UserBaseInfo>
     canAccessManagePage: boolean
+    isGuest: boolean
   }
   GetManageOwnSchools: {
     schools: (SchoolBaseIdentity &
