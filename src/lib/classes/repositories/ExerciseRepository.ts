@@ -31,11 +31,18 @@ export class ExerciseRepository extends RepositoryBase {
               select: {
                 id: true,
                 title: true,
+                questionType: true,
+                answerType: true,
                 currentVersion: true,
               },
             },
           },
         },
+        createdAt: true,
+        updatedAt: true,
+        schoolId: true,
+        isCanSkip: true,
+        isScoringBatch: true,
       },
       where: {
         id: exerciseId,
@@ -43,7 +50,11 @@ export class ExerciseRepository extends RepositoryBase {
     })
   }
 
-  public async findExerciseBySchoolId(schoolId?: string) {
+  public async findExerciseBySchoolId(
+    schoolId?: string,
+    limit?: number,
+    offset?: number,
+  ) {
     return await this.dbConnection.exercise.findMany({
       select: {
         id: true,
@@ -58,6 +69,8 @@ export class ExerciseRepository extends RepositoryBase {
       where: {
         schoolId,
       },
+      skip: offset,
+      take: limit,
       orderBy: {
         updatedAt: "desc",
       },
