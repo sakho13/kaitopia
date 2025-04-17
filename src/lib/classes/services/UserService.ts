@@ -1,6 +1,7 @@
 import { UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
 import { ServiceBase } from "../common/ServiceBase"
+import { ApiV1Error } from "../common/ApiV1Error"
 
 export class UserService extends ServiceBase {
   private _userId: string | null = null
@@ -10,10 +11,11 @@ export class UserService extends ServiceBase {
     const userRepository = new UserRepository(this.dbConnection)
 
     const user = await userRepository.findUserByFirebaseUid(firebaseUid)
-    if (user) {
-      this._userId = user.id
-      this._userRole = user.role
-    }
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    this._userId = user.id
+    this._userRole = user.role
     return user
   }
 
