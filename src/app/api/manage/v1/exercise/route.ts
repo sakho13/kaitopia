@@ -32,8 +32,7 @@ export function POST(request: NextRequest) {
     const validationResult = validatePost(body)
     if (validationResult.error) throw validationResult.error
 
-    const exerciseService = new ExerciseService()
-    exerciseService.resetExerciseRepository(prisma)
+    const exerciseService = new ExerciseService(prisma)
 
     const result = await exerciseService.createExercise(
       validationResult.result.schoolId,

@@ -47,6 +47,24 @@ export function useGetRecommendExercises() {
 // *******************
 
 /**
+ * GET: `/api/manage/v1/own-schools`
+ */
+export function useGetOwnSchools() {
+  const { idToken } = useAuth()
+
+  const { data, isLoading } = useSWRImmutable(
+    ["/api/manage/v1/own-schools", idToken],
+    async ([url, token]) =>
+      token ? fetcher("GetManageOwnSchools", "GET", url, token) : null,
+  )
+
+  return {
+    dataTooGetOwnSchools: data,
+    isLoadingToGetOwnSchools: isLoading,
+  } as const
+}
+
+/**
  * GET: `/api/manage/v1/exercises`
  */
 export function useGetManageExercises() {

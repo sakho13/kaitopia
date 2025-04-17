@@ -128,6 +128,9 @@ export type ApiV1OutTypeMap = {
       ExerciseBase &
       ReplacedDateToString<ExerciseBaseDate>)[]
   }
+  /**
+   * POST /api/manage/v1/exercise
+   */
   PostManageExercise: {
     exercise: ExerciseBaseIdentifier &
       ExerciseBase &
