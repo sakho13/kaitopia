@@ -154,6 +154,24 @@ export function useGetUserConfig(token: string | null) {
 }
 
 /**
+ * GET: `/api/user/v1/info`
+ */
+export function useGetUserInfo() {
+  const { idToken } = useAuth()
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/info", idToken],
+    async ([url, token]) =>
+      token ? fetcher("GetUserInfo", "GET", url, token) : null,
+  )
+
+  return {
+    dataTooGetUserInfo: data,
+    isLoadingToGetUserInfo: isLoading,
+    refetchUserInfo: mutate,
+  } as const
+}
+
+/**
  * POST: `/api/user/v1/login`
  */
 export function usePostUserLogin() {

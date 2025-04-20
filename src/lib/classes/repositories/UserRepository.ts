@@ -16,6 +16,9 @@ export class UserRepository extends RepositoryBase {
         birthDayDate: true,
         role: true,
         ownerSchools: true,
+        createdAt: true,
+        updatedAt: true,
+        isGuest: true,
       },
       where: {
         firebaseUid: firebaseUid,

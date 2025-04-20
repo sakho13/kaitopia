@@ -7,7 +7,7 @@ import { UserService } from "@/lib/classes/services/UserService"
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ取得")
 
-  return await api.execute("GetUser", async () => {
+  return await api.execute("GetUserInfo", async () => {
     await api.authorize(request)
 
     const userService = new UserService(prisma)
@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
           ? user.birthDayDate.toISOString()
           : null,
         role: user.role,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       },
     }
   })

@@ -16,7 +16,11 @@ import {
   SchoolBaseDate,
   SchoolBaseIdentity,
 } from "./base/schoolTypes"
-import { UserBaseInfo, UserBaseInfoOption } from "./base/userTypes"
+import {
+  UserBaseDate,
+  UserBaseInfo,
+  UserBaseInfoOption,
+} from "./base/userTypes"
 import { ReplacedDateToString } from "./common/ReplacedDateToString"
 
 export type ApiV1OutBase<R> =
@@ -116,8 +120,10 @@ export type ApiV1InTypeMap = {
 }
 
 export type ApiV1OutTypeMap = {
-  GetUser: {
-    user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
+  GetUserInfo: {
+    user: UserBaseInfo &
+      ReplacedDateToString<UserBaseInfoOption> &
+      ReplacedDateToString<Omit<UserBaseDate, "deletedAt">>
   }
   PostUserLogin: {
     state: "register" | "login"

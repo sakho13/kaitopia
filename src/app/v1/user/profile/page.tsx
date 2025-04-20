@@ -1,14 +1,18 @@
 "use client"
 
 import { RoundedFrame } from "@/components/atoms/RoundedFrame"
-import { useState } from "react"
+import { useGetUserInfo } from "@/hooks/useApiV1"
+import { DateUtility } from "@/lib/classes/common/DateUtility"
+import { useEffect, useState } from "react"
 
 export default function Page() {
+  const { dataTooGetUserInfo, refetchUserInfo } = useGetUserInfo()
+
   // 仮のユーザーデータ（将来はAPIで取得）
   const [user, setUser] = useState({
-    name: "田中 太郎",
-    email: "tanaka@example.com",
-    registeredAt: "2025/03/01",
+    name: "",
+    email: "",
+    registeredAt: "",
   })
 
   const [name, setName] = useState(user.name)
@@ -20,6 +24,20 @@ export default function Page() {
     setEditing(false)
     alert("プロフィールを更新しました")
   }
+
+  useEffect(() => {
+    if (!dataTooGetUserInfo?.success) return
+
+    setUser({
+      name: dataTooGetUserInfo.data.user.name,
+      email: "",
+      registeredAt: DateUtility.formatDateTime(
+        DateUtility.convertToLocalDate(
+          dataTooGetUserInfo.data.user.createdAt ?? "",
+        ),
+      ),
+    })
+  }, [dataTooGetUserInfo])
 
   return (
     <div className='bg-background min-h-screen text-text font-sans p-8'>
@@ -42,12 +60,12 @@ export default function Page() {
         </div>
 
         {/* メールアドレス */}
-        <div className='mb-4'>
+        {/* <div className='mb-4'>
           <label className='block text-sm font-medium mb-1'>
             メールアドレス
           </label>
           <p className='text-lg'>{user.email}</p>
-        </div>
+        </div> */}
 
         {/* 登録日 */}
         <div className='mb-4'>
