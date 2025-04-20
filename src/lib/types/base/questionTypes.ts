@@ -27,6 +27,12 @@ export type QuestionBaseEditState = {
   draftVersion: number
 }
 
+export type QuestionBaseDate = {
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: Date | null
+}
+
 export type QuestionBaseAnswers = {
   answers: QuestionAnswer[]
 }
@@ -86,10 +92,7 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
   properties: QuestionAnswerProperty[T]
 }
 
-export type QuestionAnswerContent = Omit<
-  QuestionAnswerBaseIdentifier,
-  "exerciseId"
-> &
+export type QuestionAnswerContent = QuestionAnswerBaseIdentifier &
   (
     | {
         type: "SKIP"
