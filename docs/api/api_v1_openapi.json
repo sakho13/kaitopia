@@ -230,6 +230,105 @@
         }
       }
     },
+    "/manage/v1/exercise": {
+      "get": {
+        "summary": "問題集の詳細を取得する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題集のID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の詳細の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercise": {
+                          "type": "object",
+                          "properties": {
+                            "exerciseId": {
+                              "type": "string",
+                              "description": "問題集のID"
+                            },
+                            "schoolId": {
+                              "type": "string",
+                              "description": "スクールID"
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "問題集のタイトル"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "問題集の説明"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "description": "作成日時\nJST時間をISO8601形式で返す"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "description": "更新日時\nJST時間をISO8601形式で返す"
+                            },
+                            "isCanSkip": {
+                              "type": "boolean",
+                              "description": "スキップが可能かどうか。"
+                            },
+                            "isScoringBatch": {
+                              "type": "boolean",
+                              "description": "一括採点が可能かどうか。"
+                            }
+                          }
+                        },
+                        "questions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "questionId": {
+                                "type": "string",
+                                "description": "問題のID"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "問題のタイトル"
+                              },
+                              "questionType": {
+                                "$ref": "#/components/schemas/QuestionTypeType"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
 
     "/common/v1/recommend-exercise": {
       "get": {
@@ -341,6 +440,14 @@
         "type": "string",
         "example": "USER",
         "enum": ["USER", "MODERATOR", "TEACHER", "ADMIN"]
+      },
+      "QuestionTypeType": {
+        "type": "string",
+        "enum": ["TEXT", "IMAGE"]
+      },
+      "AnswerTypeType": {
+        "type": "string",
+        "enum": ["TEXT", "SELECT", "MULTI_SELECT"]
       }
     },
 
