@@ -3,10 +3,10 @@ import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { ExerciseService } from "@/lib/classes/services/ExerciseService"
 import { prisma } from "@/lib/prisma"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の取得")
 
-  return api.execute("GetManageExercises", async () => {
+  return await api.execute("GetManageExercises", async () => {
     await api.checkAccessManagePage(request)
 
     const schoolId = request.nextUrl.searchParams.get("schoolId") ?? undefined

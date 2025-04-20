@@ -3,10 +3,10 @@ import { UserService } from "@/lib/classes/services/UserService"
 import { prisma } from "@/lib/prisma"
 import { NextRequest } from "next/server"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ設定の取得")
 
-  return api.execute("GetUserConfig", async () => {
+  return await api.execute("GetUserConfig", async () => {
     await api.authorize(request)
     const userService = new UserService(prisma)
 

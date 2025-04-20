@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の取得")
 
-  return api.execute("GetManageExercise", async () => {
+  return await api.execute("GetManageExercise", async () => {
     await api.checkAccessManagePage(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
@@ -40,10 +40,10 @@ export function GET(request: NextRequest) {
   })
 }
 
-export function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の作成")
 
-  return api.execute("PostManageExercise", async () => {
+  return await api.execute("PostManageExercise", async () => {
     await api.checkAccessManagePage(request)
 
     const body = await request.json()

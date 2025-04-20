@@ -3,11 +3,11 @@ import { ExerciseService } from "@/lib/classes/services/ExerciseService"
 import { prisma } from "@/lib/prisma"
 import { NextRequest } from "next/server"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("おすすめ問題集取得")
   // ユーザ個別に10この問題集を取得するAPI
 
-  return api.execute("GetRecommendExercise", async () => {
+  return await api.execute("GetRecommendExercise", async () => {
     await api.authorize(request)
 
     const exerciseService = new ExerciseService(prisma)
