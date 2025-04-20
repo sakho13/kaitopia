@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { DecodedIdToken } from "firebase-admin/auth"
 import { ApiV1Error } from "./ApiV1Error"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
-import { verifyIdToken } from "@/lib/functions/firebaseAdmin"
+import { isGuestUser, verifyIdToken } from "@/lib/functions/firebaseAdmin"
 import { UserService } from "../services/UserService"
 import { prisma } from "@/lib/prisma"
 
@@ -81,7 +81,7 @@ export class ApiV1Wrapper {
   public async isGuest() {
     if (!this.decodedToken)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-    return this.decodedToken.firebase?.sign_in_provider === "anonymous"
+    return isGuestUser(this.decodedToken)
   }
 
   public getFirebaseUid() {
