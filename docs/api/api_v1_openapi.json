@@ -104,6 +104,10 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": ["register", "login"]
+                        },
                         "userInfo": {
                           "$ref": "#/components/schemas/UserBaseInfoType"
                         },
@@ -653,7 +657,8 @@
           "birthDayDate": {
             "type": "string",
             "description": "生年月日\nJST時間をISO8601形式で返す",
-            "example": "2023-10-01T00:00:00+09:00"
+            "example": "2023-10-01T00:00:00+09:00",
+            "nullable": true
           },
           "role": {
             "$ref": "#/components/schemas/UserRoleType"

@@ -16,7 +16,7 @@ import {
   SchoolBaseDate,
   SchoolBaseIdentity,
 } from "./base/schoolTypes"
-import { UserBaseInfo } from "./base/userTypes"
+import { UserBaseInfo, UserBaseInfoOption } from "./base/userTypes"
 import { ReplacedDateToString } from "./common/ReplacedDateToString"
 
 export type ApiV1OutBase<R> =
@@ -112,11 +112,12 @@ export type ApiV1InTypeMap = {
 
 export type ApiV1OutTypeMap = {
   GetUser: {
-    user: ReplacedDateToString<UserBaseInfo>
+    user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
   }
-  RegisterUser: {
+  PostUserLogin: {
     state: "register" | "login"
-    user: ReplacedDateToString<UserBaseInfo>
+    user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
+    isGuest: boolean
   }
 
   GetRecommendExercise: {
@@ -130,7 +131,7 @@ export type ApiV1OutTypeMap = {
    * GET /api/user/v1/user-info
    */
   GetUserConfig: {
-    userInfo: ReplacedDateToString<UserBaseInfo>
+    userInfo: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
     canAccessManagePage: boolean
     isGuest: boolean
   }

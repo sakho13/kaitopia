@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
     return {
       userInfo: {
         name: userInfo.name,
-        birthDayDate: userInfo.birthDayDate.toISOString(),
+        birthDayDate: userInfo.birthDayDate
+          ? userInfo.birthDayDate.toISOString()
+          : null,
         role: userInfo.role,
       },
       canAccessManagePage: userService.canAccessManagePage,

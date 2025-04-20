@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
       user: {
         id: user.id,
         name: user.name,
-        birthDayDate: user.birthDayDate.toISOString(),
+        birthDayDate: user.birthDayDate
+          ? user.birthDayDate.toISOString()
+          : null,
         role: user.role,
       },
     }

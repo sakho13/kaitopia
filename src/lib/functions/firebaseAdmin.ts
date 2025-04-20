@@ -1,5 +1,5 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app"
-import { getAuth } from "firebase-admin/auth"
+import { DecodedIdToken, getAuth } from "firebase-admin/auth"
 
 if (!getApps().length) {
   initializeApp({
@@ -21,4 +21,8 @@ export async function verifyIdToken(idToken: string) {
     console.error("Error verifying ID token:", error)
     throw new Error("Invalid ID token")
   }
+}
+
+export async function isGuestUser(decodedToken: DecodedIdToken) {
+  return decodedToken.firebase?.sign_in_provider === "anonymous"
 }

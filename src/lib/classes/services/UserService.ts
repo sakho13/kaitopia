@@ -1,4 +1,4 @@
-import { UserRoleType } from "@/lib/types/base/userTypes"
+import { UserBaseInfo, UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
 import { SchoolRepository } from "../repositories/SchoolRepository"
 import { ServiceBase } from "../common/ServiceBase"
@@ -15,6 +15,18 @@ export class UserService extends ServiceBase {
     this._userId = user.id
     this._userRole = user.role
     return user
+  }
+
+  public async registerUserInfo(
+    firebaseUid: string,
+    isGuest: boolean,
+    data: UserBaseInfo,
+  ) {
+    const userRepository = new UserRepository(this.dbConnection)
+    return await userRepository.createUserByFirebaseUid(firebaseUid, isGuest, {
+      ...data,
+      birthDayDate: null,
+    })
   }
 
   public async getOwnSchools() {
