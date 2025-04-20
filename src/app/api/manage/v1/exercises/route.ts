@@ -19,11 +19,9 @@ export async function GET(request: NextRequest) {
         exerciseId: exercise.exerciseId,
         title: exercise.title,
         description: exercise.description,
-        updatedAt: exercise.updatedAt,
-        createdAt: exercise.createdAt,
+        updatedAt: exercise.updatedAt.toISOString(),
+        createdAt: exercise.createdAt.toISOString(),
       })),
     }
   })
 }
-
-export function POST(request: NextRequest) {}
