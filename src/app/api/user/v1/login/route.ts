@@ -9,19 +9,54 @@ export async function POST(request: NextRequest) {
   // ケース１：ユーザ登録
   // ケース２：ユーザ存在確認
 
-  return await api.execute("RegisterUser", async () => {
+  return await api.execute("PostUserLogin", async () => {
     await api.authorize(request)
 
     const userService = new UserService(prisma)
 
+    const userInfo = await userService.getUserInfo(api.getFirebaseUid())
+    const isGuest = await api.isGuest()
+
+    if (userInfo) {
+      return {
+        state: "login",
+        user: {
+          id: userInfo.id,
+          name: userInfo.name,
+          birthDayDate: userInfo.birthDayDate
+            ? userInfo.birthDayDate.toISOString()
+            : null,
+          role: userInfo.role,
+        },
+        isGuest,
+      }
+    }
+
+    // ユーザ登録
+
+    // ユーザ名はランダムで生成する(今後、ログイン時に登録するようにする)
+    const userName = `user-${Math.floor(Math.random() * 10000)}`
+
+    const user = await userService.registerUserInfo(
+      api.getFirebaseUid(),
+      isGuest,
+      {
+        name: userName,
+        role: "USER",
+      },
+    )
+
     return {
       state: "register",
       user: {
-        id: "",
-        name: "ユーザ名",
-        birthDayDate: new Date().toISOString(),
-        role: "USER",
+        id: user.id,
+        name: user.name,
+        birthDayDate: user.birthDayDate
+          ? user.birthDayDate.toISOString()
+          : null,
+        role: user.role,
       },
+      isGuest,
     }
   })
 }

@@ -1,6 +1,6 @@
 // API Route 内で使用するリポジトリクラスを定義する
 
-import { UserBaseInfo } from "@/lib/types/base/userTypes"
+import { UserBaseInfo, UserBaseInfoOption } from "@/lib/types/base/userTypes"
 import { RepositoryBase } from "../common/RepositoryBase"
 
 export class UserRepository extends RepositoryBase {
@@ -25,21 +25,23 @@ export class UserRepository extends RepositoryBase {
 
   public async createUserByFirebaseUid(
     firebaseUid: string,
-    data: UserBaseInfo,
+    isGuest: boolean,
+    data: UserBaseInfo & UserBaseInfoOption,
   ) {
     return await this.dbConnection.user.create({
       data: {
         firebaseUid: firebaseUid,
         name: data.name,
-        birthDayDate: data.birthDayDate,
+        birthDayDate: data.birthDayDate || null,
         role: data.role,
+        isGuest: isGuest,
       },
     })
   }
 
   public async updateUserByFirebaseUid(
     firebaseUid: string,
-    data: Partial<UserBaseInfo>,
+    data: Partial<UserBaseInfo & UserBaseInfoOption>,
   ) {
     return await this.dbConnection.user.update({
       where: {
@@ -47,7 +49,7 @@ export class UserRepository extends RepositoryBase {
       },
       data: {
         name: data.name,
-        birthDayDate: data.birthDayDate,
+        birthDayDate: data.birthDayDate || null,
         role: data.role,
       },
     })
