@@ -54,6 +54,7 @@ export class ApiV1Wrapper {
     const decodedToken = await verifyIdToken(token)
     if (!decodedToken)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    this.decodedToken = decodedToken
 
     return decodedToken
   }
