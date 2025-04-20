@@ -104,6 +104,11 @@ export type ApiV1InTypeMap = {
     exerciseId: string
   }
 
+  /**
+   * POST /api/user/v1/user/login
+   */
+  PostUserLogin: null
+
   PostUserExerciseAnswer: {
     exerciseId: string
     answers: QuestionAnswerContent[]

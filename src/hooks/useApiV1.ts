@@ -155,6 +155,25 @@ export function useGetUserConfig() {
   } as const
 }
 
+/**
+ * POST: `/api/user/v1/login`
+ */
+export function usePostUserLogin() {
+  const requestPostLogin = async (token: string) => {
+    return await requestPost(
+      "PostUserLogin",
+      "PostUserLogin",
+      "/api/user/v1/login",
+      token,
+      null,
+    )
+  }
+
+  return {
+    requestPostLogin,
+  }
+}
+
 export function useGetExercise(exerciseId: string) {
   const { idToken } = useAuth()
   const [loading, setLoading] = useState(true)
