@@ -139,11 +139,9 @@ export function usePostManageExercise(
 /**
  * GET: `/api/user/v1/user-config`
  */
-export function useGetUserConfig() {
-  const { idToken } = useAuth()
-
-  const { data, isLoading, mutate } = useSWRImmutable(
-    ["/api/user/v1/user-config", idToken],
+export function useGetUserConfig(token: string | null) {
+  const { data, isLoading, mutate } = useSwr(
+    ["/api/user/v1/user-config", token],
     async ([url, token]) =>
       token ? fetcher("GetUserConfig", "GET", url, token) : null,
   )
