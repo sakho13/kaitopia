@@ -56,7 +56,7 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "baseInfo": {
+                        "userInfo": {
                           "$ref": "#/components/schemas/UserBaseInfoType"
                         },
                         "canAccessManagePage": {

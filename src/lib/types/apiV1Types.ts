@@ -6,6 +6,12 @@ import {
   ExerciseBaseProperty,
 } from "./base/exerciseTypes"
 import {
+  QuestionAnswerContent,
+  QuestionBase,
+  QuestionBaseIdentifier,
+  QuestionVersionBase,
+} from "./base/questionTypes"
+import {
   SchoolBase,
   SchoolBaseDate,
   SchoolBaseIdentity,
@@ -85,9 +91,22 @@ export type ApiV1InTypeMap = {
     schoolId: string
     property: ExerciseBase
   }
+  PostManageQuestion: {
+    schoolId: string
+    question: QuestionBase
+    content: QuestionVersionBase
+  }
+
+  /**
+   * GET /api/user/v1/exercise?exerciseId=xxxx
+   */
+  GetUserExerciseInfo: {
+    exerciseId: string
+  }
 
   PostUserExerciseAnswer: {
     exerciseId: string
+    answers: QuestionAnswerContent[]
   }
 }
 
@@ -111,7 +130,7 @@ export type ApiV1OutTypeMap = {
    * GET /api/user/v1/user-info
    */
   GetUserConfig: {
-    baseInfo: ReplacedDateToString<UserBaseInfo>
+    userInfo: ReplacedDateToString<UserBaseInfo>
     canAccessManagePage: boolean
     isGuest: boolean
   }
@@ -122,6 +141,13 @@ export type ApiV1OutTypeMap = {
     schools: (SchoolBaseIdentity &
       SchoolBase &
       ReplacedDateToString<SchoolBaseDate>)[]
+  }
+  GetManageExercise: {
+    exercise: ExerciseBaseIdentifier &
+      ExerciseBase &
+      ExerciseBaseProperty &
+      ReplacedDateToString<ExerciseBaseDate>
+    questions: (Omit<QuestionBaseIdentifier, "schoolId"> & QuestionBase)[]
   }
   GetManageExercises: {
     exercises: (ExerciseBaseIdentifier &
@@ -137,12 +163,15 @@ export type ApiV1OutTypeMap = {
       ReplacedDateToString<ExerciseBaseDate>
   }
 
+  /**
+   * GET /api/user/v1/exercise
+   */
   GetUserExerciseInfo: {
     exercise: ExerciseBase
     property: ExerciseBaseProperty
     questions: []
   }
-  PostUserExerciseAnswer: {}
+  // PostUserExerciseAnswer: {}
 }
 
 export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =

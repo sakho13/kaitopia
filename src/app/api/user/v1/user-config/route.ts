@@ -13,13 +13,13 @@ export async function GET(request: NextRequest) {
     const userInfo = await userService.getUserInfo(api.getFirebaseUid())
 
     return {
-      baseInfo: {
+      userInfo: {
         name: userInfo.name,
         birthDayDate: userInfo.birthDayDate.toISOString(),
         role: userInfo.role,
       },
       canAccessManagePage: userService.canAccessManagePage,
-      isGuest: api.isGuest(),
+      isGuest: await api.isGuest(),
     }
   })
 }
