@@ -31,7 +31,7 @@
   ],
 
   "paths": {
-    "/user/v1/user-info": {
+    "/user/v1/user-config": {
       "get": {
         "summary": "ユーザ設定を取得",
         "description": "ユーザ設定を取得します",
@@ -57,21 +57,7 @@
                       "type": "object",
                       "properties": {
                         "baseInfo": {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string",
-                              "default": "Kaitopia"
-                            },
-                            "birthDayDate": {
-                              "type": "string",
-                              "description": "生年月日\nJST時間をISO8601形式で返す",
-                              "example": "2023-10-01T00:00:00+09:00"
-                            },
-                            "role": {
-                              "$ref": "#/components/schemas/UserRoleType"
-                            }
-                          }
+                          "$ref": "#/components/schemas/UserBaseInfoType"
                         },
                         "canAccessManagePage": {
                           "type": "boolean",
@@ -93,11 +79,203 @@
         }
       }
     },
+    "/user/v1/login": {
+      "post": {
+        "summary": "ユーザログイン",
+        "description": "ユーザログインを行います(Firebase Authでログインを実装しているため概念的なログインを意味する)\n",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ユーザログインに成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userInfo": {
+                          "$ref": "#/components/schemas/UserBaseInfoType"
+                        },
+                        "isGuest": {
+                          "type": "boolean",
+                          "example": false,
+                          "description": "ゲストユーザかどうか。\nFirebase Authのゲストユーザである場合はtrue。"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
 
     "/user/v1/exercises": {},
-    "/user/v1/exercise": {},
-    "/user/v1/exercise/start": {},
-    "/user/v1/exercise/answer": {},
+    "/user/v1/exercise": {
+      "get": {
+        "summary": "問題集の詳細を取得する",
+        "description": "問題集の詳細を取得する\n問題集のIDを指定して、問題集の詳細を取得する",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題集のID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の詳細の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "answerLogSheetId": {
+                          "type": "string",
+                          "description": "回答ログシートのID"
+                        },
+                        "exercise": {},
+                        "questions": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/v1/exercise/start": {
+      "post": {
+        "summary": "問題集の回答を始める",
+        "description": "問題集の回答を始める\n回答中の問題集があれば、遠中から始める",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "exerciseId": {
+                    "type": "string",
+                    "description": "問題集のID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題集の回答を始めるに成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "answerLogSheetId": {
+                          "type": "string",
+                          "description": "回答ログシートのID"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "作成日時\nJST時間をISO8601形式で返す"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新日時\nJST時間をISO8601形式で返す"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/v1/exercise/answer": {
+      "post": {
+        "summary": "問題の回答を送信する",
+        "description": "問題の回答を送信する\n問題のIDを指定して、問題の回答を送信する",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "answerLogSheetId": {
+                    "type": "string",
+                    "description": "回答ログシートのID"
+                  },
+                  "answers": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題の回答の送信に成功",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
 
     "/manage/v1/exercises": {
       "get": {
@@ -432,6 +610,24 @@
                 }
               }
             }
+          }
+        }
+      },
+
+      "UserBaseInfoType": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "Kaitopia"
+          },
+          "birthDayDate": {
+            "type": "string",
+            "description": "生年月日\nJST時間をISO8601形式で返す",
+            "example": "2023-10-01T00:00:00+09:00"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRoleType"
           }
         }
       },
