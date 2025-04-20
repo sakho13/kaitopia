@@ -341,7 +341,45 @@
           }
         ],
         "responses": {
-          "200": {}
+          "200": {
+            "description": "問題集の一覧の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercises": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ExerciseBaseType"
+                          }
+                        },
+                        "totalCount": {
+                          "type": "integer",
+                          "description": "問題集の総数"
+                        },
+                        "page": {
+                          "type": "integer",
+                          "description": "現在のページ番号"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "description": "1ページあたりの問題集の数"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       },
 
@@ -467,41 +505,7 @@
                       "type": "object",
                       "properties": {
                         "exercise": {
-                          "type": "object",
-                          "properties": {
-                            "exerciseId": {
-                              "type": "string",
-                              "description": "問題集のID"
-                            },
-                            "schoolId": {
-                              "type": "string",
-                              "description": "スクールID"
-                            },
-                            "title": {
-                              "type": "string",
-                              "description": "問題集のタイトル"
-                            },
-                            "description": {
-                              "type": "string",
-                              "description": "問題集の説明"
-                            },
-                            "createdAt": {
-                              "type": "string",
-                              "description": "作成日時\nJST時間をISO8601形式で返す"
-                            },
-                            "updatedAt": {
-                              "type": "string",
-                              "description": "更新日時\nJST時間をISO8601形式で返す"
-                            },
-                            "isCanSkip": {
-                              "type": "boolean",
-                              "description": "スキップが可能かどうか。"
-                            },
-                            "isScoringBatch": {
-                              "type": "boolean",
-                              "description": "一括採点が可能かどうか。"
-                            }
-                          }
+                          "$ref": "#/components/schemas/ExerciseBaseType"
                         },
                         "questions": {
                           "type": "array",
@@ -653,6 +657,44 @@
           },
           "role": {
             "$ref": "#/components/schemas/UserRoleType"
+          }
+        }
+      },
+
+      "ExerciseBaseType": {
+        "type": "object",
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "description": "問題集のID"
+          },
+          "schoolId": {
+            "type": "string",
+            "description": "スクールID"
+          },
+          "title": {
+            "type": "string",
+            "description": "問題集のタイトル"
+          },
+          "description": {
+            "type": "string",
+            "description": "問題集の説明"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "作成日時\nJST時間をISO8601形式で返す"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新日時\nJST時間をISO8601形式で返す"
+          },
+          "isCanSkip": {
+            "type": "boolean",
+            "description": "スキップが可能かどうか。"
+          },
+          "isScoringBatch": {
+            "type": "boolean",
+            "description": "一括採点が可能かどうか。"
           }
         }
       },
