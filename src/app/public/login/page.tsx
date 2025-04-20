@@ -3,7 +3,10 @@
 import { useState } from "react"
 import { redirect, useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
-import { handleGuestLoginByFirebase } from "@/lib/functions/firebaseActions"
+import {
+  handleGuestLoginByFirebase,
+  handleLogoutByFirebase,
+} from "@/lib/functions/firebaseActions"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 
 export default function LoginPage() {
@@ -30,7 +33,13 @@ export default function LoginPage() {
     try {
       const firebaseResult = await handleGuestLoginByFirebase()
 
-      await requestPostLogin(await firebaseResult.user.getIdToken())
+      const result = await requestPostLogin(
+        await firebaseResult.user.getIdToken(),
+      )
+      if (!result.success) {
+        await handleLogoutByFirebase()
+        throw new Error(result.errors[0].message)
+      }
 
       router.replace("/v1/user")
     } catch {
