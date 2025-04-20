@@ -79,11 +79,90 @@
         }
       }
     },
+    "/user/v1/info": {
+      "get": {
+        "summary": "ユーザ情報を取得",
+        "description": "ユーザ情報を取得します",
+        "tags": ["UserAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ユーザ情報の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBaseFullInfoType"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "patch": {
+        "summary": "ユーザ情報を個別で更新",
+        "description": "ユーザ情報を個別で更新します\n生年月日、名前を更新できます",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "description": "更新するキー\n生年月日: birthDayDate\n名前: name",
+                      "enum": ["name", "birthDayDate"]
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "更新する値\n生年月日: YYYY-MM-DD形式の文字列\n名前: 名前の文字列"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ユーザ情報の更新に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserBaseFullInfoType"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user/v1/login": {
       "post": {
         "summary": "ユーザログイン",
         "description": "ユーザログインを行います(Firebase Authでログインを実装しているため概念的なログインを意味する)\n",
-        "tags": ["UserAPI", "InDevelopment"],
+        "tags": ["UserAPI"],
         "parameters": [
           {
             "$ref": "#/components/parameters/AuthorizationHeader"
@@ -662,6 +741,33 @@
           },
           "role": {
             "$ref": "#/components/schemas/UserRoleType"
+          }
+        }
+      },
+
+      "UserBaseFullInfoType": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "Kaitopia"
+          },
+          "birthDayDate": {
+            "type": "string",
+            "description": "生年月日\nJST時間をISO8601形式で返す",
+            "example": "2023-10-01T00:00:00+09:00",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRoleType"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "作成日時\nJST時間をISO8601形式で返す"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新日時\nJST時間をISO8601形式で返す"
           }
         }
       },
