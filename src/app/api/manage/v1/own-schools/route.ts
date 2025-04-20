@@ -9,6 +9,15 @@ export async function GET(request: NextRequest) {
 
     const schools = await userService.getOwnSchools()
 
+    /**
+     * 初期表示するスクールID(未実装)
+     *
+     * セルフスクールを優先する
+     *
+     * ROLEがADMINの場合には、グローバルスクールで更新日時が新しいものを優先する
+     */
+    // const initSchoolId = userService.isAdmin ? "" : ""
+
     return {
       schools: schools.map((s) => ({
         id: s.id,
