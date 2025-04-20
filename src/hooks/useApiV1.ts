@@ -1,7 +1,12 @@
 import useSwr from "swr"
 import useSWRImmutable from "swr/immutable"
+import useSWRInfinite from "swr/infinite"
 import { useAuth } from "./useAuth"
-import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
+import {
+  ApiV1InTypeMap,
+  ApiV1OutBase,
+  ApiV1OutTypeMap,
+} from "@/lib/types/apiV1Types"
 import { useState } from "react"
 
 const fetcher = async <T extends keyof ApiV1OutTypeMap>(
@@ -19,6 +24,28 @@ const fetcher = async <T extends keyof ApiV1OutTypeMap>(
     if (!res.ok) return res.json()
     return res.json()
   }) as Promise<ApiV1OutBase<ApiV1OutTypeMap[T]>>
+
+const requestPost = async <
+  T extends keyof ApiV1InTypeMap,
+  K extends keyof ApiV1OutTypeMap,
+>(
+  _in: T,
+  _out: K,
+  url: string,
+  token: string,
+  input: ApiV1InTypeMap[T],
+) =>
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  }).then((res) => {
+    if (!res.ok) return res.json()
+    return res.json()
+  }) as Promise<ApiV1OutBase<ApiV1OutTypeMap[K]>>
 
 // *******************
 //      common
@@ -79,6 +106,29 @@ export function useGetManageExercises() {
   return {
     dataTooGetManageExercises: data,
     isLoadingToGetManageExercises: isLoading,
+  }
+}
+
+/**
+ * POST: `/api/manage/v1/exercise`
+ */
+export function usePostManageExercise(
+  input: ApiV1InTypeMap["PostManageExercise"],
+) {
+  const { idToken } = useAuth()
+
+  const requestPostExercise = async () => {
+    return await requestPost(
+      "PostManageExercise",
+      "PostManageExercise",
+      "/api/manage/v1/exercise",
+      idToken ?? "",
+      input,
+    )
+  }
+
+  return {
+    requestPostExercise,
   }
 }
 
