@@ -5,21 +5,40 @@ import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 
-// export function GET(request: NextRequest) {
-//   const api = new ApiV1Wrapper("管理用問題集の取得")
+export function GET(request: NextRequest) {
+  const api = new ApiV1Wrapper("管理用問題集の取得")
 
-//   return api.execute("GetManageExercise", async () => {
-//     await api.checkAccessManagePage(request)
+  return api.execute("GetManageExercise", async () => {
+    await api.checkAccessManagePage(request)
 
-//     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
-//     if (!exerciseId)
-//       throw new ApiV1Error([
-//         { key: "RequiredValueError", params: { key: "問題集ID" } },
-//       ])
+    const exerciseId = request.nextUrl.searchParams.get("exerciseId")
+    if (!exerciseId || exerciseId.length < 2)
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題集ID" } },
+      ])
 
-//     return { exercise: {}, questions: [] }
-//   })
-// }
+    const exerciseService = new ExerciseService(prisma)
+    const exercise = await exerciseService.getExerciseById(exerciseId)
+
+    return {
+      exercise: {
+        exerciseId: exercise.id,
+        title: exercise.title,
+        description: exercise.description,
+        createdAt: exercise.createdAt.toISOString(),
+        updatedAt: exercise.updatedAt.toISOString(),
+        isCanSkip: exercise.isCanSkip,
+        isScoringBatch: exercise.isScoringBatch,
+        schoolId: exercise.schoolId,
+      },
+      questions: exercise.exerciseQuestions.map((q) => ({
+        questionId: q.question.id,
+        title: q.question.title,
+        questionType: q.question.questionType,
+      })),
+    }
+  })
+}
 
 export function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の作成")
