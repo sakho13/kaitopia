@@ -160,9 +160,34 @@
                       "properties": {
                         "answerLogSheetId": {
                           "type": "string",
-                          "description": "回答ログシートのID"
+                          "description": "回答ログシートのID",
+                          "nullable": true
                         },
-                        "exercise": {},
+                        "exercise": {
+                          "type": "object",
+                          "properties": {
+                            "exerciseId": {
+                              "type": "string",
+                              "description": "問題集のID"
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "問題集のタイトル"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "問題集の説明"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "description": "作成日時\nJST時間をISO8601形式で返す"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "description": "更新日時\nJST時間をISO8601形式で返す"
+                            }
+                          }
+                        },
                         "questions": {}
                       }
                     }
