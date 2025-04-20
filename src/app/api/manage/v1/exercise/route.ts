@@ -44,8 +44,8 @@ export function POST(request: NextRequest) {
         exerciseId: result.id,
         title: result.title,
         description: result.description,
-        createdAt: result.createdAt,
-        updatedAt: result.updatedAt,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
       },
     }
   })
