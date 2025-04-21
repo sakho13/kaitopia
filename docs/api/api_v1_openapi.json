@@ -1,0 +1,841 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API V1",
+    "version": "0.0.1",
+    "description": "Kaitopia API V1 Documentation"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:3000/api",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "UserAPI",
+      "description": "User API endpoints"
+    },
+    {
+      "name": "ManageAPI",
+      "description": "Manage API endpoints"
+    },
+    {
+      "name": "CommonAPI",
+      "description": "認証が不要なAPI"
+    },
+    {
+      "name": "InDevelopment",
+      "description": "API endpoints currently in development"
+    }
+  ],
+
+  "paths": {
+    "/user/v1/user-config": {
+      "get": {
+        "summary": "ユーザ設定を取得",
+        "description": "ユーザ設定を取得します",
+        "tags": ["UserAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ユーザ設定の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userInfo": {
+                          "$ref": "#/components/schemas/UserBaseInfoType"
+                        },
+                        "canAccessManagePage": {
+                          "type": "boolean",
+                          "example": true,
+                          "description": "管理ページにアクセスできるかどうか。\ntrueの場合は管理ページにアクセスできるリンクが表示される。"
+                        },
+                        "isGuest": {
+                          "type": "boolean",
+                          "example": false,
+                          "description": "ゲストユーザかどうか。\nFirebase Authのゲストユーザである場合はtrue。"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/v1/info": {
+      "get": {
+        "summary": "ユーザ情報を取得",
+        "description": "ユーザ情報を取得します",
+        "tags": ["UserAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ユーザ情報の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBaseFullInfoType"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "patch": {
+        "summary": "ユーザ情報を個別で更新",
+        "description": "ユーザ情報を個別で更新します\n生年月日、名前を更新できます",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "description": "更新するキー\n生年月日: birthDayDate\n名前: name",
+                      "enum": ["name", "birthDayDate"]
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "更新する値\n生年月日: YYYY-MM-DD形式の文字列\n名前: 名前の文字列"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ユーザ情報の更新に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserBaseFullInfoType"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/v1/login": {
+      "post": {
+        "summary": "ユーザログイン",
+        "description": "ユーザログインを行います(Firebase Authでログインを実装しているため概念的なログインを意味する)\n",
+        "tags": ["UserAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ユーザログインに成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": ["register", "login"]
+                        },
+                        "userInfo": {
+                          "$ref": "#/components/schemas/UserBaseInfoType"
+                        },
+                        "isGuest": {
+                          "type": "boolean",
+                          "example": false,
+                          "description": "ゲストユーザかどうか。\nFirebase Authのゲストユーザである場合はtrue。"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/user/v1/exercises": {},
+    "/user/v1/exercise": {
+      "get": {
+        "summary": "問題集の詳細を取得する",
+        "description": "問題集の詳細を取得する\n問題集のIDを指定して、問題集の詳細を取得する",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題集のID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の詳細の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "answerLogSheetId": {
+                          "type": "string",
+                          "description": "回答ログシートのID",
+                          "nullable": true
+                        },
+                        "exercise": {
+                          "type": "object",
+                          "properties": {
+                            "exerciseId": {
+                              "type": "string",
+                              "description": "問題集のID"
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "問題集のタイトル"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "問題集の説明"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "description": "作成日時\nJST時間をISO8601形式で返す"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "description": "更新日時\nJST時間をISO8601形式で返す"
+                            }
+                          }
+                        },
+                        "questions": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/v1/exercise/start": {
+      "post": {
+        "summary": "問題集の回答を始める",
+        "description": "問題集の回答を始める\n回答中の問題集があれば、遠中から始める",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "exerciseId": {
+                    "type": "string",
+                    "description": "問題集のID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題集の回答を始めるに成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "answerLogSheetId": {
+                          "type": "string",
+                          "description": "回答ログシートのID"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "作成日時\nJST時間をISO8601形式で返す"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新日時\nJST時間をISO8601形式で返す"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/v1/exercise/answer": {
+      "post": {
+        "summary": "問題の回答を送信する",
+        "description": "問題の回答を送信する\n問題のIDを指定して、問題の回答を送信する",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "answerLogSheetId": {
+                    "type": "string",
+                    "description": "回答ログシートのID"
+                  },
+                  "answers": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題の回答の送信に成功",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/manage/v1/exercises": {
+      "get": {
+        "summary": "問題集の一覧を取得する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "schoolId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "スクールID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "取得する問題集の数。デフォルトは10。"
+            },
+            "example": 10
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "取得するページ番号。デフォルトは1。"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の一覧の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercises": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ExerciseBaseType"
+                          }
+                        },
+                        "totalCount": {
+                          "type": "integer",
+                          "description": "問題集の総数"
+                        },
+                        "page": {
+                          "type": "integer",
+                          "description": "現在のページ番号"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "description": "1ページあたりの問題集の数"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "post": {
+        "summary": "問題集を作成する",
+        "description": "スキップ無効、一括採点有効で問題集を作成する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "schoolId": {
+                    "type": "string",
+                    "description": "スクールID"
+                  },
+                  "property": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "問題集のタイトル"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "問題集の説明"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題集の作成に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercise": {
+                          "type": "object",
+                          "properties": {
+                            "exerciseId": {
+                              "type": "string",
+                              "description": "問題集のID"
+                            },
+                            "title": {
+                              "type": "string",
+                              "description": "問題集のタイトル"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "問題集の説明"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "description": "作成日時\nJST時間をISO8601形式で返す"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "description": "更新日時\nJST時間をISO8601形式で返す"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/v1/exercise": {
+      "get": {
+        "summary": "問題集の詳細を取得する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題集のID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の詳細の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercise": {
+                          "$ref": "#/components/schemas/ExerciseBaseType"
+                        },
+                        "questions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "questionId": {
+                                "type": "string",
+                                "description": "問題のID"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "問題のタイトル"
+                              },
+                              "questionType": {
+                                "$ref": "#/components/schemas/QuestionTypeType"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/common/v1/recommend-exercise": {
+      "get": {
+        "summary": "開発者おすすめの問題集を取得する",
+        "tags": ["CommonAPI"],
+        "responses": {
+          "200": {
+            "description": "問題集の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recommendExercises": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "問題集のID",
+                                "example": "exercise_1"
+                              },
+                              "title": {
+                                "type": "string",
+                                "example": "プログラミング入門問題種1"
+                              },
+                              "description": {
+                                "type": "string",
+                                "example": "この問題集はプログラミングの基礎を学ぶためのサンプルです。"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Check if the server is running",
+        "tags": ["CommonAPI"],
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Hello!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "ApiV1ErrorResponseType": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Invalid request"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "UserBaseInfoType": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "Kaitopia"
+          },
+          "birthDayDate": {
+            "type": "string",
+            "description": "生年月日\nJST時間をISO8601形式で返す",
+            "example": "2023-10-01T00:00:00+09:00",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRoleType"
+          }
+        }
+      },
+
+      "UserBaseFullInfoType": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "Kaitopia"
+          },
+          "birthDayDate": {
+            "type": "string",
+            "description": "生年月日\nJST時間をISO8601形式で返す",
+            "example": "2023-10-01T00:00:00+09:00",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRoleType"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "作成日時\nJST時間をISO8601形式で返す"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新日時\nJST時間をISO8601形式で返す"
+          }
+        }
+      },
+
+      "ExerciseBaseType": {
+        "type": "object",
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "description": "問題集のID"
+          },
+          "schoolId": {
+            "type": "string",
+            "description": "スクールID"
+          },
+          "title": {
+            "type": "string",
+            "description": "問題集のタイトル"
+          },
+          "description": {
+            "type": "string",
+            "description": "問題集の説明"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "作成日時\nJST時間をISO8601形式で返す"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新日時\nJST時間をISO8601形式で返す"
+          },
+          "isCanSkip": {
+            "type": "boolean",
+            "description": "スキップが可能かどうか。"
+          },
+          "isScoringBatch": {
+            "type": "boolean",
+            "description": "一括採点が可能かどうか。"
+          }
+        }
+      },
+
+      "UserRoleType": {
+        "type": "string",
+        "example": "USER",
+        "enum": ["USER", "MODERATOR", "TEACHER", "ADMIN"]
+      },
+      "QuestionTypeType": {
+        "type": "string",
+        "enum": ["TEXT", "IMAGE"]
+      },
+      "AnswerTypeType": {
+        "type": "string",
+        "enum": ["TEXT", "SELECT", "MULTI_SELECT"]
+      }
+    },
+
+    "parameters": {
+      "AuthorizationHeader": {
+        "name": "Authorization",
+        "in": "header",
+        "required": true,
+        "description": "Bearer token for authentication",
+        "schema": {
+          "type": "string",
+          "example": "Bearer YOUR_TOKEN_HERE"
+        }
+      }
+    }
+  }
+}

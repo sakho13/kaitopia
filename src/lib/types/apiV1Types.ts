@@ -6,11 +6,21 @@ import {
   ExerciseBaseProperty,
 } from "./base/exerciseTypes"
 import {
+  QuestionAnswerContent,
+  QuestionBase,
+  QuestionBaseIdentifier,
+  QuestionVersionBase,
+} from "./base/questionTypes"
+import {
   SchoolBase,
   SchoolBaseDate,
   SchoolBaseIdentity,
 } from "./base/schoolTypes"
-import { UserBaseInfo } from "./base/userTypes"
+import {
+  UserBaseDate,
+  UserBaseInfo,
+  UserBaseInfoOption,
+} from "./base/userTypes"
 import { ReplacedDateToString } from "./common/ReplacedDateToString"
 
 export type ApiV1OutBase<R> =
@@ -85,19 +95,40 @@ export type ApiV1InTypeMap = {
     schoolId: string
     property: ExerciseBase
   }
+  PostManageQuestion: {
+    schoolId: string
+    question: QuestionBase
+    content: QuestionVersionBase
+  }
+
+  /**
+   * GET /api/user/v1/exercise?exerciseId=xxxx
+   */
+  GetUserExerciseInfo: {
+    exerciseId: string
+  }
+
+  /**
+   * POST /api/user/v1/user/login
+   */
+  PostUserLogin: null
 
   PostUserExerciseAnswer: {
     exerciseId: string
+    answers: QuestionAnswerContent[]
   }
 }
 
 export type ApiV1OutTypeMap = {
-  GetUser: {
-    user: ReplacedDateToString<UserBaseInfo>
+  GetUserInfo: {
+    user: UserBaseInfo &
+      ReplacedDateToString<UserBaseInfoOption> &
+      ReplacedDateToString<Omit<UserBaseDate, "deletedAt">>
   }
-  RegisterUser: {
+  PostUserLogin: {
     state: "register" | "login"
-    user: ReplacedDateToString<UserBaseInfo>
+    user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
+    isGuest: boolean
   }
 
   GetRecommendExercise: {
@@ -111,7 +142,7 @@ export type ApiV1OutTypeMap = {
    * GET /api/user/v1/user-info
    */
   GetUserConfig: {
-    baseInfo: ReplacedDateToString<UserBaseInfo>
+    userInfo: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
     canAccessManagePage: boolean
     isGuest: boolean
   }
@@ -123,23 +154,36 @@ export type ApiV1OutTypeMap = {
       SchoolBase &
       ReplacedDateToString<SchoolBaseDate>)[]
   }
+  GetManageExercise: {
+    exercise: ExerciseBaseIdentifier &
+      ExerciseBase &
+      ExerciseBaseProperty &
+      ReplacedDateToString<ExerciseBaseDate>
+    questions: (Omit<QuestionBaseIdentifier, "schoolId"> & QuestionBase)[]
+  }
   GetManageExercises: {
     exercises: (ExerciseBaseIdentifier &
       ExerciseBase &
       ReplacedDateToString<ExerciseBaseDate>)[]
   }
+  /**
+   * POST /api/manage/v1/exercise
+   */
   PostManageExercise: {
     exercise: ExerciseBaseIdentifier &
       ExerciseBase &
       ReplacedDateToString<ExerciseBaseDate>
   }
 
+  /**
+   * GET /api/user/v1/exercise
+   */
   GetUserExerciseInfo: {
     exercise: ExerciseBase
     property: ExerciseBaseProperty
     questions: []
   }
-  PostUserExerciseAnswer: {}
+  // PostUserExerciseAnswer: {}
 }
 
 export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =

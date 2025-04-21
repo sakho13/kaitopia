@@ -38,4 +38,24 @@ export class SchoolRepository extends RepositoryBase {
       },
     })
   }
+
+  /**
+   * スクールを作成し、そのスクールにユーザを関連付ける
+   */
+  public async createSelfSchool(userId: string, userName: string) {
+    return await this.dbConnection.school.create({
+      data: {
+        name: `${userName}'s スクール`,
+        description: "あなただけのスクールです",
+        isSelfSchool: true,
+        isGlobal: false,
+        isPublic: false,
+        owners: {
+          create: {
+            userId,
+          },
+        },
+      },
+    })
+  }
 }

@@ -7,7 +7,7 @@ import { UserService } from "@/lib/classes/services/UserService"
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ取得")
 
-  return await api.execute("GetUser", async () => {
+  return await api.execute("GetUserInfo", async () => {
     await api.authorize(request)
 
     const userService = new UserService(prisma)
@@ -19,29 +19,12 @@ export async function GET(request: NextRequest) {
       user: {
         id: user.id,
         name: user.name,
-        birthDayDate: user.birthDayDate.toISOString(),
+        birthDayDate: user.birthDayDate
+          ? user.birthDayDate.toISOString()
+          : null,
         role: user.role,
-      },
-    }
-  })
-}
-
-export async function POST(request: NextRequest) {
-  const api = new ApiV1Wrapper("ユーザ登録")
-  // ログインのタイミングに必ず実行される
-  // ケース１：ユーザ登録
-  // ケース２：ユーザ存在確認
-
-  return await api.execute("RegisterUser", async () => {
-    await api.authorize(request)
-
-    return {
-      state: "register",
-      user: {
-        id: "",
-        name: "ユーザ名",
-        birthDayDate: new Date().toISOString(),
-        role: "USER",
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       },
     }
   })

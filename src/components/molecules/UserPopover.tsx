@@ -3,9 +3,11 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
+import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
 
 export default function UserPopover() {
-  const { open, ref, handleNavigate, signOut, toggleOpen } = useUserPopover()
+  const { open, ref, handleNavigate, signOut, toggleOpen, userConfig } =
+    useUserPopover()
 
   return (
     <div className='relative' ref={ref}>
@@ -18,12 +20,15 @@ export default function UserPopover() {
 
       {open && (
         <div className='absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50'>
-          {/* <button
-            onClick={() => handleNavigate("/v1/manage")}
-            className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
-          >
-            管理画面
-          </button> */}
+          {userConfig.canAccessManagePage ? (
+            <button
+              onClick={() => handleNavigate("/v1/manage")}
+              className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
+            >
+              管理画面
+            </button>
+          ) : null}
+
           <button
             onClick={() => handleNavigate("/v1/user/profile")}
             className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
@@ -44,6 +49,8 @@ export default function UserPopover() {
 }
 
 function useUserPopover() {
+  const { config: userConfig } = useUserConfigStore.getState()
+
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -73,5 +80,5 @@ function useUserPopover() {
     setOpen((prev) => !prev)
   }
 
-  return { open, ref, handleNavigate, signOut, toggleOpen }
+  return { open, ref, handleNavigate, signOut, toggleOpen, userConfig }
 }

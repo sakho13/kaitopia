@@ -3,7 +3,11 @@
 import { useState } from "react"
 import { redirect, useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
-import { handleGuestLoginByFirebase } from "@/lib/functions/firebaseActions"
+import {
+  handleGuestLoginByFirebase,
+  handleLogoutByFirebase,
+} from "@/lib/functions/firebaseActions"
+import { usePostUserLogin } from "@/hooks/useApiV1"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -12,6 +16,8 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false)
 
+  const { requestPostLogin } = usePostUserLogin()
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     // ここでFirebase AuthやAPI呼び出し
@@ -19,23 +25,30 @@ export default function LoginPage() {
     redirect("/v1/user")
   }
 
-  const handleGuestLogin = () => {
+  const handleGuestLogin = async () => {
     if (loading) return
 
     setLoading(true)
 
-    handleGuestLoginByFirebase()
-      .then(() => {
-        router.replace("/v1/user")
-      })
-      .catch(() => {
-        alert(
-          "認証システムに問題が発生しました。公式アナウンスを確認してください。",
-        )
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    try {
+      const firebaseResult = await handleGuestLoginByFirebase()
+
+      const result = await requestPostLogin(
+        await firebaseResult.user.getIdToken(),
+      )
+      if (!result.success) {
+        await handleLogoutByFirebase()
+        throw new Error(result.errors[0].message)
+      }
+
+      router.replace("/v1/user")
+    } catch {
+      alert(
+        "認証システムに問題が発生しました。公式アナウンスを確認してください。",
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

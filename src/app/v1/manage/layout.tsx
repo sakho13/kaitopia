@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { joincn } from "@/lib/functions/joincn"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { KaitopiaTitle } from "@/components/atoms/KaitopiaTitle"
+import { useGetManageOwnSchools } from "@/hooks/useApiV1"
 
 type Props = {
   children: React.ReactNode
@@ -17,30 +18,16 @@ type NaviType = {
   showNavBar: boolean
 }
 
+type SchoolType = {
+  schoolId: string
+  schoolName: string
+}
+
 export default function Layout({ children }: Props) {
-  const [schools, setSchools] = useState([
-    {
-      schoolId: "2jen2ih",
-      schoolName: "KAITOPIA",
-    },
-    {
-      schoolId: "3jen2ih",
-      schoolName: "KAITOPIA2",
-    },
-    {
-      schoolId: "4jen2ih",
-      schoolName: "KAITOPIA3",
-    },
-    {
-      schoolId: "5jen2ih",
-      schoolName: "KAITOPIA4",
-    },
-    {
-      schoolId: "6jen2ih",
-      schoolName: "KAITOPIA5",
-    },
-  ])
-  const [selectedSchoolId, setSelectedSchoolId] = useState(schools[0].schoolId)
+  const { dataTooGetOwnSchools } = useGetManageOwnSchools()
+
+  const [schools, setSchools] = useState<SchoolType[]>([])
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null)
 
   const NAVI: NaviType[] = useMemo(
     () => [
@@ -84,6 +71,20 @@ export default function Layout({ children }: Props) {
     [path, NAVI],
   )
 
+  useEffect(() => {
+    if (!dataTooGetOwnSchools?.success) return
+
+    if (dataTooGetOwnSchools.data.schools.length === 0) return
+
+    setSchools(
+      dataTooGetOwnSchools.data.schools.map((s) => ({
+        schoolId: s.id,
+        schoolName: s.name,
+      })),
+    )
+    setSelectedSchoolId(dataTooGetOwnSchools.data.schools[0].id)
+  }, [dataTooGetOwnSchools])
+
   return (
     <div
       className={joincn(`min-h-screen flex bg-background text-text font-sans`)}
@@ -97,7 +98,7 @@ export default function Layout({ children }: Props) {
           </label>
           <select
             id='schoolSelect'
-            value={selectedSchoolId}
+            value={selectedSchoolId ?? ""}
             onChange={(e) => setSelectedSchoolId(e.target.value)}
             className='w-full rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary hover:bg-primary-hover hover:cursor-pointer'
           >
