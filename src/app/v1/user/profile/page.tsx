@@ -1,12 +1,14 @@
 "use client"
 
 import { RoundedFrame } from "@/components/atoms/RoundedFrame"
+import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
 import { useGetUserInfo } from "@/hooks/useApiV1"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { useEffect, useState } from "react"
 
 export default function Page() {
-  const { dataTooGetUserInfo, refetchUserInfo } = useGetUserInfo()
+  const { dataTooGetUserInfo } = useGetUserInfo()
+  const { config } = useUserConfigStore.getState()
 
   // 仮のユーザーデータ（将来はAPIで取得）
   const [user, setUser] = useState({
@@ -43,6 +45,17 @@ export default function Page() {
     <div className='bg-background min-h-screen text-text font-sans p-8'>
       <RoundedFrame>
         <h1 className='text-2xl font-bold mb-6'>プロフィール</h1>
+
+        {config.isGuest ? (
+          <div className='mb-4 select-none'>
+            <label className='block text-sm font-medium mb-1'>
+              ゲストユーザ
+            </label>
+            <p className='text-lg text-gray-700'>
+              ゲストとしてログインしています。
+            </p>
+          </div>
+        ) : null}
 
         {/* 名前 */}
         <div className='mb-4'>
