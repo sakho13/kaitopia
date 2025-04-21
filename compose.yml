@@ -19,6 +19,20 @@ services:
           cpus: "0.2"
           memory: 256M
 
+  firebase_emulator:
+    build:
+      context: ./docker/firebase
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/firebase:/usr/src/app
+    ports:
+      - "4000:4000" # Emulator UI
+      - "9099:9099" # Firebase Auth
+      - "8080:8080" # Firebase Firestore
+    environment:
+      NODE_ENV: development
+    command: ["firebase", "emulators:start", "--only", "auth,firestore"]
+
 volumes:
   postgres_data:
     driver: local
