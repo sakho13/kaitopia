@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:ini": "npx prisma migrate deploy & npx prisma db seed & next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
