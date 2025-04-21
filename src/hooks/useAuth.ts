@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { onIdTokenChanged } from "firebase/auth"
 import { firebaseAuthClient } from "@/lib/functions/firebaseClient"
-import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
 import { useAuthStore } from "./stores/useAuthStore"
 import { useUserConfigStore } from "./stores/useUserConfigStore"
 import { useGetUserConfig } from "./useApiV1"
@@ -39,13 +38,14 @@ export function useAuth() {
         } else {
           clearAuth()
           clearConfig()
-          handleLogoutByFirebase()
         }
 
         setLoading(false)
       },
     )
-    return () => unsubscribe()
+    return () => {
+      unsubscribe()
+    }
   }, [clearAuth, setAuth, clearConfig, fetchUserConfig])
 
   return { user, idToken, loading }
