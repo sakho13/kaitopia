@@ -5,7 +5,7 @@ import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
 import { handleRegisterByFirebase } from "@/lib/functions/firebaseActions"
 import { checkEmail, checkPassword } from "@/lib/functions/validators"
-import { LOGIN_MODE } from "@/lib/types/loginMode"
+import { LoginMode } from "@/lib/types/loginMode"
 import { redirect, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -132,7 +132,7 @@ const useSignupPage = () => {
 
   const { requestPostLogin } = usePostUserLogin()
 
-  const signup = async (mode: LOGIN_MODE) => {
+  const signup = async (mode: LoginMode) => {
     if (loading) return
 
     setLoading(true)

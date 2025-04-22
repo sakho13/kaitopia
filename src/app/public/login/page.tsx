@@ -12,7 +12,7 @@ import {
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
 import { checkEmail, checkPassword } from "@/lib/functions/validators"
-import { LOGIN_MODE } from "@/lib/types/loginMode"
+import { LoginMode } from "@/lib/types/loginMode"
 
 export default function LoginPage() {
   const { idToken, email, password, onChangeEmail, onChangePassword, login } =
@@ -124,7 +124,7 @@ function useLoginPage() {
 
   const { requestPostLogin } = usePostUserLogin()
 
-  const login = async (mode: LOGIN_MODE) => {
+  const login = async (mode: LoginMode) => {
     if (loading) return
 
     setLoading(true)

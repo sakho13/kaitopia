@@ -1,1 +1,1 @@
-export type LOGIN_MODE = "GUEST" | "EMAIL" | "GOOGLE"
+export type LoginMode = "GUEST" | "EMAIL" | "GOOGLE"
