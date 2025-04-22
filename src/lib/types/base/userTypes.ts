@@ -1,15 +1,19 @@
 import { School } from "./schoolTypes"
 
 export type User = UserBaseInfo &
+  UserBaseInfoOption &
   UserBaseIdentity &
   UserBaseDate &
   UserRelationSchools
 
 export type UserBaseInfo = {
   name: string
-  birthDayDate: Date
 
   role: UserRoleType
+}
+
+export type UserBaseInfoOption = {
+  birthDayDate: Date | null
 }
 
 export type UserBaseIdentity = {

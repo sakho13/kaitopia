@@ -1,4 +1,4 @@
-import { UserRoleType } from "@/lib/types/base/userTypes"
+import { UserBaseInfo, UserRoleType } from "@/lib/types/base/userTypes"
 import { UserRepository } from "../repositories/UserRepository"
 import { SchoolRepository } from "../repositories/SchoolRepository"
 import { ServiceBase } from "../common/ServiceBase"
@@ -9,15 +9,24 @@ export class UserService extends ServiceBase {
   private _userRole: UserRoleType | null = null
 
   public async getUserInfo(firebaseUid: string) {
-    const userRepository = new UserRepository(this.dbConnection)
-
-    const user = await userRepository.findUserByFirebaseUid(firebaseUid)
-    if (!user)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    const user = await this._fetchUserInfoByFirebaseUid(firebaseUid)
+    if (!user) return null
 
     this._userId = user.id
     this._userRole = user.role
     return user
+  }
+
+  public async registerUserInfo(
+    firebaseUid: string,
+    isGuest: boolean,
+    data: UserBaseInfo,
+  ) {
+    const userRepository = new UserRepository(this.dbConnection)
+    return await userRepository.createUserByFirebaseUid(firebaseUid, isGuest, {
+      ...data,
+      birthDayDate: null,
+    })
   }
 
   public async getOwnSchools() {
@@ -29,6 +38,11 @@ export class UserService extends ServiceBase {
     const ownSchools = await schoolRepository.findOwnSchools(this._userId)
 
     return ownSchools
+  }
+
+  private async _fetchUserInfoByFirebaseUid(firebaseUid: string) {
+    const userRepository = new UserRepository(this.dbConnection)
+    return await userRepository.findUserByFirebaseUid(firebaseUid)
   }
 
   public get userId() {

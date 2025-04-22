@@ -1,6 +1,6 @@
 // import { getAnalytics } from "firebase/analytics"
 import { initializeApp, getApps } from "firebase/app"
-import { getAuth } from "firebase/auth"
+import { connectAuthEmulator, getAuth } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -13,5 +13,11 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig)
 
-export const firebaseAuthClient = getAuth(app)
+const auth = getAuth(app)
+
+if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true") {
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true })
+}
+
+export const firebaseAuthClient = auth
 // export const analytics = getAnalytics(app)

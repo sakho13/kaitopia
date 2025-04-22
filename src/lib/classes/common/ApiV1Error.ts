@@ -42,7 +42,7 @@ export class ApiV1Error<K extends keyof ApiV1ErrorMap> extends Error {
 
   private replaceParams(
     rawMessage: string,
-    params: ApiV1ErrorMap[K] extends { params: infer P } ? P : null,
+    params: ApiV1ErrorInput<K>["params"],
   ): string {
     if (!params) return rawMessage
     return Object.entries(params).reduce((acc, [key, value]) => {

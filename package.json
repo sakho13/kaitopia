@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:ini": "npx prisma migrate deploy & npx prisma db seed & next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -25,8 +26,10 @@
   "dependencies": {
     "@prisma/client": "6.5.0",
     "@radix-ui/react-dialog": "1.1.7",
+    "@radix-ui/react-slot": "1.2.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "embla-carousel-react": "8.6.0",
     "firebase": "11.6.0",
     "firebase-admin": "13.2.0",
     "lucide-react": "0.487.0",
