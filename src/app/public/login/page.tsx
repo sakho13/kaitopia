@@ -1,54 +1,32 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { redirect, useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import {
+  handleGoogleLoginByFirebase,
   handleGuestLoginByFirebase,
+  handleLoginByFirebase,
   handleLogoutByFirebase,
 } from "@/lib/functions/firebaseActions"
 import { usePostUserLogin } from "@/hooks/useApiV1"
+import { useAuth } from "@/hooks/useAuth"
+import { checkEmail, checkPassword } from "@/lib/functions/validators"
+import { LOGIN_MODE } from "@/lib/types/loginMode"
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const { idToken, email, password, onChangeEmail, onChangePassword, login } =
+    useLoginPage()
 
-  const [loading, setLoading] = useState(false)
-
-  const { requestPostLogin } = usePostUserLogin()
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    // ここでFirebase AuthやAPI呼び出し
-    console.log("ログイン", { email, password })
-    redirect("/v1/user")
-  }
-
-  const handleGuestLogin = async () => {
-    if (loading) return
-
-    setLoading(true)
-
-    try {
-      const firebaseResult = await handleGuestLoginByFirebase()
-
-      const result = await requestPostLogin(
-        await firebaseResult.user.getIdToken(),
-      )
-      if (!result.success) {
-        await handleLogoutByFirebase()
-        throw new Error(result.errors[0].message)
-      }
-
-      router.replace("/v1/user")
-    } catch {
-      alert(
-        "認証システムに問題が発生しました。公式アナウンスを確認してください。",
-      )
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    if (idToken) {
+      redirect("/v1/user")
     }
+  }, [idToken])
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await login("EMAIL")
   }
 
   return (
@@ -58,7 +36,7 @@ export default function LoginPage() {
           ログイン
         </h1>
 
-        <form onSubmit={handleLogin} className='space-y-4'>
+        <form onSubmit={onSubmit} className='space-y-4'>
           <div>
             <label
               htmlFor='email'
@@ -72,7 +50,7 @@ export default function LoginPage() {
               required
               className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => onChangeEmail(e.target.value)}
             />
           </div>
 
@@ -89,16 +67,11 @@ export default function LoginPage() {
               required
               className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => onChangePassword(e.target.value)}
             />
           </div>
 
-          <ButtonBase
-            type='submit'
-            sizeMode='full'
-            className='font-semibold'
-            onClick={handleLogin}
-          >
+          <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
             ログイン
           </ButtonBase>
         </form>
@@ -109,12 +82,17 @@ export default function LoginPage() {
           colorMode='ghost'
           sizeMode='full'
           className='mt-4'
-          onClick={handleGuestLogin}
+          onClick={() => login("GUEST")}
         >
           ゲストでログイン
         </ButtonBase>
 
-        <ButtonBase colorMode='outline' sizeMode='full' className='mt-4'>
+        <ButtonBase
+          colorMode='outline'
+          sizeMode='full'
+          className='mt-4'
+          onClick={() => login("GOOGLE")}
+        >
           <img src='/google-logo.svg' alt='Google' className='w-5 h-5' />
           Googleでログイン
         </ButtonBase>
@@ -131,4 +109,98 @@ export default function LoginPage() {
       </div>
     </div>
   )
+}
+
+function useLoginPage() {
+  const router = useRouter()
+  const { idToken } = useAuth()
+
+  const [email, setEmail] = useState("")
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const [loading, setLoading] = useState(false)
+
+  const { requestPostLogin } = usePostUserLogin()
+
+  const login = async (mode: LOGIN_MODE) => {
+    if (loading) return
+
+    setLoading(true)
+
+    try {
+      if (mode === "GUEST") {
+        const credential = await handleGuestLoginByFirebase()
+        const result = await requestPostLogin(
+          await credential.user.getIdToken(),
+        )
+        if (!result.success) {
+          await handleLogoutByFirebase()
+          throw new Error(result.errors[0].message)
+        }
+      }
+
+      if (mode === "EMAIL") {
+        if (!email || !password) {
+          if (!email) setEmailError("メールアドレスは必須です。")
+          if (!password) setPasswordError("パスワードは必須です。")
+          return
+        }
+        const checkEmailResult = checkEmail(email)
+        const checkPasswordResult = checkPassword(password)
+        if (!checkEmailResult || !checkPasswordResult) {
+          if (!checkEmailResult) setEmailError("メールアドレスが無効です。")
+          if (!checkPasswordResult)
+            setPasswordError("パスワードは8文字以上である必要があります。")
+          return
+        }
+
+        setEmailError(null)
+        setPasswordError(null)
+        const credential = await handleLoginByFirebase(email, password)
+        const result = await requestPostLogin(
+          await credential.user.getIdToken(),
+        )
+        if (!result.success) {
+          await handleLogoutByFirebase()
+          throw new Error(result.errors[0].message)
+        }
+      }
+
+      if (mode === "GOOGLE") {
+        const credential = await handleGoogleLoginByFirebase()
+        const result = await requestPostLogin(
+          await credential.user.getIdToken(),
+        )
+        if (!result.success) {
+          await handleLogoutByFirebase()
+          throw new Error(result.errors[0].message)
+        }
+      }
+
+      router.replace("/v1/user")
+    } catch {
+      alert(
+        "認証システムに問題が発生しました。公式アナウンスを確認してください。",
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const onChangeEmail = (value: string) => setEmail(value)
+  const onChangePassword = (value: string) => setPassword(value)
+
+  return {
+    idToken,
+    loading,
+    email,
+    emailError,
+    password,
+    passwordError,
+    login,
+    onChangeEmail,
+    onChangePassword,
+  }
 }

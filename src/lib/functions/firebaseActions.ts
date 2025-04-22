@@ -1,10 +1,22 @@
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signInAnonymously,
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth"
 import { firebaseAuthClient } from "./firebaseClient"
+
+export const handleRegisterByFirebase = async (
+  email: string,
+  password: string,
+) => {
+  return await createUserWithEmailAndPassword(
+    firebaseAuthClient,
+    email,
+    password,
+  )
+}
 
 export const handleLoginByFirebase = async (
   email: string,
