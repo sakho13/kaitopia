@@ -1,4 +1,9 @@
-import { signInWithEmailAndPassword, signInAnonymously } from "firebase/auth"
+import {
+  signInWithEmailAndPassword,
+  signInAnonymously,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth"
 import { firebaseAuthClient } from "./firebaseClient"
 
 export const handleLoginByFirebase = async (
@@ -10,6 +15,13 @@ export const handleLoginByFirebase = async (
 
 export const handleGuestLoginByFirebase = async () => {
   return await signInAnonymously(firebaseAuthClient)
+}
+
+export const handleGoogleLoginByFirebase = async () => {
+  const provider = new GoogleAuthProvider()
+  provider.addScope("profile")
+  provider.addScope("email")
+  return await signInWithPopup(firebaseAuthClient, provider)
 }
 
 export const handleLogoutByFirebase = async () => {
