@@ -1,0 +1,49 @@
+name: バグ報告
+description: 発生したバグについて報告します
+title: "[Bug] "
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: バグの内容
+      description: 何が起こっているかを簡潔に記述してください
+      placeholder: 例：問題解答後、正答が表示されない
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: バグが再現できる手順を記述してください
+      placeholder: 例：
+        1. 問題一覧を開く
+        2. 任意の問題を選択
+        3. 解答を送信
+        4. 正答が表示されない
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 実行環境
+      placeholder: 例：iOS Safari / Chrome / Firebase Emulator
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される挙動
+      description: 本来どう動くべきか記述してください
+      placeholder: 例：正答が表示される
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考
+      description: スクリーンショットやログがあれば添付してください
+    validations:
+      required: false
