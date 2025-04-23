@@ -96,7 +96,7 @@ export default function Layout({ children }: Props) {
         isSelfSchool: s.isSelfSchool,
       })),
     )
-    if (schoolId) {
+    if (!schoolId) {
       const firstSchoolId = dataToGetOwnSchools.data.schools[0].id
       onChangeSchool(firstSchoolId)
     }
