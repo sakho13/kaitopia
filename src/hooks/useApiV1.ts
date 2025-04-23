@@ -86,7 +86,7 @@ export function useGetManageOwnSchools() {
   )
 
   return {
-    dataTooGetOwnSchools: data,
+    dataToGetOwnSchools: data,
     isLoadingToGetOwnSchools: isLoading,
     refetchOwnSchools: mutate,
   } as const

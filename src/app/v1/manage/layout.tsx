@@ -7,6 +7,8 @@ import { joincn } from "@/lib/functions/joincn"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { KaitopiaTitle } from "@/components/atoms/KaitopiaTitle"
 import { useGetManageOwnSchools } from "@/hooks/useApiV1"
+import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { useManageStore } from "@/hooks/stores/useManageStore"
 
 type Props = {
   children: React.ReactNode
@@ -18,16 +20,12 @@ type NaviType = {
   showNavBar: boolean
 }
 
-type SchoolType = {
-  schoolId: string
-  schoolName: string
-}
-
 export default function Layout({ children }: Props) {
-  const { dataTooGetOwnSchools } = useGetManageOwnSchools()
-
-  const [schools, setSchools] = useState<SchoolType[]>([])
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null)
+  const path = usePathname()
+  const { schoolId, setSchoolId, schools, setSchools } =
+    useManageStore.getState()
+  const { dataToGetOwnSchools } = useGetManageOwnSchools()
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("")
 
   const NAVI: NaviType[] = useMemo(
     () => [
@@ -64,26 +62,37 @@ export default function Layout({ children }: Props) {
     ],
     [],
   )
-  const path = usePathname()
 
   const pageTitle = useMemo(
     () => NAVI.find((item) => item.href === path)?.label || "ダッシュボード",
     [path, NAVI],
   )
 
-  useEffect(() => {
-    if (!dataTooGetOwnSchools?.success) return
+  const onChangeSchool = (schoolId: string) => {
+    setSchoolId(schoolId)
+    setSelectedSchoolId(schoolId)
+  }
 
-    if (dataTooGetOwnSchools.data.schools.length === 0) return
+  useEffect(() => {
+    if (!dataToGetOwnSchools?.success) return
+
+    if (dataToGetOwnSchools.data.schools.length === 0) return
 
     setSchools(
-      dataTooGetOwnSchools.data.schools.map((s) => ({
+      dataToGetOwnSchools.data.schools.map((s) => ({
         schoolId: s.id,
         schoolName: s.name,
+        isGlobal: s.isGlobal,
+        isPublic: s.isPublic,
+        isSelfSchool: s.isSelfSchool,
       })),
     )
-    setSelectedSchoolId(dataTooGetOwnSchools.data.schools[0].id)
-  }, [dataTooGetOwnSchools])
+    if (schoolId) {
+      const firstSchoolId = dataToGetOwnSchools.data.schools[0].id
+      onChangeSchool(firstSchoolId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataToGetOwnSchools])
 
   return (
     <div
@@ -99,12 +108,14 @@ export default function Layout({ children }: Props) {
           <select
             id='schoolSelect'
             value={selectedSchoolId ?? ""}
-            onChange={(e) => setSelectedSchoolId(e.target.value)}
+            onChange={(e) => {
+              onChangeSchool(e.target.value)
+            }}
             className='w-full rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary hover:bg-primary-hover hover:cursor-pointer'
           >
             {schools.map((school) => (
               <option
-                key={school.schoolId}
+                key={encodeBase64(school.schoolId)}
                 value={school.schoolId}
                 className='bg-white text-black'
               >
