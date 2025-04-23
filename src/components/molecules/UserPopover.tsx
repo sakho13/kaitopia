@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
 import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function UserPopover() {
   const { open, ref, handleNavigate, signOut, toggleOpen, userConfig } =
@@ -49,6 +49,7 @@ export default function UserPopover() {
 }
 
 function useUserPopover() {
+  const { signOut: handleSignOut } = useAuth()
   const { config: userConfig } = useUserConfigStore.getState()
 
   const [open, setOpen] = useState(false)
@@ -71,7 +72,7 @@ function useUserPopover() {
   }
 
   const signOut = () => {
-    handleLogoutByFirebase()
+    handleSignOut()
     setOpen(false)
     router.push("/public/login")
   }

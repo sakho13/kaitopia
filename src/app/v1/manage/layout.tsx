@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { joincn } from "@/lib/functions/joincn"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { KaitopiaTitle } from "@/components/atoms/KaitopiaTitle"
 import { useGetManageOwnSchools } from "@/hooks/useApiV1"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { useManageStore } from "@/hooks/stores/useManageStore"
+import { useAuth } from "@/hooks/useAuth"
 
 type Props = {
   children: React.ReactNode
@@ -21,8 +22,10 @@ type NaviType = {
 }
 
 export default function Layout({ children }: Props) {
+  const router = useRouter()
   const path = usePathname()
-  const { schoolId, setSchoolId, schools, setSchools } =
+  const { signOut: handleSignOut } = useAuth()
+  const { schoolId, setSchoolId, schools, setSchools, clearSchoolId } =
     useManageStore.getState()
   const { dataToGetOwnSchools } = useGetManageOwnSchools()
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("")
@@ -71,6 +74,12 @@ export default function Layout({ children }: Props) {
   const onChangeSchool = (schoolId: string) => {
     setSchoolId(schoolId)
     setSelectedSchoolId(schoolId)
+  }
+
+  const signOut = async () => {
+    await handleSignOut()
+    clearSchoolId()
+    router.replace("/")
   }
 
   useEffect(() => {
@@ -157,6 +166,7 @@ export default function Layout({ children }: Props) {
             colorMode='ghost'
             sizeMode='fit'
             className='px-4 py-2 text-sm'
+            onClick={signOut}
           >
             ログアウト
           </ButtonBase>
