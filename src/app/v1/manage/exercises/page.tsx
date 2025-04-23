@@ -10,30 +10,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-
-type QuestionSet = {
-  id: number
-  title: string
-  questionsCount: number
-  createdAt: string
-}
+import { useGetManageExercises } from "@/hooks/useApiV1"
+import { useManageStore } from "@/hooks/stores/useManageStore"
+import { ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
+import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { ManageNewExerciseForm } from "@/components/molecules/ManageNewExerciseForm"
 
 export default function Page() {
   const router = useRouter()
-  const [sets, setSets] = useState<QuestionSet[]>([
-    {
-      id: 1,
-      title: "基本情報技術者 午前対策",
-      questionsCount: 45,
-      createdAt: "2025/04/05",
-    },
-    {
-      id: 2,
-      title: "JavaScript 初級講座",
-      questionsCount: 20,
-      createdAt: "2025/04/01",
-    },
-  ])
+  const { schoolId } = useManageStore.getState()
+
+  const [openNewExerciseDialog, setOpenNewExerciseDialog] = useState(false)
+
+  const {} = useGetManageExercises(schoolId)
+
+  const [exercises, _setExercises] = useState<
+    ApiV1OutTypeMap["GetManageExercises"]["exercises"]
+  >([])
 
   return (
     <div>
@@ -41,7 +34,10 @@ export default function Page() {
         <div className='flex justify-between items-center mb-6'>
           <h3 className='text-lg font-semibold'>登録済みの問題集</h3>
 
-          <Dialog>
+          <Dialog
+            open={openNewExerciseDialog}
+            onOpenChange={setOpenNewExerciseDialog}
+          >
             <DialogTrigger asChild>
               <ButtonBase colorMode='smart' className='px-4 py-2'>
                 新しい問題集を作成
@@ -52,29 +48,11 @@ export default function Page() {
                 <DialogTitle>新しい問題集</DialogTitle>
               </DialogHeader>
 
-              <div>
-                <div>
-                  <label className='block text-sm font-medium mb-1'>
-                    問題集名
-                  </label>
-                  <input
-                    type='text'
-                    className='w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary'
-                    // value={name}
-                    // onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-
-                <div className='mt-6 flex gap-4 justify-end'>
-                  <ButtonBase
-                    colorMode='primary'
-                    className='px-4 py-2'
-                    sizeMode='fit'
-                  >
-                    保存
-                  </ButtonBase>
-                </div>
-              </div>
+              <ManageNewExerciseForm
+                onClickButton={() => {
+                  setOpenNewExerciseDialog(false)
+                }}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -90,15 +68,15 @@ export default function Page() {
           </thead>
 
           <tbody>
-            {sets.map((set) => (
-              <tr key={set.id} className='border-t'>
-                <td className='px-4 py-2'>{set.title}</td>
-                <td className='px-4 py-2'>{set.questionsCount} 問</td>
-                <td className='px-4 py-2'>{set.createdAt}</td>
+            {exercises.map((exercise) => (
+              <tr key={encodeBase64(exercise.exerciseId)} className='border-t'>
+                <td className='px-4 py-2'>{exercise.title}</td>
+                <td className='px-4 py-2'>{exercise.questionCount} 問</td>
+                <td className='px-4 py-2'>{exercise.createdAt}</td>
                 <td className='px-4 py-2 space-x-2 text-sm'>
                   <button
                     onClick={() =>
-                      router.push(`/admin/question-sets/${set.id}/edit`)
+                      router.push(`/v1/manage/${exercise.exerciseId}/edit`)
                     }
                     className='text-primary hover:underline'
                   >

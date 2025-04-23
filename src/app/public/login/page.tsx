@@ -7,22 +7,24 @@ import {
   handleGoogleLoginByFirebase,
   handleGuestLoginByFirebase,
   handleLoginByFirebase,
-  handleLogoutByFirebase,
 } from "@/lib/functions/firebaseActions"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
 import { checkEmail, checkPassword } from "@/lib/functions/validators"
 import { LoginMode } from "@/lib/types/loginMode"
+import { FirebaseError } from "firebase/app"
+import { joincn } from "@/lib/functions/joincn"
 
 export default function LoginPage() {
-  const { idToken, email, password, onChangeEmail, onChangePassword, login } =
-    useLoginPage()
-
-  useEffect(() => {
-    if (idToken) {
-      redirect("/v1/user")
-    }
-  }, [idToken])
+  const {
+    email,
+    emailError,
+    password,
+    passwordError,
+    onChangeEmail,
+    onChangePassword,
+    login,
+  } = useLoginPage()
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,10 +50,16 @@ export default function LoginPage() {
               type='email'
               id='email'
               required
-              className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
+              className={joincn(
+                "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
+                emailError ? "border-red-500" : "",
+              )}
               value={email}
               onChange={(e) => onChangeEmail(e.target.value)}
             />
+            {emailError && (
+              <p className='text-red-500 text-sm mt-1'>{emailError}</p>
+            )}
           </div>
 
           <div>
@@ -65,10 +73,16 @@ export default function LoginPage() {
               type='password'
               id='password'
               required
-              className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
+              className={joincn(
+                "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
+                passwordError ? "border-red-500" : "",
+              )}
               value={password}
               onChange={(e) => onChangePassword(e.target.value)}
             />
+            {passwordError && (
+              <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
+            )}
           </div>
 
           <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
@@ -113,7 +127,7 @@ export default function LoginPage() {
 
 function useLoginPage() {
   const router = useRouter()
-  const { idToken } = useAuth()
+  const { idToken, signOut: handleSignOut } = useAuth()
 
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState<string | null>(null)
@@ -136,9 +150,11 @@ function useLoginPage() {
           await credential.user.getIdToken(),
         )
         if (!result.success) {
-          await handleLogoutByFirebase()
+          await handleSignOut()
           throw new Error(result.errors[0].message)
         }
+        redirect("/v1/user")
+        return
       }
 
       if (mode === "EMAIL") {
@@ -163,7 +179,7 @@ function useLoginPage() {
           await credential.user.getIdToken(),
         )
         if (!result.success) {
-          await handleLogoutByFirebase()
+          await handleSignOut()
           throw new Error(result.errors[0].message)
         }
       }
@@ -174,13 +190,23 @@ function useLoginPage() {
           await credential.user.getIdToken(),
         )
         if (!result.success) {
-          await handleLogoutByFirebase()
+          await handleSignOut()
           throw new Error(result.errors[0].message)
         }
       }
 
       router.replace("/v1/user")
-    } catch {
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/user-not-found") {
+          setEmailError("メールアドレスが登録されていません。")
+          return
+        }
+        if (error.code === "auth/wrong-password") {
+          setPasswordError("パスワードが間違っています。")
+          return
+        }
+      }
       alert(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
       )
