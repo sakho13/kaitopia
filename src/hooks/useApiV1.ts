@@ -113,12 +113,12 @@ export function useGetManageExercises() {
 /**
  * POST: `/api/manage/v1/exercise`
  */
-export function usePostManageExercise(
-  input: ApiV1InTypeMap["PostManageExercise"],
-) {
+export function usePostManageExercise() {
   const { idToken } = useAuth()
 
-  const requestPostExercise = async () => {
+  const requestPostExercise = async (
+    input: ApiV1InTypeMap["PostManageExercise"],
+  ) => {
     return await requestPost(
       "PostManageExercise",
       "PostManageExercise",
