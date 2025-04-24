@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import {
@@ -22,7 +22,13 @@ export default function Page() {
 
   const [openNewExerciseDialog, setOpenNewExerciseDialog] = useState(false)
 
-  const {} = useGetManageExercises(schoolId)
+  const {
+    dataTooGetManageExercises,
+    totalCountToGetManageExercises,
+    sizeToGetManageExercises,
+    setSizeToGetManageExercises,
+    isValidatingToGetManageExercises,
+  } = useGetManageExercises(schoolId)
 
   const [exercises, _setExercises] = useState<
     ApiV1OutTypeMap["GetManageExercises"]["exercises"]
@@ -32,7 +38,12 @@ export default function Page() {
     <div>
       <div className='max-w-5xl mx-auto'>
         <div className='flex justify-between items-center mb-6'>
-          <h3 className='text-lg font-semibold'>登録済みの問題集</h3>
+          <h3 className='text-lg font-semibold select-none'>
+            登録済みの問題集{" "}
+            <span className='text-gray-600 font-medium'>
+              {totalCountToGetManageExercises}件
+            </span>
+          </h3>
 
           <Dialog
             open={openNewExerciseDialog}
@@ -68,7 +79,7 @@ export default function Page() {
           </thead>
 
           <tbody>
-            {exercises.map((exercise) => (
+            {dataTooGetManageExercises.map((exercise) => (
               <tr key={encodeBase64(exercise.exerciseId)} className='border-t'>
                 <td className='px-4 py-2'>{exercise.title}</td>
                 <td className='px-4 py-2'>{exercise.questionCount} 問</td>
