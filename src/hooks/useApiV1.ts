@@ -123,7 +123,7 @@ export function useGetManageExercises(schoolId: string) {
   const { data, isLoading, mutate, size, setSize, isValidating } =
     useSWRInfinite(getKey, async ([url, token]) =>
       token ? fetcher("GetManageExercises", "GET", url, token) : null,
-  )
+    )
 
   return {
     dataTooGetManageExercises:
@@ -159,6 +159,32 @@ export function usePostManageExercise() {
   return {
     requestPostExercise,
   }
+}
+
+/**
+ * GET: `/api/manage/v1/exercise`
+ */
+export function useGetManageExercise(exerciseId: string) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/manage/v1/exercise", idToken],
+    async ([url, token]) =>
+      token
+        ? fetcher(
+            "GetManageExercise",
+            "GET",
+            `${url}?exerciseId=${exerciseId}`,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataTooGetManageExercise: data,
+    isLoadingToGetManageExercise: isLoading,
+    refetchManageExercise: mutate,
+  } as const
 }
 
 // *******************
@@ -219,11 +245,11 @@ export function usePostUserLogin() {
   }
 }
 
-export function useGetExercise(exerciseId: string) {
-  const { idToken } = useAuth()
-  const [loading, setLoading] = useState(true)
+// export function useGetExercise(exerciseId: string) {
+//   const { idToken } = useAuth()
+//   const [loading, setLoading] = useState(true)
 
-  return {
-    isLoadingToGetExercise: loading,
-  }
-}
+//   return {
+//     isLoadingToGetExercise: loading,
+//   }
+// }
