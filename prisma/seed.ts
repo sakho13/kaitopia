@@ -5,6 +5,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log(`Start seeding ...`)
 
+  await transferUsers()
   await transferSchools()
   await Promise.all([transferExcises(), transferQuestions()])
 
@@ -29,6 +30,28 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
+
+async function transferUsers() {
+  return await prisma.user.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        id: "kaitopia-user+001",
+        firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
+        name: "Kaitopia User 001",
+        isGuest: false,
+        role: "USER",
+      },
+      {
+        id: "kaitopia-admin+001",
+        firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
+        name: "Kaitopia Admin 001",
+        isGuest: false,
+        role: "ADMIN",
+      },
+    ],
+  })
+}
 
 async function transferSchools() {
   return await prisma.school.createMany({
@@ -59,7 +82,7 @@ async function transferExcises() {
     skipDuplicates: true,
     data: [
       SeedDataIntroProgramming1.exercise,
-{
+      {
         id: "it_passport_1",
         title: "ITパスポート 問題集1",
         schoolId: "kaitopia_1",
