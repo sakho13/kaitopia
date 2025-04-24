@@ -418,9 +418,8 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "description": "取得するページ番号。デフォルトは1。"
-            },
-            "example": 1
+              "description": "次のページを取得するためのページ番号\nnullの場合は次のページがないことを示す"
+            }
           }
         ],
         "responses": {
@@ -444,17 +443,13 @@
                             "$ref": "#/components/schemas/ExerciseBaseType"
                           }
                         },
+                        "nextPage": {
+                          "type": "integer",
+                          "description": "次のページを取得するためのページ番号\nnullの場合は次のページがないことを示す"
+                        },
                         "totalCount": {
                           "type": "integer",
                           "description": "問題集の総数"
-                        },
-                        "page": {
-                          "type": "integer",
-                          "description": "現在のページ番号"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "description": "1ページあたりの問題集の数"
                         }
                       }
                     }
@@ -806,6 +801,10 @@
           "isScoringBatch": {
             "type": "boolean",
             "description": "一括採点が可能かどうか。"
+          },
+          "questionCount": {
+            "type": "integer",
+            "description": "登録済みの問題数"
           }
         }
       },
