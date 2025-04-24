@@ -7,7 +7,6 @@ import {
   ApiV1OutBase,
   ApiV1OutTypeMap,
 } from "@/lib/types/apiV1Types"
-import { useState } from "react"
 
 const fetcher = async <T extends keyof ApiV1OutTypeMap>(
   _label: T,
@@ -95,18 +94,47 @@ export function useGetManageOwnSchools() {
 /**
  * GET: `/api/manage/v1/exercises`
  */
-export function useGetManageExercises() {
+export function useGetManageExercises(schoolId: string) {
+  const PAGE_SIZE = 10
   const { idToken } = useAuth()
 
-  const { data, isLoading } = useSwr(
-    ["/api/manage/v1/exercises", idToken],
-    async ([url, token]) =>
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ApiV1OutTypeMap["GetManageExercises"] | null,
+  ) => {
+    if (!idToken) return null
+
+    const isFirstFetch = pageIndex === 0
+    if (isFirstFetch)
+      return [
+        `/api/manage/v1/exercises?schoolId=${schoolId}&page=1&count=${PAGE_SIZE}`,
+        idToken,
+      ]
+
+    if (previousPageData?.nextPage === null || !previousPageData) return null
+
+    const page = pageIndex === 0 ? 1 : pageIndex + 1
+    return [
+      `/api/manage/v1/exercises?schoolId=${schoolId}&page=${page}&count=${PAGE_SIZE}`,
+      idToken,
+    ]
+  }
+
+  const { data, isLoading, mutate, size, setSize, isValidating } =
+    useSWRInfinite(getKey, async ([url, token]) =>
       token ? fetcher("GetManageExercises", "GET", url, token) : null,
   )
 
   return {
-    dataTooGetManageExercises: data,
+    dataTooGetManageExercises:
+      data?.flatMap((page) => (page?.success ? page.data.exercises : [])) ?? [],
+    totalCountToGetManageExercises:
+      data && data[0]?.success ? data[0].data.totalCount : 0,
     isLoadingToGetManageExercises: isLoading,
+    isValidatingToGetManageExercises: isValidating,
+    sizeToGetManageExercises: size,
+    setSizeToGetManageExercises: setSize,
+    refetchManageExercises: mutate,
   }
 }
 
