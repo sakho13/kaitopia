@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { redirect, useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import {

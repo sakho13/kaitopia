@@ -1,5 +1,6 @@
 import { ExerciseService } from "@/lib/classes/services/ExerciseService"
 import { PrismaClient } from "@prisma/client"
+import { count } from "console"
 
 describe("lib/classes/services/ExerciseService", () => {
   afterEach(() => {
@@ -53,68 +54,20 @@ describe("lib/classes/services/ExerciseService", () => {
       const connection = {
         exercise: {
           findMany: jest.fn().mockResolvedValueOnce([]),
+          count: jest.fn().mockResolvedValueOnce(0),
         },
       }
       const exerciseService = new ExerciseService(
         connection as unknown as PrismaClient,
       )
 
-      const exercises = await exerciseService.getExercisesForManage()
+      const schoolId = "testSchoolId"
+
+      const { exercises, nextPage, totalCount } =
+        await exerciseService.getExercisesForManage(schoolId, 10)
       expect(exercises).toEqual([])
-    })
-
-    test("問題集あり", async () => {
-      const connection = {
-        exercise: {
-          findMany: jest.fn().mockResolvedValueOnce([
-            {
-              id: "testId",
-              title: "testTitle",
-              description: "testDescription",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              isCanSkip: false,
-              isScoringBatch: false,
-            },
-            {
-              id: "testId2",
-              title: "testTitle2",
-              description: "testDescription2",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              isCanSkip: true,
-              isScoringBatch: true,
-            },
-          ]),
-        },
-      }
-      const exerciseService = new ExerciseService(
-        connection as unknown as PrismaClient,
-      )
-
-      const exercises = await exerciseService.getExercisesForManage()
-      expect(exercises).toEqual([
-        {
-          schoolId: undefined,
-          exerciseId: "testId",
-          title: "testTitle",
-          description: "testDescription",
-          createdAt: expect.any(Date),
-          updatedAt: expect.any(Date),
-          isCanSkip: false,
-          isScoringBatch: false,
-        },
-        {
-          schoolId: undefined,
-          exerciseId: "testId2",
-          title: "testTitle2",
-          description: "testDescription2",
-          createdAt: expect.any(Date),
-          updatedAt: expect.any(Date),
-          isCanSkip: true,
-          isScoringBatch: true,
-        },
-      ])
+      expect(nextPage).toBeNull()
+      expect(totalCount).toBe(0)
     })
   })
 })

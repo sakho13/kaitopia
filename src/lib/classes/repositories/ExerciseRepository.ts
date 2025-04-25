@@ -65,14 +65,27 @@ export class ExerciseRepository extends RepositoryBase {
         updatedAt: true,
         isCanSkip: true,
         isScoringBatch: true,
+        exerciseQuestions: {
+          select: {
+            questionId: true,
+          },
+        },
       },
       where: {
         schoolId,
+        deletedAt: null,
       },
-      skip: offset,
       take: limit,
-      orderBy: {
-        updatedAt: "desc",
+      skip: offset,
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+    })
+  }
+
+  public async countExerciseBySchoolId(schoolId?: string) {
+    return await this.dbConnection.exercise.count({
+      where: {
+        schoolId,
+        deletedAt: null,
       },
     })
   }

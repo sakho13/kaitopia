@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog"
 import { useGetManageExercises } from "@/hooks/useApiV1"
 import { useManageStore } from "@/hooks/stores/useManageStore"
-import { ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { ManageNewExerciseForm } from "@/components/molecules/ManageNewExerciseForm"
 
@@ -22,17 +21,23 @@ export default function Page() {
 
   const [openNewExerciseDialog, setOpenNewExerciseDialog] = useState(false)
 
-  const {} = useGetManageExercises(schoolId)
-
-  const [exercises, _setExercises] = useState<
-    ApiV1OutTypeMap["GetManageExercises"]["exercises"]
-  >([])
+  const {
+    dataTooGetManageExercises,
+    totalCountToGetManageExercises,
+    isLoadingToGetManageExercises,
+    loadMoreToGetManageExercises,
+  } = useGetManageExercises(schoolId)
 
   return (
     <div>
       <div className='max-w-5xl mx-auto'>
         <div className='flex justify-between items-center mb-6'>
-          <h3 className='text-lg font-semibold'>登録済みの問題集</h3>
+          <h3 className='text-lg font-semibold select-none'>
+            登録済みの問題集{" "}
+            <span className='text-gray-600 font-medium'>
+              {totalCountToGetManageExercises}件
+            </span>
+          </h3>
 
           <Dialog
             open={openNewExerciseDialog}
@@ -68,7 +73,7 @@ export default function Page() {
           </thead>
 
           <tbody>
-            {exercises.map((exercise) => (
+            {dataTooGetManageExercises.map((exercise) => (
               <tr key={encodeBase64(exercise.exerciseId)} className='border-t'>
                 <td className='px-4 py-2'>{exercise.title}</td>
                 <td className='px-4 py-2'>{exercise.questionCount} 問</td>
@@ -86,6 +91,25 @@ export default function Page() {
                 </td>
               </tr>
             ))}
+
+            <tr className='py-8 text-center'>
+              <td colSpan={4} className='px-4 py-2'>
+                {totalCountToGetManageExercises === 0 ? (
+                  <span className='select-none'>
+                    登録された問題集はありません
+                  </span>
+                ) : (
+                  <button
+                    onClick={loadMoreToGetManageExercises}
+                    disabled={isLoadingToGetManageExercises}
+                  >
+                    {isLoadingToGetManageExercises
+                      ? "読み込み中..."
+                      : "さらに読み込む"}
+                  </button>
+                )}
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

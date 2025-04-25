@@ -1,0 +1,45 @@
+{
+  "kind": "identitytoolkit#DownloadAccountResponse",
+  "users": [
+    {
+      "localId": "3na1wqgfg7Jj71amJifrwGrCtkCg",
+      "createdAt": "1745493855473",
+      "lastLoginAt": "1745493855473",
+      "passwordHash": "fakeHash:salt=fakeSaltgkLNVQGl7CGqiCEpHuON:password=password",
+      "salt": "fakeSaltgkLNVQGl7CGqiCEpHuON",
+      "passwordUpdatedAt": 1745494459844,
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "kaitopia-user+001@kaitopia.com",
+          "federatedId": "kaitopia-user+001@kaitopia.com",
+          "rawId": "kaitopia-user+001@kaitopia.com"
+        }
+      ],
+      "validSince": "1745494459",
+      "email": "kaitopia-user+001@kaitopia.com",
+      "emailVerified": false,
+      "disabled": false
+    },
+    {
+      "localId": "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
+      "lastLoginAt": "1745494870071",
+      "emailVerified": false,
+      "email": "kaitopia-admin+001@kaitopia.com",
+      "salt": "fakeSaltC2widPciMEUDmi1q6JyG",
+      "passwordHash": "fakeHash:salt=fakeSaltC2widPciMEUDmi1q6JyG:password=password",
+      "passwordUpdatedAt": 1745494870076,
+      "validSince": "1745494870",
+      "createdAt": "1745494870071",
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "email": "kaitopia-admin+001@kaitopia.com",
+          "federatedId": "kaitopia-admin+001@kaitopia.com",
+          "rawId": "kaitopia-admin+001@kaitopia.com"
+        }
+      ],
+      "lastRefreshAt": "2025-04-24T11:41:10.081Z"
+    }
+  ]
+}

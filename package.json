@@ -18,7 +18,9 @@
     "prisma:init": "npm run prisma:generate && npm run prisma:deploy && npm run prisma:seed",
     "prisma:studio": "npx prisma studio",
     "test": "jest",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e-report": "playwright show-report"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -46,6 +48,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "3",
     "@microsoft/tsdoc": "0.15.1",
+    "@playwright/test": "1.52.0",
     "@tailwindcss/postcss": "4",
     "@testing-library/dom": "10.4.0",
     "@testing-library/jest-dom": "6.6.3",

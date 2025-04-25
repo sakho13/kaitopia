@@ -86,6 +86,13 @@ export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
 }
 
 export type ApiV1InTypeMap = {
+  /**
+   * GET /api/manage/v1/exercise?exerciseId=xxxx
+   */
+  GetManageExercise: {
+    exerciseId: string
+  }
+
   GetManageExercises: {
     // クエリパラメータ
     schoolId?: string
@@ -154,18 +161,31 @@ export type ApiV1OutTypeMap = {
       SchoolBase &
       ReplacedDateToString<SchoolBaseDate>)[]
   }
+  /**
+   * GET /api/manage/v1/exercise
+   */
   GetManageExercise: {
     exercise: ExerciseBaseIdentifier &
       ExerciseBase &
       ExerciseBaseProperty &
-      ReplacedDateToString<ExerciseBaseDate>
+      ReplacedDateToString<ExerciseBaseDate> & { questionCount: number }
     questions: (Omit<QuestionBaseIdentifier, "schoolId"> & QuestionBase)[]
   }
+  /**
+   * GET /api/manage/v1/exercises
+   */
   GetManageExercises: {
     exercises: (ExerciseBaseIdentifier &
       ExerciseBase &
-      ReplacedDateToString<ExerciseBaseDate>)[]
+      ExerciseBaseProperty &
+      ReplacedDateToString<ExerciseBaseDate> & { questionCount: number })[]
+    /**
+     * @description nullの場合は次のページがないことを示す
+     */
+    nextPage: number | null
+    totalCount: number
   }
+
   /**
    * POST /api/manage/v1/exercise
    */

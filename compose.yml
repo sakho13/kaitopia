@@ -31,7 +31,14 @@ services:
       - "8080:8080" # Firebase Firestore
     environment:
       NODE_ENV: development
-    command: ["firebase", "emulators:start", "--only", "auth,firestore"]
+    command:
+      [
+        "firebase",
+        "emulators:start",
+        "--only",
+        "auth,firestore",
+        "--import=./init-data",
+      ]
 
 volumes:
   postgres_data:

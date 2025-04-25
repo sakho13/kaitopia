@@ -3,7 +3,6 @@ import { ServiceBase } from "../common/ServiceBase"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { AnswerLogRepository } from "../repositories/AnswerLogRepository"
-import { QuestionRepository } from "../repositories/QuestionRepository"
 
 export class ExerciseService extends ServiceBase {
   public async getRecommendExercises() {
@@ -20,30 +19,47 @@ export class ExerciseService extends ServiceBase {
     })
   }
 
+  /**
+   * 管理用問題集取得
+   */
   public async getExercisesForManage(
-    schoolId?: string,
-    limit?: number,
-    offset?: number,
+    schoolId: string,
+    limit: number = 10,
+    page?: number,
   ) {
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
+    const offset = page ? (page - 1) * limit : undefined
     const exercises = await exerciseRepository.findExerciseBySchoolId(
       schoolId,
       limit,
       offset,
     )
-    return exercises.map((exercise) => {
-      return {
-        schoolId: exercise.schoolId,
-        exerciseId: exercise.id,
-        title: exercise.title,
-        description: exercise.description,
-        createdAt: exercise.createdAt,
-        updatedAt: exercise.updatedAt,
-        isCanSkip: exercise.isCanSkip,
-        isScoringBatch: exercise.isScoringBatch,
-      }
-    })
+    const totalCount = await exerciseRepository.countExerciseBySchoolId(
+      schoolId,
+    )
+    /**
+     * @description 同じlimitとしたときの次のページNo。nullの場合は次のページがないことを示す
+     */
+    const nextPage = exercises.length < limit ? null : page ? page + 1 : 2
+
+    return {
+      exercises: exercises.map((exercise) => {
+        return {
+          schoolId: exercise.schoolId,
+          exerciseId: exercise.id,
+          title: exercise.title,
+          description: exercise.description,
+          createdAt: exercise.createdAt,
+          updatedAt: exercise.updatedAt,
+          isCanSkip: exercise.isCanSkip,
+          isScoringBatch: exercise.isScoringBatch,
+          questionCount: exercise.exerciseQuestions.length,
+        }
+      }),
+      totalCount,
+      nextPage,
+    }
   }
 
   public async getExerciseById(exerciseId: string) {
@@ -110,9 +126,10 @@ export class ExerciseService extends ServiceBase {
             exerciseId,
           )
 
-        const questionRepository = new QuestionRepository(tx)
-        const answers =
-          await questionRepository.findQuestionAnswersByExerciseId(exerciseId)
+        // 出題する問題を選出して紐づける
+        // const questionRepository = new QuestionRepository(tx)
+        // const questions =
+        //   await questionRepository.findQuestionAnswersByExerciseId(exerciseId)
 
         return {
           answerLogSheetId: created.answerLogSheetId,
