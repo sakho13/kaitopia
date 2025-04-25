@@ -683,6 +683,156 @@
         }
       },
 
+      "post": {
+        "summary": "問題集を作成する（スキップ無効、一括採点有効で作成する）",
+        "description": "問題集を作成します",
+        "tags": ["ManageAPI"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "schoolId": {
+                    "type": "string",
+                    "description": "紐づけるスクールID"
+                  },
+                  "property": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "問題集のタイトル"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "問題集の説明\n現実装では空文字"
+                      }
+                    }
+                  }
+                },
+                "required": ["schoolId", "property"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題集の作成に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exerciseId": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "1文字以上、200文字未満",
+                          "minLength": 1,
+                          "maxLength": 199
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "2000文字未満",
+                          "minLength": 0,
+                          "maxLength": 1999
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "作成日時\nJST時間をISO8601形式で返す"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新日時\nJST時間をISO8601形式で返す"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "patch": {
+        "summary": "問題集設定を更新する",
+        "tags": ["ManageAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "minItems": 1,
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "問題集のタイトル",
+                    "minLength": 1,
+                    "maxLength": 199
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "問題集の説明",
+                    "minLength": 0,
+                    "maxLength": 1999
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "編集に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercise": {
+                          "$ref": "#/components/schemas/ExerciseBaseType"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
       "delete": {
         "summary": "問題集を削除する",
         "tags": ["ManageAPI", "InDevelopment"],
