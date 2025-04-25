@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import {
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog"
 import { useGetManageExercises } from "@/hooks/useApiV1"
 import { useManageStore } from "@/hooks/stores/useManageStore"
-import { ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { ManageNewExerciseForm } from "@/components/molecules/ManageNewExerciseForm"
 
@@ -25,14 +24,9 @@ export default function Page() {
   const {
     dataTooGetManageExercises,
     totalCountToGetManageExercises,
-    sizeToGetManageExercises,
-    setSizeToGetManageExercises,
-    isValidatingToGetManageExercises,
+    isLoadingToGetManageExercises,
+    loadMoreToGetManageExercises,
   } = useGetManageExercises(schoolId)
-
-  const [exercises, _setExercises] = useState<
-    ApiV1OutTypeMap["GetManageExercises"]["exercises"]
-  >([])
 
   return (
     <div>
@@ -97,6 +91,25 @@ export default function Page() {
                 </td>
               </tr>
             ))}
+
+            <tr className='py-8 text-center'>
+              <td colSpan={4} className='px-4 py-2'>
+                {totalCountToGetManageExercises === 0 ? (
+                  <span className='select-none'>
+                    登録された問題集はありません
+                  </span>
+                ) : (
+                  <button
+                    onClick={loadMoreToGetManageExercises}
+                    disabled={isLoadingToGetManageExercises}
+                  >
+                    {isLoadingToGetManageExercises
+                      ? "読み込み中..."
+                      : "さらに読み込む"}
+                  </button>
+                )}
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

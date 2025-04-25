@@ -95,7 +95,7 @@ export function useGetManageOwnSchools() {
  * GET: `/api/manage/v1/exercises`
  */
 export function useGetManageExercises(schoolId: string) {
-  const PAGE_SIZE = 10
+  const PAGE_SIZE = 20
   const { idToken } = useAuth()
 
   const getKey = (
@@ -107,33 +107,48 @@ export function useGetManageExercises(schoolId: string) {
     const isFirstFetch = pageIndex === 0
     if (isFirstFetch)
       return [
-        `/api/manage/v1/exercises?schoolId=${schoolId}&page=1&count=${PAGE_SIZE}`,
+        `/api/manage/v1/exercises?schoolId=${schoolId}&count=${PAGE_SIZE}&page=1`,
         idToken,
       ]
 
     if (previousPageData?.nextPage === null || !previousPageData) return null
 
-    const page = pageIndex === 0 ? 1 : pageIndex + 1
+    const page = pageIndex + 1
     return [
-      `/api/manage/v1/exercises?schoolId=${schoolId}&page=${page}&count=${PAGE_SIZE}`,
+      `/api/manage/v1/exercises?schoolId=${schoolId}&count=${PAGE_SIZE}&page=${page}`,
       idToken,
     ]
   }
 
-  const { data, isLoading, mutate, size, setSize, isValidating } =
-    useSWRInfinite(getKey, async ([url, token]) =>
+  const { data, isLoading, mutate, setSize, isValidating } = useSWRInfinite(
+    getKey,
+    async ([url, token]) =>
       token ? fetcher("GetManageExercises", "GET", url, token) : null,
-    )
+  )
+
+  const loadMore = () => {
+    if (isLoading || isValidating) return
+    if (!data) {
+      setSize(1)
+      return
+    }
+    const latest = data[data.length - 1]
+    if (!latest?.success) {
+      setSize(1)
+      return
+    }
+    if (latest.data.nextPage === null) return
+    setSize((prev) => (prev ? prev + 1 : 1))
+  }
 
   return {
-    dataTooGetManageExercises:
-      data?.flatMap((page) => (page?.success ? page.data.exercises : [])) ?? [],
+    dataTooGetManageExercises: data
+      ? data.flatMap((d) => (d?.success ? d.data.exercises : []))
+      : [],
     totalCountToGetManageExercises:
       data && data[0]?.success ? data[0].data.totalCount : 0,
-    isLoadingToGetManageExercises: isLoading,
-    isValidatingToGetManageExercises: isValidating,
-    sizeToGetManageExercises: size,
-    setSizeToGetManageExercises: setSize,
+    isLoadingToGetManageExercises: isLoading || isValidating,
+    loadMoreToGetManageExercises: loadMore,
     refetchManageExercises: mutate,
   }
 }

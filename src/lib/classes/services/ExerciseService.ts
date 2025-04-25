@@ -45,21 +45,21 @@ export class ExerciseService extends ServiceBase {
 
     return {
       exercises: exercises.map((exercise) => {
-      return {
-        schoolId: exercise.schoolId,
-        exerciseId: exercise.id,
-        title: exercise.title,
-        description: exercise.description,
-        createdAt: exercise.createdAt,
-        updatedAt: exercise.updatedAt,
-        isCanSkip: exercise.isCanSkip,
-        isScoringBatch: exercise.isScoringBatch,
+        return {
+          schoolId: exercise.schoolId,
+          exerciseId: exercise.id,
+          title: exercise.title,
+          description: exercise.description,
+          createdAt: exercise.createdAt,
+          updatedAt: exercise.updatedAt,
+          isCanSkip: exercise.isCanSkip,
+          isScoringBatch: exercise.isScoringBatch,
           questionCount: exercise.exerciseQuestions.length,
         }
       }),
       totalCount,
       nextPage,
-      }
+    }
   }
 
   public async getExerciseById(exerciseId: string) {
@@ -126,9 +126,10 @@ export class ExerciseService extends ServiceBase {
             exerciseId,
           )
 
-        const questionRepository = new QuestionRepository(tx)
-        const answers =
-          await questionRepository.findQuestionAnswersByExerciseId(exerciseId)
+        // 出題する問題を選出して紐づける
+        // const questionRepository = new QuestionRepository(tx)
+        // const questions =
+        //   await questionRepository.findQuestionAnswersByExerciseId(exerciseId)
 
         return {
           answerLogSheetId: created.answerLogSheetId,
