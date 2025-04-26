@@ -66,7 +66,9 @@ export default function Layout({ children }: Props) {
   )
 
   const pageTitle = useMemo(
-    () => NAVI.find((item) => item.href === path)?.label || "ダッシュボード",
+    () =>
+      NAVI.find((item) => path.startsWith(item.href))?.label ||
+      "ダッシュボード",
     [path, NAVI],
   )
 
