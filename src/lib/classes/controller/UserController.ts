@@ -63,7 +63,7 @@ export class UserController extends ControllerBase {
 
     const ownSchools = await this.getOwnSchools()
     const memberSchools = await this.getMemberSchools()
-    if (ownSchools.length < 0 || memberSchools.length < 0) return []
+    if (ownSchools.length < 0) return []
 
     // セルフスクールならば全ての権限を付与する
     const selfSchool = ownSchools.find(
