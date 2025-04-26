@@ -767,7 +767,7 @@
 
       "patch": {
         "summary": "問題集設定を更新する",
-        "tags": ["ManageAPI", "InDevelopment"],
+        "tags": ["ManageAPI"],
         "parameters": [
           {
             "$ref": "#/components/parameters/AuthorizationHeader"
