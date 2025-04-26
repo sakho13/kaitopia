@@ -200,6 +200,31 @@ export function useGetManageExercise(exerciseId: string) {
 }
 
 /**
+ * PATCH: `/api/manage/v1/exercise`
+ */
+export function usePatchManageExercise() {
+  const { idToken } = useAuth()
+
+  const requestPatchExercise = async (
+    exerciseId: string,
+    input: ApiV1InTypeMap["PatchManageExercise"],
+  ) => {
+    return await requestHttp(
+      "PatchManageExercise",
+      "PatchManageExercise",
+      `/api/manage/v1/exercise?exerciseId=${exerciseId}`,
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchExercise,
+  }
+}
+
+/**
  * DELETE: `/api/manage/v1/exercise?exerciseId=xxxxx`
  * @returns
  */

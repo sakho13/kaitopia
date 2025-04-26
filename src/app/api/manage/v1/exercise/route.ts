@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
         isCanSkip: exercise.isCanSkip,
         isScoringBatch: exercise.isScoringBatch,
         schoolId: exercise.schoolId,
+        questionCount: exercise._count.exerciseQuestions,
       },
       questions: exercise.exerciseQuestions.map((q) => ({
         questionId: q.question.id,
