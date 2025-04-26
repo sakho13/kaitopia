@@ -2,10 +2,14 @@
  * @jest-environment node
  */
 
-import { GET, POST } from "@/app/api/manage/v1/exercise/route"
+import { DELETE, GET, POST } from "@/app/api/manage/v1/exercise/route"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { TestUtility } from "@/tests/TestUtility"
-import { NextRequest } from "next/server"
+
+const AdminUserEmail = "kaitopia-admin+001@kaitopia.com"
+const AdminUserPassword = "password"
+const UserUserEmail = "kaitopia-user+001@kaitopia.com"
+const UserUserPassword = "password"
 
 describe("API /api/manage/v1/exercise", () => {
   beforeEach(() => {
@@ -19,16 +23,14 @@ describe("API /api/manage/v1/exercise", () => {
           "kaitopia-admin+001@kaitopia.com",
           "password",
         )
-        const request = new NextRequest(
-          "http://localhost:3000/api/manage/v1/exercise?exerciseId=it_passport_1",
+        const result = await TestUtility.runApi(
+          GET,
+          "GET",
+          "/api/manage/v1/exercise?exerciseId=it_passport_1",
           {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            Authorization: `Bearer ${token}`,
           },
         )
-        const result = await GET(request)
 
         expect(result.ok).toBe(true)
         expect(result.status).toBe(200)
@@ -48,16 +50,14 @@ describe("API /api/manage/v1/exercise", () => {
           "kaitopia-user+001@kaitopia.com",
           "password",
         )
-        const request = new NextRequest(
-          "http://localhost:3000/api/manage/v1/exercise?exerciseId=it_passport_1",
+        const result = await TestUtility.runApi(
+          GET,
+          "GET",
+          "/api/manage/v1/exercise?exerciseId=it_passport_1",
           {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            Authorization: `Bearer ${token}`,
           },
         )
-        const result = await GET(request)
 
         expect(result.ok).toBe(false)
         expect(result.status).toBe(403)
@@ -80,23 +80,21 @@ describe("API /api/manage/v1/exercise", () => {
           "password",
         )
         const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
-        const request = new NextRequest(
-          "http://localhost:3000/api/manage/v1/exercise",
+        const result = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
           {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {
+              title: exerciseTitle,
+              description: "",
             },
-            body: JSON.stringify({
-              schoolId: "kaitopia_1",
-              property: {
-                title: exerciseTitle,
-                description: "",
-              },
-            }),
           },
         )
-        const result = await POST(request)
 
         expect(result.ok).toBe(true)
         expect(result.status).toBe(200)
@@ -117,23 +115,21 @@ describe("API /api/manage/v1/exercise", () => {
           "password",
         )
         const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
-        const request = new NextRequest(
-          "http://localhost:3000/api/manage/v1/exercise",
+        const result = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
           {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {
+              title: exerciseTitle,
+              description: "",
             },
-            body: JSON.stringify({
-              schoolId: "kaitopia_1",
-              property: {
-                title: exerciseTitle,
-                description: "",
-              },
-            }),
           },
         )
-        const result = await POST(request)
 
         expect(result.ok).toBe(false)
         expect(result.status).toBe(403)
@@ -146,6 +142,93 @@ describe("API /api/manage/v1/exercise", () => {
             },
           ]),
         })
+      })
+    })
+
+    test("ADMINユーザがグローバルスクールに問題集を追加し、削除できる", async () => {
+      const token = await TestUtility.getTokenByEmailAndLogin(
+        AdminUserEmail,
+        AdminUserPassword,
+      )
+
+      const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
+      const postResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/manage/v1/exercise",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          schoolId: "kaitopia_1",
+          property: {
+            title: exerciseTitle,
+            description: "",
+          },
+        },
+      )
+
+      expect(postResult.ok).toBe(true)
+      expect(postResult.status).toBe(200)
+      const data = await postResult.json()
+      expect(data.success).toBe(true)
+
+      const deleteResult = await TestUtility.runApi(
+        DELETE,
+        "DELETE",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+
+      expect(deleteResult.ok).toBe(true)
+      expect(deleteResult.status).toBe(200)
+      const deleteJson = await deleteResult.json()
+      expect(deleteJson).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          exerciseId: data.data.exercise.exerciseId,
+        }),
+      })
+
+      const checkResult = await TestUtility.runApi(
+        GET,
+        "GET",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(checkResult.ok).toBe(false)
+      expect(checkResult.status).toBe(404)
+    })
+
+    test("USERユーザがグローバルスクールの問題集を削除できない", async () => {
+      const token = await TestUtility.getTokenByEmailAndLogin(
+        UserUserEmail,
+        UserUserPassword,
+      )
+
+      const deleteResult = await TestUtility.runApi(
+        DELETE,
+        "DELETE",
+        `/api/manage/v1/exercise?exerciseId=intro_programming_1`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+
+      expect(deleteResult.ok).toBe(false)
+      expect(deleteResult.status).toBe(403)
+      const deleteJson = await deleteResult.json()
+      expect(deleteJson).toEqual({
+        success: false,
+        errors: expect.arrayContaining([
+          {
+            message: "アクセス権限がありません",
+          },
+        ]),
       })
     })
   })
