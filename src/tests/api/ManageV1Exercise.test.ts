@@ -466,6 +466,85 @@ describe("API /api/manage/v1/exercise", () => {
           ]),
         })
       })
+
+      test("公開設定の使用がBooleanでない(新規で問題集を作成しテストする)", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
+        const postResult = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {
+              title: exerciseTitle,
+              description: "",
+            },
+          },
+        )
+        expect(postResult.ok).toBe(true)
+        expect(postResult.status).toBe(200)
+        const postResultJson = await postResult.json()
+        expect(postResultJson.success).toBe(true)
+
+        const exerciseId = postResultJson.data.exercise.exerciseId
+        const result = await TestUtility.runApi(
+          PATCH,
+          "PATCH",
+          `/api/manage/v1/exercise?exerciseId=${exerciseId}`,
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            title: "テスト問題集",
+            description: "テスト問題集の説明",
+            isPublished: "true",
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "公開状態の形式が不正です",
+            },
+          ]),
+        })
+
+        const userToken = await TestUtility.getTokenByEmailAndLogin(
+          UserUserEmail,
+          UserUserPassword,
+        )
+
+        const checkResult = await TestUtility.runApi(
+          GET,
+          "GET",
+          `/api/manage/v1/exercise?exerciseId=${exerciseId}`,
+          {
+            Authorization: `Bearer ${userToken}`,
+          },
+        )
+        expect(checkResult.ok).toBe(false)
+        expect(checkResult.status).toBe(403)
+        const checkJson = await checkResult.json()
+        expect(checkJson).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "アクセス権限がありません",
+            },
+          ]),
+        })
+      })
     })
 
     describe("DELETE", () => {
@@ -643,6 +722,62 @@ describe("API /api/manage/v1/exercise", () => {
 
       expect(patchData.data.exercise.title).toBe("更新されたタイトル")
       expect(patchData.data.exercise.description).toBe("更新された説明")
+    })
+
+    test("問題集を作成し削除する", async () => {
+      const token = await TestUtility.getTokenByEmailAndLogin(
+        AdminUserEmail,
+        AdminUserPassword,
+      )
+
+      const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
+      const postResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/manage/v1/exercise",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          schoolId: "kaitopia_1",
+          property: {
+            title: exerciseTitle,
+            description: "",
+          },
+        },
+      )
+
+      expect(postResult.ok).toBe(true)
+      expect(postResult.status).toBe(200)
+      const data = await postResult.json()
+      expect(data.success).toBe(true)
+
+      const deleteResult = await TestUtility.runApi(
+        DELETE,
+        "DELETE",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+
+      expect(deleteResult.ok).toBe(true)
+      expect(deleteResult.status).toBe(200)
+      const deleteData = await deleteResult.json()
+      expect(deleteData.success).toBe(true)
+
+      expect(deleteData.data.exerciseId).toBe(data.data.exercise.exerciseId)
+
+      const checkResult = await TestUtility.runApi(
+        GET,
+        "GET",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(checkResult.ok).toBe(false)
+      expect(checkResult.status).toBe(404)
     })
   })
 })
