@@ -1,7 +1,10 @@
 import { RepositoryBase } from "../common/RepositoryBase"
 
 export class ExerciseRepository extends RepositoryBase {
-  public async findExerciseInGlobalSchool(count?: number) {
+  public async findExerciseInGlobalSchool(
+    count?: number,
+    isPublished?: boolean,
+  ) {
     return await this.dbConnection.exercise.findMany({
       select: {
         id: true,
@@ -12,6 +15,7 @@ export class ExerciseRepository extends RepositoryBase {
       },
       where: {
         school: { isGlobal: true },
+        isPublished: isPublished,
       },
       orderBy: {
         createdAt: "desc",

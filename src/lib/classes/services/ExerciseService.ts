@@ -17,16 +17,14 @@ export class ExerciseService extends ServiceBase {
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
     const recommendExercises =
-      await exerciseRepository.findExerciseInGlobalSchool(10)
-    return recommendExercises
-      .filter((r) => r.isPublished)
-      .map((exercise) => {
-        return {
-          id: exercise.id,
-          title: exercise.title,
-          description: exercise.description,
-        }
-      })
+      await exerciseRepository.findExerciseInGlobalSchool(10, true)
+    return recommendExercises.map((exercise) => {
+      return {
+        id: exercise.id,
+        title: exercise.title,
+        description: exercise.description,
+      }
+    })
   }
 
   /**
