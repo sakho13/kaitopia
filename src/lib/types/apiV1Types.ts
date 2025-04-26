@@ -40,10 +40,12 @@ export const ApiV1ErrorMapObj = {
   RequiredValueError: {
     message: "{key}は必須です",
     params: ["key"],
+    status: 400,
   },
   InvalidFormatError: {
     message: "{key}の形式が不正です",
-    params: ["key", "aaa"],
+    params: ["key"],
+    status: 400,
   },
   AuthenticationError: {
     message: "認証に失敗しました。再ログインしてください。",
@@ -101,6 +103,11 @@ export type ApiV1InTypeMap = {
   PostManageExercise: {
     schoolId: string
     property: ExerciseBase
+  }
+  PatchManageExercise: {
+    // クエリパラメータ: exerciseId
+    title?: string
+    description?: string
   }
   PostManageQuestion: {
     schoolId: string
@@ -197,7 +204,14 @@ export type ApiV1OutTypeMap = {
       ExerciseBase &
       ReplacedDateToString<ExerciseBaseDate>
   }
-
+  /**
+   * PATCH /api/manage/v1/exercise
+   */
+  PatchManageExercise: {
+    exercise: ExerciseBaseIdentifier &
+      ExerciseBase &
+      ReplacedDateToString<ExerciseBaseDate>
+  }
   /**
    * DELETE /api/manage/v1/exercise
    */

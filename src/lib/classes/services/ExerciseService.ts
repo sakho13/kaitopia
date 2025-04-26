@@ -110,7 +110,23 @@ export class ExerciseService extends ServiceBase {
     })
   }
 
-  // public async updateExercise() {}
+  public async updateExercise(
+    exerciseId: string,
+    property: Partial<ExerciseBase>,
+  ) {
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+    const exercise = await exerciseRepository.findExerciseById(exerciseId)
+    if (!exercise)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    const accessResult = await this.userController.accessSchoolMethod(
+      exercise.schoolId,
+    )
+    if (!accessResult.includes("edit"))
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+
+    return await exerciseRepository.updateExercise(exerciseId, property)
+  }
 
   /**
    * 問題集を削除する

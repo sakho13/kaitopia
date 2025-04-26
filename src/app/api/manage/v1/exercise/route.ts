@@ -73,6 +73,40 @@ export async function POST(request: NextRequest) {
   })
 }
 
+export async function PATCH(request: NextRequest) {
+  const api = new ApiV1Wrapper("管理用問題集の更新")
+
+  return api.execute("PatchManageExercise", async () => {
+    const { userService } = await api.checkAccessManagePage(request)
+
+    const exerciseId = request.nextUrl.searchParams.get("exerciseId")
+    if (!exerciseId || exerciseId.length < 2)
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題集ID" } },
+      ])
+
+    const body = await request.json()
+    const { error, result: resultBody } = validatePatch(body)
+
+    if (error) throw error
+
+    const exerciseService = new ExerciseService(prisma)
+    exerciseService.setUserController(userService.userController)
+
+    const result = await exerciseService.updateExercise(exerciseId, resultBody)
+
+    return {
+      exercise: {
+        exerciseId: result.id,
+        title: result.title,
+        description: result.description,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
+      },
+    }
+  })
+}
+
 export function DELETE(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の削除")
 
@@ -102,7 +136,7 @@ function validatePost(
   body: unknown,
 ): ApiV1ValidationResult<
   ApiV1InTypeMap["PostManageExercise"],
-  "RequiredValueError" | "NotFoundError"
+  "RequiredValueError" | "NotFoundError" | "InvalidFormatError"
 > {
   if (typeof body !== "object" || body === null)
     return {
@@ -146,7 +180,8 @@ function validatePost(
   if (typeof title !== "string" || typeof description !== "string")
     return {
       error: new ApiV1Error([
-        { key: "RequiredValueError", params: { key: "問題集タイトル" } },
+        { key: "InvalidFormatError", params: { key: "問題集タイトル" } },
+        { key: "InvalidFormatError", params: { key: "問題集説明" } },
       ]),
       result: null,
     }
@@ -154,7 +189,7 @@ function validatePost(
   if (title.length < 1 || title.length > 200)
     return {
       error: new ApiV1Error([
-        { key: "RequiredValueError", params: { key: "問題集タイトル" } },
+        { key: "InvalidFormatError", params: { key: "問題集タイトル" } },
       ]),
       result: null,
     }
@@ -162,7 +197,7 @@ function validatePost(
   if (description.length > 2000)
     return {
       error: new ApiV1Error([
-        { key: "RequiredValueError", params: { key: "問題集説明" } },
+        { key: "InvalidFormatError", params: { key: "問題集説明" } },
       ]),
       result: null,
     }
@@ -170,5 +205,67 @@ function validatePost(
   return {
     error: null,
     result: body as ApiV1InTypeMap["PostManageExercise"],
+  }
+}
+
+function validatePatch(
+  body: unknown,
+): ApiV1ValidationResult<
+  ApiV1InTypeMap["PatchManageExercise"],
+  "RequiredValueError" | "NotFoundError"
+> {
+  if (typeof body !== "object" || body === null)
+    return {
+      error: new ApiV1Error([{ key: "NotFoundError", params: null }]),
+      result: null,
+    }
+
+  if (!("title" in body || "description" in body))
+    return {
+      error: new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題集のプロパティ" } },
+      ]),
+      result: null,
+    }
+
+  if ("title" in body) {
+    if (typeof body.title !== "string")
+      return {
+        error: new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "問題集タイトル" } },
+        ]),
+        result: null,
+      }
+
+    if (body.title.length < 1 || body.title.length > 200)
+      return {
+        error: new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "問題集タイトル" } },
+        ]),
+        result: null,
+      }
+  }
+
+  if ("description" in body) {
+    if (typeof body.description !== "string")
+      return {
+        error: new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "問題集説明" } },
+        ]),
+        result: null,
+      }
+
+    if (body.description.length > 2000)
+      return {
+        error: new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "問題集説明" } },
+        ]),
+        result: null,
+      }
+  }
+
+  return {
+    error: null,
+    result: body as ApiV1InTypeMap["PatchManageExercise"],
   }
 }

@@ -116,6 +116,23 @@ export class ExerciseRepository extends RepositoryBase {
     })
   }
 
+  public async updateExercise(
+    exerciseId: string,
+    property: Partial<{
+      title: string
+      description: string
+    }>,
+  ) {
+    return await this.dbConnection.exercise.update({
+      data: {
+        ...property,
+      },
+      where: {
+        id: exerciseId,
+      },
+    })
+  }
+
   public async deleteExercise(exerciseId: string) {
     return await this.dbConnection.exercise.update({
       where: {
