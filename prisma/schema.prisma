@@ -33,6 +33,7 @@ model User {
 
   ownerSchools SchoolOwner[]
   // memberSchools SchoolMember[]
+  SchoolMember SchoolMember[]
 }
 
 model School {
@@ -53,8 +54,8 @@ model School {
   question Question[]
   exercise Exercise[]
 
-  owners SchoolOwner[]
-  // members SchoolMember[]
+  owners  SchoolOwner[]
+  members SchoolMember[]
 }
 
 model SchoolOwner {
@@ -71,17 +72,20 @@ model SchoolOwner {
   @@id([schoolId, userId])
 }
 
-// model SchoolMember {
-//   schoolId String @map("school_id")
-//   userId   String @map("user_id")
+model SchoolMember {
+  schoolId String @map("school_id")
+  userId   String @map("user_id")
 
-//   createdAt DateTime @default(now()) @map("created_at")
+  // 利用期限 nullの場合は期限なし
+  limitAt DateTime?
 
-//   school School @relation(fields: [schoolId], references: [id])
-//   member User   @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
 
-//   @@id([schoolId, userId])
-// }
+  school School @relation(fields: [schoolId], references: [id])
+  member User   @relation(fields: [userId], references: [id])
+
+  @@id([schoolId, userId])
+}
 
 model Question {
   id       String @id @default(cuid(2))
@@ -154,6 +158,8 @@ model Exercise {
 
   title       String @map("title")
   description String @default("") @map("description")
+
+  isPublished Boolean @default(false) @map("is_published") // 公開中かどうか
 
   isCanSkip      Boolean @default(false) @map("is_can_skip") // スキップ可能かどうか
   isScoringBatch Boolean @default(false) @map("is_scoring_batch") // 一括採点可能かどうか

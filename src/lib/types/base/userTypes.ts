@@ -39,4 +39,19 @@ export type UserRoleType = keyof typeof UserRole
 
 export type UserRelationSchools = {
   ownerSchools: School[]
+  memberSchools: School[]
 }
+
+/**
+ * read: 読み取り
+ * create: 作成
+ * edit: 編集
+ * publish: 公開設定変更
+ * delete: 削除
+ */
+export type UserAccessSchoolMethod =
+  | "read"
+  | "create"
+  | "edit"
+  | "publish"
+  | "delete"

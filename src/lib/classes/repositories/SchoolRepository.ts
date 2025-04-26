@@ -28,6 +28,14 @@ export class SchoolRepository extends RepositoryBase {
         isSelfSchool: true,
         createdAt: true,
         updatedAt: true,
+        owners: {
+          select: {
+            priority: true,
+          },
+          where: {
+            userId,
+          },
+        },
       },
       where: {
         owners: {
@@ -35,6 +43,46 @@ export class SchoolRepository extends RepositoryBase {
             userId,
           },
         },
+      },
+    })
+  }
+
+  /**
+   * メンバーとして所属しているスクールとグローバルスクールを取得する
+   * @param userId
+   * @returns
+   */
+  public async findMemberSchools(userId: string) {
+    return await this.dbConnection.school.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isGlobal: true,
+        isPublic: true,
+        isSelfSchool: true,
+        createdAt: true,
+        updatedAt: true,
+        members: {
+          select: {
+            limitAt: true,
+          },
+          where: {
+            userId,
+          },
+        },
+      },
+      where: {
+        OR: [
+          {
+            members: {
+              every: {
+                userId,
+              },
+            },
+          },
+          { isGlobal: true },
+        ],
       },
     })
   }
@@ -53,6 +101,7 @@ export class SchoolRepository extends RepositoryBase {
         owners: {
           create: {
             userId,
+            priority: 1,
           },
         },
       },

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の取得")
 
   return await api.execute("GetManageExercises", async () => {
-    await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const schoolId = request.nextUrl.searchParams.get("schoolId") ?? undefined
     if (!schoolId)
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     )
 
     const exerciseService = new ExerciseService(prisma)
+    exerciseService.setUserController(userService.userController)
     const { exercises, totalCount, nextPage } =
       await exerciseService.getExercisesForManage(schoolId, count, page)
 
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
         createdAt: exercise.createdAt.toISOString(),
 
         schoolId: exercise.schoolId,
+        isPublished: exercise.isPublished,
         isCanSkip: exercise.isCanSkip,
         isScoringBatch: exercise.isScoringBatch,
         questionCount: exercise.questionCount,

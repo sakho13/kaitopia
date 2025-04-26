@@ -1,16 +1,21 @@
 import { RepositoryBase } from "../common/RepositoryBase"
 
 export class ExerciseRepository extends RepositoryBase {
-  public async findExerciseInGlobalSchool(count?: number) {
+  public async findExerciseInGlobalSchool(
+    count?: number,
+    isPublished?: boolean,
+  ) {
     return await this.dbConnection.exercise.findMany({
       select: {
         id: true,
         title: true,
+        isPublished: true,
         description: true,
         schoolId: true,
       },
       where: {
         school: { isGlobal: true },
+        isPublished: isPublished,
       },
       orderBy: {
         createdAt: "desc",
@@ -41,11 +46,18 @@ export class ExerciseRepository extends RepositoryBase {
         createdAt: true,
         updatedAt: true,
         schoolId: true,
+        isPublished: true,
         isCanSkip: true,
         isScoringBatch: true,
+        _count: {
+          select: {
+            exerciseQuestions: true,
+          },
+        },
       },
       where: {
         id: exerciseId,
+        deletedAt: null,
       },
     })
   }
@@ -63,11 +75,12 @@ export class ExerciseRepository extends RepositoryBase {
         schoolId: true,
         createdAt: true,
         updatedAt: true,
+        isPublished: true,
         isCanSkip: true,
         isScoringBatch: true,
-        exerciseQuestions: {
+        _count: {
           select: {
-            questionId: true,
+            exerciseQuestions: true,
           },
         },
       },
@@ -95,6 +108,7 @@ export class ExerciseRepository extends RepositoryBase {
     property: {
       title: string
       description: string
+      isPublished: boolean
       isCanSkip: boolean
       isScoringBatch: boolean
     },
@@ -111,6 +125,34 @@ export class ExerciseRepository extends RepositoryBase {
       data: {
         schoolId,
         ...property,
+      },
+    })
+  }
+
+  public async updateExercise(
+    exerciseId: string,
+    property: Partial<{
+      title: string
+      description: string
+    }>,
+  ) {
+    return await this.dbConnection.exercise.update({
+      data: {
+        ...property,
+      },
+      where: {
+        id: exerciseId,
+      },
+    })
+  }
+
+  public async deleteExercise(exerciseId: string) {
+    return await this.dbConnection.exercise.update({
+      where: {
+        id: exerciseId,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     })
   }

@@ -40,10 +40,12 @@ export const ApiV1ErrorMapObj = {
   RequiredValueError: {
     message: "{key}は必須です",
     params: ["key"],
+    status: 400,
   },
   InvalidFormatError: {
     message: "{key}の形式が不正です",
-    params: ["key", "aaa"],
+    params: ["key"],
+    status: 400,
   },
   AuthenticationError: {
     message: "認証に失敗しました。再ログインしてください。",
@@ -102,11 +104,21 @@ export type ApiV1InTypeMap = {
     schoolId: string
     property: ExerciseBase
   }
+  PatchManageExercise: {
+    // クエリパラメータ: exerciseId
+    title?: string
+    description?: string
+    isPublished?: boolean
+  }
   PostManageQuestion: {
     schoolId: string
     question: QuestionBase
     content: QuestionVersionBase
   }
+  /**
+   * DELETE /api/manage/v1/exercise
+   */
+  DeleteManageExercise: null
 
   /**
    * GET /api/user/v1/exercise?exerciseId=xxxx
@@ -152,6 +164,9 @@ export type ApiV1OutTypeMap = {
     userInfo: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
     canAccessManagePage: boolean
     isGuest: boolean
+    schools: (SchoolBaseIdentity &
+      SchoolBase &
+      ReplacedDateToString<SchoolBaseDate>)[]
   }
   /**
    * GET /api/manage/v1/own-schools
@@ -193,6 +208,20 @@ export type ApiV1OutTypeMap = {
     exercise: ExerciseBaseIdentifier &
       ExerciseBase &
       ReplacedDateToString<ExerciseBaseDate>
+  }
+  /**
+   * PATCH /api/manage/v1/exercise
+   */
+  PatchManageExercise: {
+    exercise: ExerciseBaseIdentifier &
+      ExerciseBase &
+      ReplacedDateToString<ExerciseBaseDate>
+  }
+  /**
+   * DELETE /api/manage/v1/exercise
+   */
+  DeleteManageExercise: {
+    exerciseId: string
   }
 
   /**
