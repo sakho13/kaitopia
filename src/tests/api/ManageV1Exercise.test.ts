@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { DELETE, GET, POST } from "@/app/api/manage/v1/exercise/route"
+import { DELETE, GET, PATCH, POST } from "@/app/api/manage/v1/exercise/route"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { TestUtility } from "@/tests/TestUtility"
 
@@ -145,6 +145,39 @@ describe("API /api/manage/v1/exercise", () => {
       })
     })
 
+    describe("PATCH", () => {
+      test("USERユーザがグローバルスクールの問題集を更新できない", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          UserUserEmail,
+          UserUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          PATCH,
+          "PATCH",
+          "/api/manage/v1/exercise?exerciseId=intro_programming_1",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            title: "更新されたタイトル",
+            description: "更新された説明",
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(403)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "アクセス権限がありません",
+            },
+          ]),
+        })
+      })
+    })
+
     test("ADMINユーザがグローバルスクールに問題集を追加し、削除できる", async () => {
       const token = await TestUtility.getTokenByEmailAndLogin(
         AdminUserEmail,
@@ -230,6 +263,386 @@ describe("API /api/manage/v1/exercise", () => {
           },
         ]),
       })
+    })
+  })
+
+  describe("バリデーション", () => {
+    describe("POST", () => {
+      test("必須項目が不足している キーが存在しない", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {},
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "問題集のプロパティは必須です",
+            },
+          ]),
+        })
+      })
+
+      test("必須項目が不足している 空文字", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {
+              title: "",
+              description: "",
+            },
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "問題集タイトルの形式が不正です",
+            },
+          ]),
+        })
+      })
+
+      test("タイトルが200文字以上", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {
+              title: "a".repeat(201),
+              description: "",
+            },
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "問題集タイトルの形式が不正です",
+            },
+          ]),
+        })
+      })
+
+      test("説明が2000文字以上", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            schoolId: "kaitopia_1",
+            property: {
+              title: "テスト問題集",
+              description: "a".repeat(2001),
+            },
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "問題集説明の形式が不正です",
+            },
+          ]),
+        })
+      })
+    })
+
+    describe("PATCH", () => {
+      test("exerciseIdが指定されていない", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          PATCH,
+          "PATCH",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            title: "テスト問題集",
+            description: "テスト問題集の説明",
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "問題集IDは必須です",
+            },
+          ]),
+        })
+      })
+
+      test("存在しないexerciseId", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const exerciseId = `not_found_exercise_id-${DateUtility.generateDateStringNow()}`
+        const result = await TestUtility.runApi(
+          PATCH,
+          "PATCH",
+          `/api/manage/v1/exercise?exerciseId=${exerciseId}`,
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            title: "テスト問題集",
+            description: "テスト問題集の説明",
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(404)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message:
+                "リソースが見つかりません。再読み込みしても解決しない場合は、お問い合わせください。",
+            },
+          ]),
+        })
+      })
+    })
+
+    describe("DELETE", () => {
+      test("exerciseIdが指定されていない", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          DELETE,
+          "DELETE",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              message: "問題集IDは必須です",
+            },
+          ]),
+        })
+      })
+    })
+  })
+
+  describe("CRUD", () => {
+    test("問題集を作成しタイトルを更新する", async () => {
+      const token = await TestUtility.getTokenByEmailAndLogin(
+        AdminUserEmail,
+        AdminUserPassword,
+      )
+
+      const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
+      const postResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/manage/v1/exercise",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          schoolId: "kaitopia_1",
+          property: {
+            title: exerciseTitle,
+            description: "",
+          },
+        },
+      )
+
+      expect(postResult.ok).toBe(true)
+      expect(postResult.status).toBe(200)
+      const data = await postResult.json()
+      expect(data.success).toBe(true)
+
+      const patchResult = await TestUtility.runApi(
+        PATCH,
+        "PATCH",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          title: "更新されたタイトル",
+        },
+      )
+
+      expect(patchResult.ok).toBe(true)
+      expect(patchResult.status).toBe(200)
+      const patchData = await patchResult.json()
+      expect(patchData.success).toBe(true)
+
+      expect(patchData.data.exercise.title).toBe("更新されたタイトル")
+    })
+
+    test("問題集を作成し説明を更新する", async () => {
+      const token = await TestUtility.getTokenByEmailAndLogin(
+        AdminUserEmail,
+        AdminUserPassword,
+      )
+
+      const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
+      const postResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/manage/v1/exercise",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          schoolId: "kaitopia_1",
+          property: {
+            title: exerciseTitle,
+            description: "",
+          },
+        },
+      )
+
+      expect(postResult.ok).toBe(true)
+      expect(postResult.status).toBe(200)
+      const data = await postResult.json()
+      expect(data.success).toBe(true)
+
+      const patchResult = await TestUtility.runApi(
+        PATCH,
+        "PATCH",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          description: "更新された説明",
+        },
+      )
+
+      expect(patchResult.ok).toBe(true)
+      expect(patchResult.status).toBe(200)
+      const patchData = await patchResult.json()
+      expect(patchData.success).toBe(true)
+
+      expect(patchData.data.exercise.description).toBe("更新された説明")
+    })
+
+    test("問題集を作成しタイトルと説明を更新する", async () => {
+      const token = await TestUtility.getTokenByEmailAndLogin(
+        AdminUserEmail,
+        AdminUserPassword,
+      )
+
+      const exerciseTitle = `テスト問題集-${DateUtility.generateDateStringNow()}`
+      const postResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/manage/v1/exercise",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          schoolId: "kaitopia_1",
+          property: {
+            title: exerciseTitle,
+            description: "",
+          },
+        },
+      )
+
+      expect(postResult.ok).toBe(true)
+      expect(postResult.status).toBe(200)
+      const data = await postResult.json()
+      expect(data.success).toBe(true)
+
+      const patchResult = await TestUtility.runApi(
+        PATCH,
+        "PATCH",
+        `/api/manage/v1/exercise?exerciseId=${data.data.exercise.exerciseId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          title: "更新されたタイトル",
+          description: "更新された説明",
+        },
+      )
+
+      expect(patchResult.ok).toBe(true)
+      expect(patchResult.status).toBe(200)
+      const patchData = await patchResult.json()
+      expect(patchData.success).toBe(true)
+
+      expect(patchData.data.exercise.title).toBe("更新されたタイトル")
+      expect(patchData.data.exercise.description).toBe("更新された説明")
     })
   })
 })

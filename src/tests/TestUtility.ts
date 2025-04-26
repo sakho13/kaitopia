@@ -29,7 +29,7 @@ export class TestUtility {
 
   public static async runApi(
     api: (request: NextRequest) => Promise<NextResponse>,
-    method: "GET" | "POST" | "PUT" | "DELETE",
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
     path: string,
     headers: Record<string, string> = {},
     body: unknown = null,
