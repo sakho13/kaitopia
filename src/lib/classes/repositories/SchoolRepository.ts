@@ -39,6 +39,29 @@ export class SchoolRepository extends RepositoryBase {
     })
   }
 
+  public async findMemberSchools(userId: string) {
+    return await this.dbConnection.school.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isGlobal: true,
+        isPublic: true,
+        isSelfSchool: false,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: {
+        members: {
+          every: {
+            userId,
+            OR: [{ limitAt: null }, { limitAt: { gte: new Date() } }],
+          },
+        },
+      },
+    })
+  }
+
   /**
    * スクールを作成し、そのスクールにユーザを関連付ける
    */

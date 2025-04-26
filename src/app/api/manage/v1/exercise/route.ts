@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の取得")
 
   return await api.execute("GetManageExercise", async () => {
-    await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length < 2)
@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
       ])
 
     const exerciseService = new ExerciseService(prisma)
+    exerciseService.setUserController(userService.userController)
+
     const exercise = await exerciseService.getExerciseById(exerciseId)
 
     return {
