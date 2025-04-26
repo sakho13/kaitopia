@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         description: exercise.description,
         createdAt: exercise.createdAt.toISOString(),
         updatedAt: exercise.updatedAt.toISOString(),
+        isPublished: exercise.isPublished,
         isCanSkip: exercise.isCanSkip,
         isScoringBatch: exercise.isScoringBatch,
         schoolId: exercise.schoolId,
@@ -212,7 +213,7 @@ function validatePatch(
   body: unknown,
 ): ApiV1ValidationResult<
   ApiV1InTypeMap["PatchManageExercise"],
-  "RequiredValueError" | "NotFoundError"
+  "RequiredValueError" | "NotFoundError" | "InvalidFormatError"
 > {
   if (typeof body !== "object" || body === null)
     return {
@@ -220,7 +221,7 @@ function validatePatch(
       result: null,
     }
 
-  if (!("title" in body || "description" in body))
+  if (!("title" in body || "description" in body || "isPublished" in body))
     return {
       error: new ApiV1Error([
         { key: "RequiredValueError", params: { key: "問題集のプロパティ" } },
@@ -259,6 +260,16 @@ function validatePatch(
       return {
         error: new ApiV1Error([
           { key: "RequiredValueError", params: { key: "問題集説明" } },
+        ]),
+        result: null,
+      }
+  }
+
+  if ("isPublished" in body) {
+    if (typeof body.isPublished !== "boolean")
+      return {
+        error: new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "公開状態" } },
         ]),
         result: null,
       }

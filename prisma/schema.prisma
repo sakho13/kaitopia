@@ -159,6 +159,8 @@ model Exercise {
   title       String @map("title")
   description String @default("") @map("description")
 
+  isPublished Boolean @default(false) @map("is_published") // 公開中かどうか
+
   isCanSkip      Boolean @default(false) @map("is_can_skip") // スキップ可能かどうか
   isScoringBatch Boolean @default(false) @map("is_scoring_batch") // 一括採点可能かどうか
 

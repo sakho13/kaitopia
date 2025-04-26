@@ -51,10 +51,20 @@ async function transferUsers() {
       },
     ],
   })
+}
 
+async function transferSchools() {
   await prisma.school.createMany({
     skipDuplicates: true,
     data: [
+      {
+        id: "kaitopia_1",
+        name: "Kaitopia",
+        description: "誰でも学べる学校",
+        isGlobal: true,
+        isPublic: true,
+        isSelfSchool: true,
+      },
       {
         id: "kaitopia_user_001_school",
         name: "Kaitopia User 001's スクール",
@@ -78,22 +88,6 @@ async function transferUsers() {
   })
 }
 
-async function transferSchools() {
-  return await prisma.school.createMany({
-    skipDuplicates: true,
-    data: [
-      {
-        id: "kaitopia_1",
-        name: "Kaitopia",
-        description: "誰でも学べる学校",
-        isGlobal: true,
-        isPublic: true,
-        isSelfSchool: true,
-      },
-    ],
-  })
-}
-
 async function transferExcises() {
   return await prisma.exercise.createMany({
     skipDuplicates: true,
@@ -104,18 +98,21 @@ async function transferExcises() {
         title: "ITパスポート 問題集1",
         schoolId: "kaitopia_1",
         description: "ITパスポートの問題集です。",
+        isPublished: false,
       },
       {
         id: "fundamental_information_technology_engineer_exam_1",
         title: "基本情報技術者試験 問題集1",
         schoolId: "kaitopia_1",
         description: "基本情報技術者試験の過去問を集めた問題集です。",
+        isPublished: false,
       },
       {
         id: "moped_license_1",
         title: "原付免許問題集1",
         schoolId: "kaitopia_1",
         description: "原付免許の問題集です。",
+        isPublished: false,
       },
 
       {
@@ -123,6 +120,7 @@ async function transferExcises() {
         title: "危険物取扱者丙種 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者丙種の問題集です。",
+        isPublished: false,
       },
 
       {
@@ -130,36 +128,42 @@ async function transferExcises() {
         title: "危険物取扱者乙種1類 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者乙種1類の問題集です。",
+        isPublished: false,
       },
       {
         id: "hazardous_material_handling_2_category_B_1",
         title: "危険物取扱者乙種2類 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者乙種2類の問題集です。",
+        isPublished: false,
       },
       {
         id: "hazardous_material_handling_3_category_B_1",
         title: "危険物取扱者乙種3類 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者乙種3類の問題集です。",
+        isPublished: false,
       },
       {
         id: "hazardous_material_handling_4_category_B_1",
         title: "危険物取扱者乙種4類 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者乙種4類の問題集です。",
+        isPublished: false,
       },
       {
         id: "hazardous_material_handling_5_category_B_1",
         title: "危険物取扱者乙種5類 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者乙種5類の問題集です。",
+        isPublished: false,
       },
       {
         id: "hazardous_material_handling_6_category_B_1",
         title: "危険物取扱者乙種6類 問題集1",
         schoolId: "kaitopia_1",
         description: "危険物取扱者乙種6類の問題集です。",
+        isPublished: false,
       },
     ],
   })

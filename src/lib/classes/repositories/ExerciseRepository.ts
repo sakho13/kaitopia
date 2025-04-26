@@ -6,6 +6,7 @@ export class ExerciseRepository extends RepositoryBase {
       select: {
         id: true,
         title: true,
+        isPublished: true,
         description: true,
         schoolId: true,
       },
@@ -41,6 +42,7 @@ export class ExerciseRepository extends RepositoryBase {
         createdAt: true,
         updatedAt: true,
         schoolId: true,
+        isPublished: true,
         isCanSkip: true,
         isScoringBatch: true,
       },
@@ -64,6 +66,7 @@ export class ExerciseRepository extends RepositoryBase {
         schoolId: true,
         createdAt: true,
         updatedAt: true,
+        isPublished: true,
         isCanSkip: true,
         isScoringBatch: true,
         _count: {
@@ -96,6 +99,7 @@ export class ExerciseRepository extends RepositoryBase {
     property: {
       title: string
       description: string
+      isPublished: boolean
       isCanSkip: boolean
       isScoringBatch: boolean
     },

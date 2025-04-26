@@ -18,13 +18,15 @@ export class ExerciseService extends ServiceBase {
 
     const recommendExercises =
       await exerciseRepository.findExerciseInGlobalSchool(10)
-    return recommendExercises.map((exercise) => {
-      return {
-        id: exercise.id,
-        title: exercise.title,
-        description: exercise.description,
-      }
-    })
+    return recommendExercises
+      .filter((r) => r.isPublished)
+      .map((exercise) => {
+        return {
+          id: exercise.id,
+          title: exercise.title,
+          description: exercise.description,
+        }
+      })
   }
 
   /**
@@ -63,6 +65,7 @@ export class ExerciseService extends ServiceBase {
         description: exercise.description,
         createdAt: exercise.createdAt,
         updatedAt: exercise.updatedAt,
+        isPublished: exercise.isPublished,
         isCanSkip: exercise.isCanSkip,
         isScoringBatch: exercise.isScoringBatch,
         questionCount: exercise._count.exerciseQuestions,
@@ -103,6 +106,7 @@ export class ExerciseService extends ServiceBase {
     return await exerciseRepository.createExercise(schoolId, {
       title: property.title,
       description: property.description,
+      isPublished: false,
       isCanSkip: false,
       isScoringBatch: true,
     })
@@ -110,7 +114,7 @@ export class ExerciseService extends ServiceBase {
 
   public async updateExercise(
     exerciseId: string,
-    property: Partial<ExerciseBase>,
+    property: Partial<ExerciseBase & { isPublished: boolean }>,
   ) {
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
     const exercise = await exerciseRepository.findExerciseById(exerciseId)

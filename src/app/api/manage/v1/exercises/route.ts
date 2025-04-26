@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         createdAt: exercise.createdAt.toISOString(),
 
         schoolId: exercise.schoolId,
+        isPublished: exercise.isPublished,
         isCanSkip: exercise.isCanSkip,
         isScoringBatch: exercise.isScoringBatch,
         questionCount: exercise.questionCount,

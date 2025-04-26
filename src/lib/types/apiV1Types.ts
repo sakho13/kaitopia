@@ -108,6 +108,7 @@ export type ApiV1InTypeMap = {
     // クエリパラメータ: exerciseId
     title?: string
     description?: string
+    isPublished?: boolean
   }
   PostManageQuestion: {
     schoolId: string

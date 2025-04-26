@@ -14,7 +14,17 @@ export type ExerciseBase = {
 
 export type ExerciseBaseProperty = {
   schoolId: string
+  /**
+   * @description 問題集の公開状態
+   */
+  isPublished: boolean
+  /**
+   * @description 問題をスキップできるか
+   */
   isCanSkip: boolean
+  /**
+   * @description 一括採点を行うか
+   */
   isScoringBatch: boolean
 }
 
