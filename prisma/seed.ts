@@ -32,25 +32,50 @@ main()
   })
 
 async function transferUsers() {
-  return await prisma.user.createMany({
-    skipDuplicates: true,
-    data: [
-      {
-        id: "kaitopia-user+001",
-        firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
-        name: "Kaitopia User 001",
-        isGuest: false,
-        role: "USER",
-      },
-      {
-        id: "kaitopia-admin+001",
-        firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
-        name: "Kaitopia Admin 001",
-        isGuest: false,
-        role: "ADMIN",
-      },
-    ],
-  })
+  return await Promise.all([
+    prisma.user.createMany({
+      skipDuplicates: true,
+      data: [
+        {
+          id: "kaitopia-user+001",
+          firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
+          name: "Kaitopia User 001",
+          isGuest: false,
+          role: "USER",
+        },
+        {
+          id: "kaitopia-admin+001",
+          firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
+          name: "Kaitopia Admin 001",
+          isGuest: false,
+          role: "ADMIN",
+        },
+      ],
+    }),
+    prisma.school.createMany({
+      skipDuplicates: true,
+      data: [
+        {
+          id: "kaitopia_user_001_school",
+          name: "Kaitopia User 001's スクール",
+          description: "あなただけのスクールです",
+          isSelfSchool: true,
+          isGlobal: false,
+          isPublic: false,
+        },
+      ],
+    }),
+    prisma.schoolOwner.createMany({
+      skipDuplicates: true,
+      data: [
+        {
+          userId: "kaitopia-user+001",
+          schoolId: "kaitopia_user_001_school",
+          priority: 1,
+        },
+      ],
+    }),
+  ])
 }
 
 async function transferSchools() {
@@ -65,14 +90,6 @@ async function transferSchools() {
         isPublic: true,
         isSelfSchool: true,
       },
-      // {
-      //   id: "kaitopia_test",
-      //   name: "Kaitopia Test",
-      //   description: "誰でも学べる学校(テスト用)",
-      //   isGlobal: true,
-      //   isPublic: true,
-      //   isSelfSchool: true,
-      // },
     ],
   })
 }
