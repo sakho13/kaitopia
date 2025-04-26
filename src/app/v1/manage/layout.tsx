@@ -9,7 +9,7 @@ import { KaitopiaTitle } from "@/components/atoms/KaitopiaTitle"
 import { useGetManageOwnSchools } from "@/hooks/useApiV1"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { useManageStore } from "@/hooks/stores/useManageStore"
-import { useAuth } from "@/hooks/useAuth"
+import { DoorOpen } from "lucide-react"
 
 type Props = {
   children: React.ReactNode
@@ -24,7 +24,6 @@ type NaviType = {
 export default function Layout({ children }: Props) {
   const router = useRouter()
   const path = usePathname()
-  const { signOut: handleSignOut } = useAuth()
   const { schoolId, setSchoolId, schools, setSchools, clearSchoolId } =
     useManageStore.getState()
   const { dataToGetOwnSchools } = useGetManageOwnSchools()
@@ -76,10 +75,9 @@ export default function Layout({ children }: Props) {
     setSelectedSchoolId(schoolId)
   }
 
-  const signOut = async () => {
-    await handleSignOut()
+  const goToUserPage = async () => {
     clearSchoolId()
-    router.replace("/")
+    router.push("/v1/user")
   }
 
   useEffect(() => {
@@ -147,15 +145,6 @@ export default function Layout({ children }: Props) {
             </Link>
           ))}
         </nav>
-
-        <nav className='space-y-2 mt-auto'>
-          <Link
-            href={"/v1/user"}
-            className={`block w-full text-left px-4 py-2 rounded-md hover:bg-primary-hover`}
-          >
-            ユーザ画面
-          </Link>
-        </nav>
       </aside>
 
       <main className='flex-1 p-8'>
@@ -166,9 +155,10 @@ export default function Layout({ children }: Props) {
             colorMode='ghost'
             sizeMode='fit'
             className='px-4 py-2 text-sm'
-            onClick={signOut}
+            onClick={goToUserPage}
           >
-            ログアウト
+            <DoorOpen size={16} strokeWidth={3} />
+            ユーザ画面へ
           </ButtonBase>
         </div>
 
