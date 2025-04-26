@@ -3,8 +3,16 @@ import { ServiceBase } from "../common/ServiceBase"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { AnswerLogRepository } from "../repositories/AnswerLogRepository"
+import { UserController } from "../controller/UserController"
 
 export class ExerciseService extends ServiceBase {
+  private userController: UserController
+
+  constructor(...args: ConstructorParameters<typeof ServiceBase>) {
+    super(...args)
+    this.userController = new UserController(this.dbConnection)
+  }
+
   public async getRecommendExercises() {
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
@@ -27,6 +35,10 @@ export class ExerciseService extends ServiceBase {
     limit: number = 10,
     page?: number,
   ) {
+    const canAccess = await this.userController.accessSchoolMethod(schoolId)
+    if (!canAccess.includes("read"))
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
     const offset = page ? (page - 1) * limit : undefined
@@ -69,6 +81,12 @@ export class ExerciseService extends ServiceBase {
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
+    const accessResult = await this.userController.accessSchoolMethod(
+      exercise.schoolId,
+    )
+    if (!accessResult.includes("read"))
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+
     return exercise
   }
 
@@ -79,6 +97,10 @@ export class ExerciseService extends ServiceBase {
    */
   public async createExercise(schoolId: string, property: ExerciseBase) {
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
+
+    const accessResult = await this.userController.accessSchoolMethod(schoolId)
+    if (!accessResult.includes("create"))
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     return await exerciseRepository.createExercise(schoolId, {
       title: property.title,
@@ -106,10 +128,11 @@ export class ExerciseService extends ServiceBase {
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-    const { answerLogSheetId } = await this.dbConnection.$transaction(
-      async (tx) => {
+    const { answerLogSheetId, createdAt, updatedAt } =
+      await this.dbConnection.$transaction(async (tx) => {
         const answerLogRepository = new AnswerLogRepository(tx)
 
+        // 回答ログシートが存在するか確認
         const logSheet =
           await answerLogRepository.findLatestAnswerLogSheetByExerciseId(
             userId,
@@ -118,8 +141,11 @@ export class ExerciseService extends ServiceBase {
         if (logSheet)
           return {
             answerLogSheetId: logSheet.answerLogSheetId,
+            createdAt: logSheet.createdAt,
+            updatedAt: logSheet.updatedAt,
           }
 
+        // 回答ログシートが存在しない場合は新規作成
         const created =
           await answerLogRepository.createAnswerLogSheetByExerciseId(
             userId,
@@ -133,13 +159,20 @@ export class ExerciseService extends ServiceBase {
 
         return {
           answerLogSheetId: created.answerLogSheetId,
+          createdAt: created.createdAt,
+          updatedAt: created.updatedAt,
         }
-      },
-    )
+      })
 
     return {
       answerLogSheetId: answerLogSheetId,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     }
+  }
+
+  public setUserController(userController: UserController) {
+    this.userController = userController
   }
 
   // ************************

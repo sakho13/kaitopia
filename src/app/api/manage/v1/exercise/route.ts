@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の作成")
 
   return await api.execute("PostManageExercise", async () => {
-    await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const body = await request.json()
 
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
     if (validationResult.error) throw validationResult.error
 
     const exerciseService = new ExerciseService(prisma)
+    exerciseService.setUserController(userService.userController)
 
     const result = await exerciseService.createExercise(
       validationResult.result.schoolId,

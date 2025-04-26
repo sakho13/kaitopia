@@ -7,6 +7,7 @@ import { ApiV1Error } from "../common/ApiV1Error"
 import { ControllerBase } from "../common/ControllerBase"
 import { SchoolRepository } from "../repositories/SchoolRepository"
 import { UserRepository } from "../repositories/UserRepository"
+import { DateUtility } from "../common/DateUtility"
 
 export class UserController extends ControllerBase {
   private _userId: string | null = null
@@ -36,28 +37,50 @@ export class UserController extends ControllerBase {
   public async accessSchoolMethod(
     schoolId: string,
   ): Promise<UserAccessSchoolMethod[]> {
-    if (this._userRole === "ADMIN") return ["edit", "read", "publish", "delete"]
+    const AllAccess: UserAccessSchoolMethod[] = [
+      "read",
+      "edit",
+      "create",
+      "publish",
+      "delete",
+    ]
+
+    if (this._userRole === "ADMIN") return AllAccess
 
     const ownSchools = await this.getOwnSchools()
     const memberSchools = await this.getMemberSchools()
     if (ownSchools.length < 0 || memberSchools.length < 0) return []
 
+    // セルフスクールならば全ての権限を付与する
+    const selfSchool = ownSchools.find(
+      (s) => s.id === schoolId && s.isSelfSchool,
+    )
+    if (selfSchool?.isSelfSchool) return AllAccess
+
+    // グローバルスクールならばReadのみ付与する
+    const globalSchools = memberSchools.find(
+      (s) => s.id === schoolId && s.isGlobal && s.isPublic,
+    )
+    if (globalSchools) return ["read"]
+
     if (this._userRole === "USER") {
-      const selfSchool = ownSchools.find(
-        (s) => s.id === schoolId && s.isSelfSchool,
+      // スクールのメンバーならばReadのみ付与する
+      const isInMember = memberSchools.find(
+        (s) =>
+          s.id === schoolId &&
+          s.members.some(
+            (m) => m.limitAt === null || m.limitAt >= DateUtility.getNowDate(),
+          ),
       )
-      if (selfSchool) return ["read"]
-
-      const hasAccess = memberSchools.some((s) => s.id === schoolId)
-      if (hasAccess) return ["read"]
+      if (isInMember) return ["read"]
 
       return []
     }
 
-    if (this._userRole === "MODERATOR") {
-      const hasAccess = ownSchools.some((s) => s.id === schoolId)
-      return []
-    }
+    // if (this._userRole === "MODERATOR") {
+    //   const hasAccess = ownSchools.some((s) => s.id === schoolId)
+    //   return []
+    // }
 
     if (this._userRole === "TEACHER") {
       return []
@@ -80,7 +103,7 @@ export class UserController extends ControllerBase {
   }
 
   /**
-   * メンバーのスクールを取得する
+   * メンバーのスクールとグローバルのスクールを取得する
    * @returns
    */
   public async getMemberSchools() {

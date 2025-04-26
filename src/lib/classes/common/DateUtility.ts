@@ -3,6 +3,14 @@
  */
 export class DateUtility {
   /**
+   * ローカル時間をDateオブジェクトを取得する
+   * @returns 現在のローカル時間を表すDateオブジェクト
+   */
+  public static getNowDate() {
+    return new Date()
+  }
+
+  /**
    * ISO 形式の文字列をローカルタイムゾーンに基づく日付に変換する
    * @param isoString ISO 形式の文字列
    * @returns ローカルタイムゾーンに基づく日付
@@ -46,7 +54,7 @@ export class DateUtility {
    * @returns `yyyymmddhhmmssSSS`形式の文字列
    */
   public static generateDateStringNow(): string {
-    const now = new Date()
+    const now = this.getNowDate()
     const year = now.getFullYear().toString().padStart(4, "0")
     const month = (now.getMonth() + 1).toString().padStart(2, "0")
     const day = now.getDate().toString().padStart(2, "0")
