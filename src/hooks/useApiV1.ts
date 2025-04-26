@@ -183,20 +183,15 @@ export function useGetManageExercise(exerciseId: string) {
   const { idToken } = useAuth()
 
   const { data, isLoading, mutate } = useSWRImmutable(
-    ["/api/manage/v1/exercise", idToken],
-    async ([url, token]) =>
+    ["/api/manage/v1/exercise", idToken, exerciseId],
+    async ([url, token, eid]) =>
       token
-        ? fetcher(
-            "GetManageExercise",
-            "GET",
-            `${url}?exerciseId=${exerciseId}`,
-            token,
-          )
+        ? fetcher("GetManageExercise", "GET", `${url}?exerciseId=${eid}`, token)
         : null,
   )
 
   return {
-    dataTooGetManageExercise: data,
+    dataToGetManageExercise: data,
     isLoadingToGetManageExercise: isLoading,
     refetchManageExercise: mutate,
   } as const

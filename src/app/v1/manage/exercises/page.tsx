@@ -14,6 +14,7 @@ import { useGetManageExercises } from "@/hooks/useApiV1"
 import { useManageStore } from "@/hooks/stores/useManageStore"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { ManageNewExerciseForm } from "@/components/molecules/ManageNewExerciseForm"
+import { DateUtility } from "@/lib/classes/common/DateUtility"
 
 export default function Page() {
   const router = useRouter()
@@ -68,6 +69,7 @@ export default function Page() {
               <th className='px-4 py-2'>タイトル</th>
               <th className='px-4 py-2'>問題数</th>
               <th className='px-4 py-2'>作成日</th>
+              <th className='px-4 py-2'>更新日</th>
               <th className='px-4 py-2'>操作</th>
             </tr>
           </thead>
@@ -77,17 +79,36 @@ export default function Page() {
               <tr key={encodeBase64(exercise.exerciseId)} className='border-t'>
                 <td className='px-4 py-2'>{exercise.title}</td>
                 <td className='px-4 py-2'>{exercise.questionCount} 問</td>
-                <td className='px-4 py-2'>{exercise.createdAt}</td>
-                <td className='px-4 py-2 space-x-2 text-sm'>
-                  <button
+                <td className='px-4 py-2'>
+                  {DateUtility.formatDateTime(
+                    DateUtility.convertToLocalDate(exercise.createdAt ?? ""),
+                  )}
+                </td>
+                <td className='px-4 py-2'>
+                  {DateUtility.formatDateTime(
+                    DateUtility.convertToLocalDate(exercise.updatedAt ?? ""),
+                  )}
+                </td>
+
+                <td className='px-4 py-2 space-x-2 text-sm flex'>
+                  <ButtonBase
+                    sizeMode='fit'
+                    colorMode='primary'
+                    className='px-4 py-2'
                     onClick={() =>
-                      router.push(`/v1/manage/${exercise.exerciseId}/edit`)
+                      router.push(
+                        `/v1/manage/exercises/${encodeURIComponent(
+                          encodeBase64(exercise.exerciseId),
+                        )}`,
+                      )
                     }
-                    className='text-primary hover:underline'
                   >
-                    編集
-                  </button>
-                  <button className='text-red-500 hover:underline'>削除</button>
+                    詳細
+                  </ButtonBase>
+
+                  <ButtonBase colorMode='danger' className='px-4 py-2'>
+                    削除
+                  </ButtonBase>
                 </td>
               </tr>
             ))}
