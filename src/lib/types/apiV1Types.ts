@@ -115,6 +115,10 @@ export type ApiV1InTypeMap = {
     question: QuestionBase
     content: QuestionVersionBase
   }
+  /**
+   * DELETE /api/manage/v1/exercise
+   */
+  DeleteManageExercise: null
 
   /**
    * GET /api/user/v1/exercise?exerciseId=xxxx

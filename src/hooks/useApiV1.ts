@@ -24,7 +24,7 @@ const fetcher = async <T extends keyof ApiV1OutTypeMap>(
     return res.json()
   }) as Promise<ApiV1OutBase<ApiV1OutTypeMap[T]>>
 
-const requestPost = async <
+const requestHttp = async <
   T extends keyof ApiV1InTypeMap,
   K extends keyof ApiV1OutTypeMap,
 >(
@@ -33,9 +33,10 @@ const requestPost = async <
   url: string,
   token: string,
   input: ApiV1InTypeMap[T],
+  method: "POST" | "PATCH" | "DELETE",
 ) =>
   fetch(url, {
-    method: "POST",
+    method,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -162,12 +163,13 @@ export function usePostManageExercise() {
   const requestPostExercise = async (
     input: ApiV1InTypeMap["PostManageExercise"],
   ) => {
-    return await requestPost(
+    return await requestHttp(
       "PostManageExercise",
       "PostManageExercise",
       "/api/manage/v1/exercise",
       idToken ?? "",
       input,
+      "POST",
     )
   }
 
@@ -195,6 +197,26 @@ export function useGetManageExercise(exerciseId: string) {
     isLoadingToGetManageExercise: isLoading,
     refetchManageExercise: mutate,
   } as const
+}
+
+/**
+ * DELETE: `/api/manage/v1/exercise?exerciseId=xxxxx`
+ * @returns
+ */
+export function useDeleteManageExercise() {
+  const { idToken } = useAuth()
+
+  const requestDeleteExercise = async (exerciseId: string) =>
+    requestHttp(
+      "DeleteManageExercise",
+      "DeleteManageExercise",
+      `/api/manage/v1/exercise?exerciseId=${exerciseId}`,
+      idToken ?? "",
+      null,
+      "DELETE",
+    )
+
+  return { requestDeleteExercise }
 }
 
 // *******************
@@ -241,12 +263,13 @@ export function useGetUserInfo() {
  */
 export function usePostUserLogin() {
   const requestPostLogin = async (token: string) => {
-    return await requestPost(
+    return await requestHttp(
       "PostUserLogin",
       "PostUserLogin",
       "/api/user/v1/login",
       token,
       null,
+      "POST",
     )
   }
 
