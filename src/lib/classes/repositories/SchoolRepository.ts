@@ -60,7 +60,7 @@ export class SchoolRepository extends RepositoryBase {
         description: true,
         isGlobal: true,
         isPublic: true,
-        isSelfSchool: false,
+        isSelfSchool: true,
         createdAt: true,
         updatedAt: true,
         members: {
@@ -78,7 +78,6 @@ export class SchoolRepository extends RepositoryBase {
             members: {
               every: {
                 userId,
-                // OR: [{ limitAt: null }, { limitAt: { gte: new Date() } }],
               },
             },
           },

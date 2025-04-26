@@ -152,6 +152,9 @@ export type ApiV1OutTypeMap = {
     userInfo: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
     canAccessManagePage: boolean
     isGuest: boolean
+    schools: (SchoolBaseIdentity &
+      SchoolBase &
+      ReplacedDateToString<SchoolBaseDate>)[]
   }
   /**
    * GET /api/manage/v1/own-schools

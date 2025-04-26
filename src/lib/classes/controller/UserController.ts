@@ -104,6 +104,15 @@ export class UserController extends ControllerBase {
   }
 
   /**
+   * ユーザがアクセス可能なスクールを取得する
+   * @returns
+   */
+  public async getUserAccessibleSchools() {
+    const memberSchools = await this.getOwnSchools()
+    return memberSchools
+  }
+
+  /**
    * 所有しているスクールを取得する
    * @returns
    */

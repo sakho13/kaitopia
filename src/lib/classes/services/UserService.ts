@@ -30,6 +30,10 @@ export class UserService extends ServiceBase {
     return await this._userController.getOwnSchools()
   }
 
+  public async getAccessibleSchools() {
+    return await this.userController.getUserAccessibleSchools()
+  }
+
   public get userId() {
     return this._userController.userId
   }
