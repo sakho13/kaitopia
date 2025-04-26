@@ -11,6 +11,7 @@ export const SeedDataIntroProgramming1 = {
     title: "プログラミング入門",
     schoolId: "kaitopia_1",
     description: "プログラミングの基礎を学ぶための問題集です。",
+    isPublished: true,
   } as Exercise,
 
   questions: [
