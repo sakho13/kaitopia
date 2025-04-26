@@ -32,50 +32,50 @@ main()
   })
 
 async function transferUsers() {
-  return await Promise.all([
-    prisma.user.createMany({
-      skipDuplicates: true,
-      data: [
-        {
-          id: "kaitopia-user+001",
-          firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
-          name: "Kaitopia User 001",
-          isGuest: false,
-          role: "USER",
-        },
-        {
-          id: "kaitopia-admin+001",
-          firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
-          name: "Kaitopia Admin 001",
-          isGuest: false,
-          role: "ADMIN",
-        },
-      ],
-    }),
-    prisma.school.createMany({
-      skipDuplicates: true,
-      data: [
-        {
-          id: "kaitopia_user_001_school",
-          name: "Kaitopia User 001's スクール",
-          description: "あなただけのスクールです",
-          isSelfSchool: true,
-          isGlobal: false,
-          isPublic: false,
-        },
-      ],
-    }),
-    prisma.schoolOwner.createMany({
-      skipDuplicates: true,
-      data: [
-        {
-          userId: "kaitopia-user+001",
-          schoolId: "kaitopia_user_001_school",
-          priority: 1,
-        },
-      ],
-    }),
-  ])
+  await prisma.user.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        id: "kaitopia-user+001",
+        firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
+        name: "Kaitopia User 001",
+        isGuest: false,
+        role: "USER",
+      },
+      {
+        id: "kaitopia-admin+001",
+        firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
+        name: "Kaitopia Admin 001",
+        isGuest: false,
+        role: "ADMIN",
+      },
+    ],
+  })
+
+  await prisma.school.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        id: "kaitopia_user_001_school",
+        name: "Kaitopia User 001's スクール",
+        description: "あなただけのスクールです",
+        isSelfSchool: true,
+        isGlobal: false,
+        isPublic: false,
+      },
+    ],
+  })
+
+  await prisma.schoolOwner.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        userId: "kaitopia-user+001",
+        schoolId: "kaitopia_user_001_school",
+        priority: 1,
+      },
+    ],
+  })
 }
 
 async function transferSchools() {
