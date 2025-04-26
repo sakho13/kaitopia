@@ -835,7 +835,7 @@
 
       "delete": {
         "summary": "問題集を削除する",
-        "tags": ["ManageAPI", "InDevelopment"],
+        "tags": ["ManageAPI"],
         "description": "問題集を削除する\n問題集のIDを指定して、問題集を削除する。紐づく問題は削除しない。",
         "parameters": [
           {

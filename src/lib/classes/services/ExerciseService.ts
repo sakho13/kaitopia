@@ -112,7 +112,26 @@ export class ExerciseService extends ServiceBase {
 
   // public async updateExercise() {}
 
-  // public async deleteExercise(exerciseId: string) {}
+  /**
+   * 問題集を削除する
+   * @param exerciseId
+   * @returns
+   */
+  public async deleteExercise(exerciseId: string) {
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+
+    const exercise = await exerciseRepository.findExerciseById(exerciseId)
+    if (!exercise)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    const accessResult = await this.userController.accessSchoolMethod(
+      exercise.schoolId,
+    )
+    if (!accessResult.includes("delete"))
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+
+    return await exerciseRepository.deleteExercise(exerciseId)
+  }
 
   /**
    * 問題集の回答を開始する

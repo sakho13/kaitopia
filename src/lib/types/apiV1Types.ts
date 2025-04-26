@@ -196,6 +196,13 @@ export type ApiV1OutTypeMap = {
   }
 
   /**
+   * DELETE /api/manage/v1/exercise
+   */
+  DeleteManageExercise: {
+    exerciseId: string
+  }
+
+  /**
    * GET /api/user/v1/exercise
    */
   GetUserExerciseInfo: {

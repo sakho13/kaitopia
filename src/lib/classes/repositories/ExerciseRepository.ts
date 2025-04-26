@@ -46,6 +46,7 @@ export class ExerciseRepository extends RepositoryBase {
       },
       where: {
         id: exerciseId,
+        deletedAt: null,
       },
     })
   }
@@ -111,6 +112,17 @@ export class ExerciseRepository extends RepositoryBase {
       data: {
         schoolId,
         ...property,
+      },
+    })
+  }
+
+  public async deleteExercise(exerciseId: string) {
+    return await this.dbConnection.exercise.update({
+      where: {
+        id: exerciseId,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     })
   }

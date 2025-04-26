@@ -73,7 +73,28 @@ export async function POST(request: NextRequest) {
   })
 }
 
-// export function DELETE(request: NextRequest) {}
+export function DELETE(request: NextRequest) {
+  const api = new ApiV1Wrapper("管理用問題集の削除")
+
+  return api.execute("DeleteManageExercise", async () => {
+    const { userService } = await api.checkAccessManagePage(request)
+
+    const exerciseId = request.nextUrl.searchParams.get("exerciseId")
+    if (!exerciseId || exerciseId.length < 2)
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題集ID" } },
+      ])
+
+    const exerciseService = new ExerciseService(prisma)
+    exerciseService.setUserController(userService.userController)
+
+    await exerciseService.deleteExercise(exerciseId)
+
+    return {
+      exerciseId,
+    }
+  })
+}
 
 // validation
 
