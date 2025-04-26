@@ -3,6 +3,7 @@
  */
 
 import { POST } from "@/app/api/user/v1/login/route"
+import { GET as UserConfigGET } from "@/app/api/user/v1/user-config/route"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
 import { TestUtility } from "@/tests/TestUtility"
@@ -47,15 +48,16 @@ describe("API /api/user/v1/login/", () => {
       "password",
     )
     expect(token).toBeDefined()
-    const request = new NextRequest("http://localhost:3000/api/user/v1/login", {
-      method: "POST",
-      body: JSON.stringify({}),
-      headers: {
+
+    const result = await TestUtility.runApi(
+      POST,
+      "POST",
+      "/api/user/v1/login",
+      {
         Authorization: `Bearer ${token}`,
       },
-    })
+    )
 
-    const result = await POST(request)
     expect(result.ok).toBe(true)
     expect(result.status).toBe(200)
     const json = await result.json()
@@ -66,6 +68,34 @@ describe("API /api/user/v1/login/", () => {
         isGuest: false,
       }),
     })
+
+    const resultUserConfig = await TestUtility.runApi(
+      UserConfigGET,
+      "GET",
+      "/api/user/v1/user-config",
+      {
+        Authorization: `Bearer ${token}`,
+      },
+    )
+
+    expect(resultUserConfig.ok).toBe(true)
+    expect(resultUserConfig.status).toBe(200)
+    const jsonUserConfig = await resultUserConfig.json()
+
+    expect(jsonUserConfig.success).toBe(true)
+    expect(jsonUserConfig.data).toBeDefined()
+    expect(jsonUserConfig.data.userInfo).toBeDefined()
+    expect(jsonUserConfig.data.schools).toBeDefined()
+    expect(Array.isArray(jsonUserConfig.data.schools)).toBe(true)
+    expect(jsonUserConfig.data.schools).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          isSelfSchool: true,
+          isGlobal: false,
+          isPublic: false,
+        }),
+      ]),
+    )
   })
 
   test("ゲストユーザでログイン", async () => {
