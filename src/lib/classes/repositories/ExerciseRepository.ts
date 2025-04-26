@@ -66,9 +66,9 @@ export class ExerciseRepository extends RepositoryBase {
         updatedAt: true,
         isCanSkip: true,
         isScoringBatch: true,
-        exerciseQuestions: {
+        _count: {
           select: {
-            questionId: true,
+            exerciseQuestions: true,
           },
         },
       },

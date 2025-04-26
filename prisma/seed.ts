@@ -180,4 +180,12 @@ async function transferQuestions() {
     skipDuplicates: true,
     data: SeedDataIntroProgramming1.questionAnswers,
   })
+
+  await prisma.exerciseQuestion.createMany({
+    skipDuplicates: true,
+    data: SeedDataIntroProgramming1.questions.map((q) => ({
+      exerciseId: SeedDataIntroProgramming1.exercise.id,
+      questionId: q.id,
+    })),
+  })
 }

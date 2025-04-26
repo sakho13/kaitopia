@@ -56,19 +56,17 @@ export class ExerciseService extends ServiceBase {
     const nextPage = exercises.length < limit ? null : page ? page + 1 : 2
 
     return {
-      exercises: exercises.map((exercise) => {
-        return {
-          schoolId: exercise.schoolId,
-          exerciseId: exercise.id,
-          title: exercise.title,
-          description: exercise.description,
-          createdAt: exercise.createdAt,
-          updatedAt: exercise.updatedAt,
-          isCanSkip: exercise.isCanSkip,
-          isScoringBatch: exercise.isScoringBatch,
-          questionCount: exercise.exerciseQuestions.length,
-        }
-      }),
+      exercises: exercises.map((exercise) => ({
+        schoolId: exercise.schoolId,
+        exerciseId: exercise.id,
+        title: exercise.title,
+        description: exercise.description,
+        createdAt: exercise.createdAt,
+        updatedAt: exercise.updatedAt,
+        isCanSkip: exercise.isCanSkip,
+        isScoringBatch: exercise.isScoringBatch,
+        questionCount: exercise._count.exerciseQuestions,
+      })),
       totalCount,
       nextPage,
     }
