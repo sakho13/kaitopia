@@ -27,13 +27,27 @@ export class UserController extends ControllerBase {
     isGuest: boolean,
     data: UserBaseInfo,
   ) {
-    const userRepository = new UserRepository(this.dbConnection)
-    return await userRepository.createUserByFirebaseUid(firebaseUid, isGuest, {
-      ...data,
-      birthDayDate: null,
+    return this.dbConnection.$transaction(async (t) => {
+      const userRepository = new UserRepository(t)
+      const schoolRepository = new SchoolRepository(t)
+      const user = await userRepository.createUserByFirebaseUid(
+        firebaseUid,
+        isGuest,
+        {
+          ...data,
+          birthDayDate: null,
+        },
+      )
+      await schoolRepository.createSelfSchool(user.id, user.name)
+      return user
     })
   }
 
+  /**
+   * このユーザがこのスクールで持つ権限を取得する
+   * @param schoolId
+   * @returns UserAccessSchoolMethod[]
+   */
   public async accessSchoolMethod(
     schoolId: string,
   ): Promise<UserAccessSchoolMethod[]> {

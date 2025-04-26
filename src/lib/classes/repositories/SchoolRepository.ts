@@ -102,6 +102,7 @@ export class SchoolRepository extends RepositoryBase {
         owners: {
           create: {
             userId,
+            priority: 1,
           },
         },
       },
