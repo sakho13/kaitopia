@@ -67,20 +67,12 @@ describe("API /api/user/v1/exercise", () => {
 
   describe("CRUD", () => {
     test("回答前に詳細を見る", async () => {
-      const token = await TestUtility.getTokenByEmailAndSignUp(
-        `test-user-${DateUtility.generateDateStringNow()}+${generateRandomLenNumber(
-          3,
-        )}@kaitopia.com`,
-        "password",
-      )
-      const loginResult = await TestUtility.signUpByToken(token)
-      expect(loginResult.ok).toBe(true)
       const result = await TestUtility.runApi(
         GET,
         "GET",
         "/api/user/v1/exercise/question?exerciseId=intro_programming_1&mode=show",
         {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${newUserToken}`,
         },
       )
       expect(result.ok).toBe(true)
@@ -105,21 +97,12 @@ describe("API /api/user/v1/exercise", () => {
     })
 
     test("回答のために問題を取得できる", async () => {
-      const token = await TestUtility.getTokenByEmailAndSignUp(
-        `test-user-${DateUtility.generateDateStringNow()}+${generateRandomLenNumber(
-          3,
-        )}@kaitopia.com`,
-        "password",
-      )
-      const loginResult = await TestUtility.signUpByToken(token)
-      expect(loginResult.ok).toBe(true)
-
       const result = await TestUtility.runApi(
         GET,
         "GET",
         "/api/user/v1/exercise/question?exerciseId=intro_programming_1&mode=answer",
         {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${newUserToken}`,
         },
       )
 
