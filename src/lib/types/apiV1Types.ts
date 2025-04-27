@@ -1,4 +1,5 @@
 import { ApiV1Error } from "../classes/common/ApiV1Error"
+import { AnswerLogSheetBase } from "./base/answerLogSheetTypes"
 import {
   ExerciseBase,
   ExerciseBaseDate,
@@ -13,6 +14,7 @@ import {
   QuestionBaseIdentifier,
   QuestionBasePublishedState,
   QuestionBaseStatus,
+  QuestionForUser,
   QuestionVersionBase,
   QuestionVersionBaseIdentifier,
 } from "./base/questionTypes"
@@ -138,9 +140,21 @@ export type ApiV1InTypeMap = {
    */
   PostUserLogin: null
 
-  PostUserExerciseAnswer: {
+  /**
+   * 一括採点or結果を取得したい場合に実行される
+   *
+   * POST /api/user/v1/exercise/question
+   */
+  PostUserExerciseQuestion: {
+    answerLogSheetId: string
     exerciseId: string
-    answers: QuestionAnswerContent[]
+  }
+  PatchUserExerciseQuestion: {
+    answerLogSheetId: string
+    exerciseId: string
+    questionId: string
+    version: number
+    answer: QuestionAnswerContent
   }
 }
 
@@ -248,7 +262,39 @@ export type ApiV1OutTypeMap = {
     exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
     questions: QuestionBase[]
   }
-  // PostUserExerciseAnswer: {}
+  /**
+   * GET /api/user/v1/exercise/question?exerciseId=xxxx&mode=xxxx
+   */
+  GetUserExerciseQuestion: {
+    fn: "answer" | "back" | null
+    answerLogSheetId: string | null
+    exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
+    questions: QuestionForUser[]
+  }
+  /**
+   * POST /api/user/v1/exercise/question
+   */
+  PostUserExerciseQuestion: {
+    /**
+     * * `answer`: 採点に必要な情報が不足している
+     */
+    fn: "answer" | null
+    answerLogSheetId: string
+    exerciseId: string
+    result: AnswerLogSheetBase
+  }
+  PatchUserExerciseQuestion: {
+    /**
+     * * `answer`: 採点に必要な情報が不足している
+     */
+    fn: "answer" | null
+    answerLogSheetId: string
+    exerciseId: string
+    /**
+     * 一括採点の場合は `null` を返す
+     */
+    result: AnswerLogSheetBase | null
+  }
 }
 
 export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =

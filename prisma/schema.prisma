@@ -125,10 +125,11 @@ model QuestionVersion {
 
   question Question @relation(fields: [questionId], references: [id])
 
-  currentQuestion Question?        @relation("CurrentVersion")
-  draftQuestion   Question?        @relation("DraftVersion")
+  currentQuestion Question?         @relation("CurrentVersion")
+  draftQuestion   Question?         @relation("DraftVersion")
   questionAnswers QuestionAnswer[]
   answerLogs      AnswerLog[]
+  questionUserLog QuestionUserLog[]
 
   @@id([questionId, version])
 }
@@ -137,7 +138,7 @@ model QuestionAnswer {
   questionId String @map("question_id")
   version    Int    @map("version")
   // QuestionTypeがTEXTの場合は1のみ
-  answerId   Int    @default(1) @map("answer_id")
+  answerId   String @default(cuid(2)) @map("answer_id")
 
   // QuestionTypeがSELECT/MULTI_SELECTの場合
   selectContent String?  @map("select_content") // 選択肢の内容
@@ -163,6 +164,11 @@ model Exercise {
 
   isCanSkip      Boolean @default(false) @map("is_can_skip") // スキップ可能かどうか
   isScoringBatch Boolean @default(false) @map("is_scoring_batch") // 一括採点可能かどうか
+
+  // ランダム出題選択可能かどうか
+  isSelectRandom Boolean @default(false) @map("is_select_random")
+  // ランダム出題かどうか
+  random         Boolean @default(false) @map("random")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -208,10 +214,55 @@ model AnswerLogSheet {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  exercise   Exercise?   @relation(fields: [exerciseId], references: [id])
-  answerLogs AnswerLog[]
+  exercise         Exercise?         @relation(fields: [exerciseId], references: [id])
+  answerLogs       AnswerLog[]
+  questionUserLogs QuestionUserLog[]
 
   @@id([userId, answerLogSheetId])
+}
+
+// 出題した問題の履歴
+model QuestionUserLog {
+  questionUserLogId String @id @default(cuid(2))
+
+  userId           String @map("user_id")
+  answerLogSheetId String @map("answer_log_sheet_id")
+
+  orderIndex Int    @default(1) @map("order_index") // 問題の出題順
+  questionId String @map("question_id")
+  version    Int    @map("version") // 問題のバージョン
+
+  // QuestionTypeがSELECT/MULTI_SELECTの場合は正解が100点
+  // QuestionTypeがTEXTの場合は内容によって変わる
+  // 0点から100点の間でスコアをつける
+  score Int @default(0) @map("score")
+
+  questionVersion QuestionVersion @relation(fields: [questionId, version], references: [questionId, version])
+  answerLogSheet  AnswerLogSheet  @relation(fields: [userId, answerLogSheetId], references: [userId, answerLogSheetId])
+  // TYPE: MULTI_SELECT の場合は複数
+  answerUserLogs  AnswerUserLog[]
+}
+
+model AnswerUserLog {
+  answerUserLogId String @id @default(cuid(2))
+
+  questionId        String @map("question_id")
+  questionUserLogId String @map("question_user_log_id")
+
+  // スキップされたかどうか
+  skipped Boolean @default(false) @map("skipped")
+
+  // QuestionTypeがSELECT/MULTI_SELECTの場合
+  selectAnswerId String?  @map("select_answer_id")
+  isCorrect      Boolean? @default(false) @map("is_correct")
+
+  // QuestionTypeがTEXTの場合
+  textContent String? @map("text_content") // 回答の内容
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  questionUserLog QuestionUserLog @relation(fields: [questionUserLogId], references: [questionUserLogId])
 }
 
 model AnswerLog {
@@ -223,8 +274,9 @@ model AnswerLog {
   wasSkipped Boolean @default(false) @map("was_skipped") // スキップされたかどうか
 
   // QuestionTypeがSELECT/MULTI_SELECTの場合
-  selectContent String?  @map("select_content") // 選択肢の answerId (MULTI_SELECTの場合はカンマ区切り)
-  isCorrect     Boolean? @default(false) @map("is_correct") // 正解かどうか
+  // selectContent  String?  @map("select_content") // 選択肢の answerId (MULTI_SELECTの場合はカンマ区切り)
+  selectAnswerId Int?     @map("select_answer_id") // 選択肢の answerId (MULTI_SELECTの場合はカンマ区切り)
+  isCorrect      Boolean? @default(false) @map("is_correct") // 正解かどうか
 
   // QuestionTypeがTEXTの場合
   textContent String? @map("text_content") // 回答の内容

@@ -1,4 +1,33 @@
 // *********************
+//      ユーザ用
+// *********************
+
+/**
+ * ユーザが回答するときの問題の型
+ */
+export type QuestionForUser = {
+  questionId: string
+  version: number
+
+  title: string
+  questionType: QuestionTypeType
+
+  content: string
+  hint: string
+
+  isCanSkip: boolean | null
+
+  answerType: QuestionAnswerTypeType
+  answer: QuestionAnswerForUser<QuestionAnswerTypeType>
+} & (QuestionAnswerContent | object) // すでに回答していた場合に現れるオブジェクト
+
+/**
+ * ユーザが回答するときの回答の型(送信するときの型ではない)
+ */
+export type QuestionAnswerForUser<T extends QuestionAnswerTypeType> =
+  QuestionAnswerProperty[T]
+
+// *********************
 //       Question
 // *********************
 
@@ -92,24 +121,22 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
   properties: QuestionAnswerProperty[T]
 }
 
-export type QuestionAnswerContent = QuestionAnswerBaseIdentifier &
-  (
-    | {
-        type: "SKIP"
-      }
-    | {
-        type: "SELECT"
-        answerId: string
-      }
-    | {
-        type: "MULTI_SELECT"
-        answerIds: string[]
-      }
-    | {
-        type: "TEXT"
-        content: string
-      }
-  )
+export type QuestionAnswerContent =
+  | {
+      type: "SKIP"
+    }
+  | {
+      type: "SELECT"
+      answerId: string
+    }
+  | {
+      type: "MULTI_SELECT"
+      answerIds: string[]
+    }
+  | {
+      type: "TEXT"
+      content: string
+    }
 
 export const QuestionType = {
   TEXT: "TEXT",
