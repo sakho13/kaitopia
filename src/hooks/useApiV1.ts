@@ -303,11 +303,28 @@ export function usePostUserLogin() {
   }
 }
 
-// export function useGetExercise(exerciseId: string) {
-//   const { idToken } = useAuth()
-//   const [loading, setLoading] = useState(true)
+/**
+ * GET: `/api/user/v1/exercise?exerciseId=xxxxx`
+ */
+export function useGetUserExercise(exerciseId: string) {
+  const { idToken } = useAuth()
 
-//   return {
-//     isLoadingToGetExercise: loading,
-//   }
-// }
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/exercise", idToken, exerciseId],
+    async ([url, token, eid]) =>
+      token && eid
+        ? fetcher(
+            "GetUserExerciseInfo",
+            "GET",
+            `${url}?exerciseId=${eid}`,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetUserExercise: data,
+    isLoadingToGetUserExercise: isLoading,
+    refetchUserExercise: mutate,
+  } as const
+}

@@ -244,9 +244,8 @@ export type ApiV1OutTypeMap = {
    * GET /api/user/v1/exercise
    */
   GetUserExerciseInfo: {
-    exercise: ExerciseBase
-    property: ExerciseBaseProperty
-    questions: []
+    exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
+    questions: QuestionBase[]
   }
   // PostUserExerciseAnswer: {}
 }
