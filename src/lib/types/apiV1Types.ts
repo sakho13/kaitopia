@@ -36,6 +36,7 @@ export type ApiV1OutBase<R> =
   | {
       success: false
       errors: {
+        code: keyof typeof ApiV1ErrorMapObj
         message: string
         columnName?: string
       }[]
