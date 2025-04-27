@@ -61,6 +61,7 @@ describe("API /api/manage/v1/exercises", () => {
         success: false,
         errors: expect.arrayContaining([
           {
+            code: "RoleTypeError",
             message: "アクセス権限がありません",
           },
         ]),

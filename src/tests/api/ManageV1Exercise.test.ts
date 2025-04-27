@@ -68,6 +68,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -140,6 +141,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -173,6 +175,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -261,6 +264,7 @@ describe("API /api/manage/v1/exercise", () => {
         success: false,
         errors: expect.arrayContaining([
           {
+            code: "RoleTypeError",
             message: "アクセス権限がありません",
           },
         ]),
@@ -291,6 +295,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集IDは必須です",
             },
           ]),
@@ -323,6 +328,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集のプロパティは必須です",
             },
           ]),
@@ -357,6 +363,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "問題集タイトルの形式が不正です",
             },
           ]),
@@ -391,6 +398,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "問題集タイトルの形式が不正です",
             },
           ]),
@@ -425,6 +433,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "問題集説明の形式が不正です",
             },
           ]),
@@ -458,6 +467,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集IDは必須です",
             },
           ]),
@@ -490,6 +500,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "NotFoundError",
               message:
                 "リソースが見つかりません。再読み込みしても解決しない場合は、お問い合わせください。",
             },
@@ -545,6 +556,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "公開状態の形式が不正です",
             },
           ]),
@@ -570,6 +582,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -599,6 +612,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集IDは必須です",
             },
           ]),

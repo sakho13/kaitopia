@@ -10,7 +10,7 @@ const AdminUserPassword = "password"
 const UserUserEmail = "kaitopia-user+001@kaitopia.com"
 const UserUserPassword = "password"
 
-describe("API /api/manage/v1/exercise", () => {
+describe("API /api/manage/v1/exercise/question", () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -71,6 +71,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -102,6 +103,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集IDは必須です",
             },
           ]),
@@ -129,6 +131,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題IDは必須です",
             },
           ]),

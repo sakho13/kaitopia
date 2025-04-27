@@ -45,6 +45,7 @@ describe("API /api/user/v1/exercise", () => {
           success: false,
           errors: [
             {
+              code: "NotFoundError",
               message:
                 "リソースが見つかりません。再読み込みしても解決しない場合は、お問い合わせください。",
             },
