@@ -232,6 +232,9 @@ model QuestionUserLog {
   questionId String @map("question_id")
   version    Int    @map("version") // 問題のバージョン
 
+  // スキップされたかどうか
+  skipped Boolean @default(false) @map("skipped")
+
   // QuestionTypeがSELECT/MULTI_SELECTの場合は正解が100点
   // QuestionTypeがTEXTの場合は内容によって変わる
   // 0点から100点の間でスコアをつける
@@ -248,9 +251,6 @@ model AnswerUserLog {
 
   questionId        String @map("question_id")
   questionUserLogId String @map("question_user_log_id")
-
-  // スキップされたかどうか
-  skipped Boolean @default(false) @map("skipped")
 
   // QuestionTypeがSELECT/MULTI_SELECTの場合
   selectAnswerId String?  @map("select_answer_id")
