@@ -114,6 +114,8 @@ export type QuestionAnswerContent = QuestionAnswerBaseIdentifier &
 export const QuestionType = {
   TEXT: "TEXT",
   IMAGE: "IMAGE",
+  VIDEO: "VIDEO",
+  AUDIO: "AUDIO",
 } as const
 
 export type QuestionTypeType = keyof typeof QuestionType

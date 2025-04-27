@@ -8,7 +8,9 @@ import {
 import {
   QuestionAnswerContent,
   QuestionBase,
+  QuestionBaseEditState,
   QuestionBaseIdentifier,
+  QuestionBasePublishedState,
   QuestionVersionBase,
 } from "./base/questionTypes"
 import {
@@ -184,7 +186,10 @@ export type ApiV1OutTypeMap = {
       ExerciseBase &
       ExerciseBaseProperty &
       ReplacedDateToString<ExerciseBaseDate> & { questionCount: number }
-    questions: (Omit<QuestionBaseIdentifier, "schoolId"> & QuestionBase)[]
+    questions: (Omit<QuestionBaseIdentifier, "schoolId"> &
+      QuestionBase &
+      QuestionBasePublishedState &
+      QuestionBaseEditState)[]
   }
   /**
    * GET /api/manage/v1/exercises
