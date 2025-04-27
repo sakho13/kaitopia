@@ -8,10 +8,13 @@ import {
 import {
   QuestionAnswerContent,
   QuestionBase,
+  QuestionBaseDate,
   QuestionBaseEditState,
   QuestionBaseIdentifier,
   QuestionBasePublishedState,
+  QuestionBaseStatus,
   QuestionVersionBase,
+  QuestionVersionBaseIdentifier,
 } from "./base/questionTypes"
 import {
   SchoolBase,
@@ -205,7 +208,6 @@ export type ApiV1OutTypeMap = {
     nextPage: number | null
     totalCount: number
   }
-
   /**
    * POST /api/manage/v1/exercise
    */
@@ -228,6 +230,15 @@ export type ApiV1OutTypeMap = {
   DeleteManageExercise: {
     exerciseId: string
   }
+  /**
+   * GET /api/manage/v1/exercise/question?exerciseId=xxxx&questionId=xxxx
+   */
+  GetManageExerciseQuestion: {
+    versions: (Omit<QuestionVersionBaseIdentifier, "questionId"> &
+      QuestionVersionBase)[]
+  } & QuestionBase &
+    QuestionBaseStatus &
+    ReplacedDateToString<QuestionBaseDate>
 
   /**
    * GET /api/user/v1/exercise
