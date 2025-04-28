@@ -171,30 +171,27 @@ async function transferExcises(db: Prisma.TransactionClient) {
 async function transferQuestions(db: Prisma.TransactionClient) {
   await db.question.createMany({
     skipDuplicates: true,
-    data: SeedDataIntroProgramming1.questions,
+    data: [
+      ...SeedDataIntroProgramming1.questions,
+      ...SeedDataMopedLicense1.questions,
+    ],
   })
-  // await db.question.createMany({
-  //   skipDuplicates: true,
-  //   data: SeedDataMopedLicense1.questions,
-  // })
 
   await db.questionVersion.createMany({
     skipDuplicates: true,
-    data: SeedDataIntroProgramming1.questionVersions,
+    data: [
+      ...SeedDataIntroProgramming1.questionVersions,
+      ...SeedDataMopedLicense1.questionVersions,
+    ],
   })
-  // await db.questionVersion.createMany({
-  //   skipDuplicates: true,
-  //   data: SeedDataMopedLicense1.questionVersions,
-  // })
 
   await db.questionAnswer.createMany({
     skipDuplicates: true,
-    data: SeedDataIntroProgramming1.questionAnswers,
+    data: [
+      ...SeedDataIntroProgramming1.questionAnswers,
+      ...SeedDataMopedLicense1.questionAnswers,
+    ],
   })
-  // await db.questionAnswer.createMany({
-  //   skipDuplicates: true,
-  //   data: SeedDataMopedLicense1.questionAnswers,
-  // })
 
   await db.exerciseQuestion.createMany({
     skipDuplicates: true,
@@ -203,11 +200,37 @@ async function transferQuestions(db: Prisma.TransactionClient) {
       questionId: q.id,
     })),
   })
-  // await db.exerciseQuestion.createMany({
-  //   skipDuplicates: true,
-  //   data: SeedDataMopedLicense1.questions.map((q) => ({
-  //     exerciseId: SeedDataMopedLicense1.exercise.id,
-  //     questionId: q.id,
-  //   })),
-  // })
+  await db.exerciseQuestion.createMany({
+    skipDuplicates: true,
+    data: SeedDataMopedLicense1.questions.map((q) => ({
+      exerciseId: SeedDataMopedLicense1.exercise.id,
+      questionId: q.id,
+    })),
+  })
+
+  // 公開バージョン
+  await Promise.all(
+    SeedDataIntroProgramming1.questionCurrentVersion.map((q) =>
+      db.question.update({
+        data: {
+          currentVersionId: q.version,
+        },
+        where: {
+          id: q.questionId,
+        },
+      }),
+    ),
+  )
+  await Promise.all(
+    SeedDataMopedLicense1.questionCurrentVersion.map((q) =>
+      db.question.update({
+        data: {
+          currentVersionId: q.version,
+        },
+        where: {
+          id: q.questionId,
+        },
+      }),
+    ),
+  )
 }

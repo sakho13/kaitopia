@@ -455,4 +455,47 @@ export const SeedDataIntroProgramming1 = {
       isCorrect: false,
     },
   ] as QuestionAnswer[],
+
+  questionCurrentVersion: [
+    {
+      questionId: "intro_programming_1_1",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_2",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_3",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_4",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_5",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_6",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_7",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_8",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_9",
+      version: 1,
+    },
+    {
+      questionId: "intro_programming_1_10",
+      version: 1,
+    },
+  ],
 }

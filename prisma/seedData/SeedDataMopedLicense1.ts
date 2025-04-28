@@ -22,7 +22,7 @@ export const SeedDataMopedLicense1 = {
       questionType: "TEXT",
       answerType: "SELECT",
       isPublished: true,
-      currentVersionId: 1,
+      currentVersionId: null,
       draftVersionId: null,
     },
   ] as Question[],
@@ -40,15 +40,24 @@ export const SeedDataMopedLicense1 = {
   questionAnswers: [
     {
       questionId: "moped_license_1_1",
+      version: 1,
       answerId: "1",
       selectContent: "正しい",
       isCorrect: false,
     },
     {
       questionId: "moped_license_1_1",
+      version: 1,
       answerId: "2",
       selectContent: "誤り",
       isCorrect: true,
     },
   ] as QuestionAnswer[],
+
+  questionCurrentVersion: [
+    {
+      questionId: "moped_license_1_1",
+      version: 1,
+    },
+  ],
 }
