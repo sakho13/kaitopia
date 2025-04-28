@@ -1,22 +1,26 @@
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 import { SeedDataIntroProgramming1 } from "./seedData/SeedDataIntroProgramming1"
+import { SeedDataMopedLicense1 } from "./seedData/SeedDataMopedLicense1"
 const prisma = new PrismaClient()
 
 async function main() {
   console.log(`Start seeding ...`)
 
-  await transferUsers()
-  await transferSchools()
-  await Promise.all([transferExcises(), transferQuestions()])
+  await prisma.$transaction(async (t) => {
+    await transferUsers(t)
+    await transferSchools(t)
+    await transferExcises(t)
+    await transferQuestions(t)
 
-  await prisma.question.updateMany({
-    data: { currentVersionId: 1 },
-    where: {
-      id: {
-        in: SeedDataIntroProgramming1.questions.map((q) => q.id),
+    await t.question.updateMany({
+      data: { currentVersionId: 1 },
+      where: {
+        id: {
+          in: SeedDataIntroProgramming1.questions.map((q) => q.id),
+        },
+        schoolId: SeedDataIntroProgramming1.exercise.schoolId,
       },
-      schoolId: SeedDataIntroProgramming1.exercise.schoolId,
-    },
+    })
   })
 
   console.log(`Seeding finished.`)
@@ -31,8 +35,8 @@ main()
     await prisma.$disconnect()
   })
 
-async function transferUsers() {
-  await prisma.user.createMany({
+async function transferUsers(db: Prisma.TransactionClient) {
+  await db.user.createMany({
     skipDuplicates: true,
     data: [
       {
@@ -53,8 +57,8 @@ async function transferUsers() {
   })
 }
 
-async function transferSchools() {
-  await prisma.school.createMany({
+async function transferSchools(db: Prisma.TransactionClient) {
+  await db.school.createMany({
     skipDuplicates: true,
     data: [
       {
@@ -76,7 +80,7 @@ async function transferSchools() {
     ],
   })
 
-  await prisma.schoolOwner.createMany({
+  await db.schoolOwner.createMany({
     skipDuplicates: true,
     data: [
       {
@@ -88,8 +92,8 @@ async function transferSchools() {
   })
 }
 
-async function transferExcises() {
-  return await prisma.exercise.createMany({
+async function transferExcises(db: Prisma.TransactionClient) {
+  return await db.exercise.createMany({
     skipDuplicates: true,
     data: [
       SeedDataIntroProgramming1.exercise,
@@ -107,13 +111,8 @@ async function transferExcises() {
         description: "基本情報技術者試験の過去問を集めた問題集です。",
         isPublished: false,
       },
-      {
-        id: "moped_license_1",
-        title: "原付免許問題集1",
-        schoolId: "kaitopia_1",
-        description: "原付免許の問題集です。",
-        isPublished: false,
-      },
+
+      SeedDataMopedLicense1.exercise,
 
       {
         id: "hazardous_material_handling_category_C_1",
@@ -169,27 +168,46 @@ async function transferExcises() {
   })
 }
 
-async function transferQuestions() {
-  await prisma.question.createMany({
+async function transferQuestions(db: Prisma.TransactionClient) {
+  await db.question.createMany({
     skipDuplicates: true,
     data: SeedDataIntroProgramming1.questions,
   })
+  // await db.question.createMany({
+  //   skipDuplicates: true,
+  //   data: SeedDataMopedLicense1.questions,
+  // })
 
-  await prisma.questionVersion.createMany({
+  await db.questionVersion.createMany({
     skipDuplicates: true,
     data: SeedDataIntroProgramming1.questionVersions,
   })
+  // await db.questionVersion.createMany({
+  //   skipDuplicates: true,
+  //   data: SeedDataMopedLicense1.questionVersions,
+  // })
 
-  await prisma.questionAnswer.createMany({
+  await db.questionAnswer.createMany({
     skipDuplicates: true,
     data: SeedDataIntroProgramming1.questionAnswers,
   })
+  // await db.questionAnswer.createMany({
+  //   skipDuplicates: true,
+  //   data: SeedDataMopedLicense1.questionAnswers,
+  // })
 
-  await prisma.exerciseQuestion.createMany({
+  await db.exerciseQuestion.createMany({
     skipDuplicates: true,
     data: SeedDataIntroProgramming1.questions.map((q) => ({
       exerciseId: SeedDataIntroProgramming1.exercise.id,
       questionId: q.id,
     })),
   })
+  // await db.exerciseQuestion.createMany({
+  //   skipDuplicates: true,
+  //   data: SeedDataMopedLicense1.questions.map((q) => ({
+  //     exerciseId: SeedDataMopedLicense1.exercise.id,
+  //     questionId: q.id,
+  //   })),
+  // })
 }
