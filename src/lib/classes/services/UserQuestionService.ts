@@ -1,4 +1,5 @@
 import {
+  QuestionAnswerContent,
   QuestionAnswerForUser,
   QuestionAnswerTypeType,
   QuestionForUser,
@@ -7,6 +8,8 @@ import { ApiV1Error } from "../common/ApiV1Error"
 import { ServiceBase } from "../common/ServiceBase"
 import { UserController } from "../controller/UserController"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
+import { UserLogRepository } from "../repositories/UserLogRepository"
+import { UserQuestionRepository } from "../repositories/UserQuestionRepository"
 
 export class UserQuestionService extends ServiceBase {
   private userController: UserController
@@ -35,12 +38,12 @@ export class UserQuestionService extends ServiceBase {
     answerLogSheetId: string | null
   }> {
     if (this._exerciseId) {
-      const exerciseRepository = new ExerciseRepository(this.dbConnection)
-      const exercise = await exerciseRepository.findExerciseById(
-        this._exerciseId,
-      )
-      if (!exercise)
-        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      // const exerciseRepository = new ExerciseRepository(this.dbConnection)
+      // const exercise = await exerciseRepository.findExerciseById(
+      //   this._exerciseId,
+      // )
+      // if (!exercise)
+      //   throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
       // if (mode === "restart") {
       //   const latestAnswerLogSheet =
@@ -52,31 +55,14 @@ export class UserQuestionService extends ServiceBase {
       // }
 
       if (mode === "show") {
-        const questions = await this.dbConnection.question.findMany({
-          select: {
-            id: true,
-            title: true,
-            questionType: true,
-            answerType: true,
-            currentVersionId: true,
-            currentVersion: {
-              select: {
-                content: true,
-                hint: true,
-              },
-            },
-          },
-          where: {
-            exerciseQuestions: {
-              every: {
-                exerciseId: this._exerciseId,
-              },
-            },
-            currentVersionId: {
-              not: null,
-            },
-          },
-        })
+        const userQuestionRepository = new UserQuestionRepository(
+          this._userId,
+          this.dbConnection,
+        )
+        const questions =
+          await userQuestionRepository.findQuestionsByExerciseId(
+            this._exerciseId,
+          )
 
         return {
           questions: questions.map((q) => ({
@@ -100,7 +86,7 @@ export class UserQuestionService extends ServiceBase {
       }
 
       if (mode === "answer") {
-        const { questions, sheet } =
+        const { questions, sheet, exercise } =
           await this._insertAnswerLogSheetAndPropertyByExercise(
             this._exerciseId,
           )
@@ -158,74 +144,144 @@ export class UserQuestionService extends ServiceBase {
     throw new ApiV1Error([{ key: "NotFoundError", params: null }])
   }
 
-  // private async _getLatestAnswerLogSheetInProgress() {
-  //   return await this.dbConnection.answerLogSheet.findFirst({
-  //     where: {
-  //       userId: this._userId,
-  //       exerciseId: this._exerciseId,
-  //       isInProgress: true,
-  //     },
-  //     orderBy: {
-  //       updatedAt: "desc",
-  //     },
-  //   })
-  // }
+  /**
+   * 問題に回答する
+   * @param answerLogSheetId
+   * @param questionUserLogId
+   * @param answer
+   */
+  public async saveAnswerLog(
+    answerLogSheetId: string,
+    questionUserLogId: string,
+    answer: QuestionAnswerContent,
+  ) {
+    if (this._exerciseId) {
+      const userLogRepository = new UserLogRepository(
+        this._userId,
+        this.dbConnection,
+      )
+      const latest =
+        await userLogRepository.findLatestAnswerLogSheetByExerciseId(
+          this._exerciseId,
+        )
+      if (!latest)
+        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-  private async _insertAnswerLogSheetAndPropertyByExercise(exerciseId: string) {
+      const created = await this.saveUserAnswerLog(
+        latest.answerLogSheetId,
+        answer,
+      )
+      console.log(created)
+    }
+  }
+
+  private async saveUserAnswerLog(
+    answerLogSheetId: string,
+    answer: QuestionAnswerContent,
+  ) {
+    console.log(answerLogSheetId, answer)
+    return true
+  }
+
+  private async _checkAnswerResult(answerLogSheetId: string) {
+    console.log(answerLogSheetId)
+  }
+
+  /**
+   * 問題集用の回答ログシートを作成する
+   * @param exerciseId
+   * @param createNew trueの場合は、既出の問題集があっても新しいものを作成する
+   * @returns
+   */
+  private async _insertAnswerLogSheetAndPropertyByExercise(
+    exerciseId: string,
+    createNew: boolean = false,
+  ) {
+    const exercise = await this._getExerciseById(exerciseId)
+
+    if (createNew) {
+      const latest = await this._getLatestAnswerLogSheetInProgressByExerciseId(
+        exerciseId,
+      )
+      if (latest && latest.questionUserLogs.length > 0) {
+        // すでに存在し回答していない場合は再度作成する
+        if (
+          latest.questionUserLogs.every(
+            (q) => q.answerUserLogs.length === 0 || q.skipped,
+          )
+        ) {
+          // this.dbConnection.questionUserLog
+        }
+
+        return { sheet: latest, questions: [], exercise }
+      }
+    }
+
     // 最新の問題集に設定している情報からログシートを作成する
-    const questions = await this.dbConnection.question.findMany({
-      select: {
-        id: true,
-        title: true,
-        questionType: true,
-        answerType: true,
-        currentVersionId: true,
-        currentVersion: {
-          select: {
-            content: true,
-            hint: true,
-            questionAnswers: {
-              select: {
-                questionId: true,
-                version: true,
+    const { questions, sheet } = await this.dbConnection.$transaction(
+      async (t) => {
+        const userQuestionRepository = new UserQuestionRepository(
+          this._userId,
+          t,
+        )
+        const questions =
+          await userQuestionRepository.findQuestionsByExerciseId(exerciseId)
+        if (questions.length === 0)
+          throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-                answerId: true,
-                isCorrect: false, // ここはfalseで良い
-                selectContent: true,
-                maxLength: true,
-                minLength: true,
-              },
-            },
+        const userLogRepository = new UserLogRepository(this._userId, t)
+        const sheet =
+          await userLogRepository.createExerciseAnswerLogSheetByQuestions(
+            exerciseId,
+            questions.map((q) => ({
+              questionId: q.id,
+              version: q.currentVersionId!,
+            })),
+          )
+
+        return { questions, sheet }
+      },
+    )
+    return { questions, sheet, exercise }
+  }
+
+  /**
+   * 最新の回答中の回答ログシートを取得する
+   */
+  private async _getLatestAnswerLogSheetInProgressByExerciseId(
+    exerciseId: string,
+  ) {
+    return await this.dbConnection.answerLogSheet.findFirst({
+      select: {
+        answerLogSheetId: true,
+        questionUserLogs: {
+          select: {
+            questionId: true,
+            version: true,
+            orderIndex: true,
+            skipped: true,
+            score: true,
+            answerUserLogs: true,
           },
         },
       },
       where: {
-        exerciseQuestions: { every: { exerciseId } },
-        currentVersionId: { not: null },
-      },
-    })
-    if (questions.length === 0)
-      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-
-    // ログシートを作成(そのときの出題履歴も記録する)
-    const sheet = await this.dbConnection.answerLogSheet.create({
-      data: {
         userId: this._userId,
         exerciseId: exerciseId,
         isInProgress: true,
-        questionUserLogs: {
-          createMany: {
-            skipDuplicates: true,
-            data: questions.map((q, i) => ({
-              questionId: q.id,
-              version: q.currentVersionId!,
-              orderIndex: i + 1,
-            })),
-          },
-        },
+      },
+      orderBy: {
+        updatedAt: "desc",
       },
     })
-    return { questions, sheet }
+  }
+
+  private async _getExerciseById(exerciseId: string) {
+    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+    const exercise = await exerciseRepository.findExerciseById(exerciseId)
+    if (!exercise)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+    return exercise
   }
 
   private get _userId() {

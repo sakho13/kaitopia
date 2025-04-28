@@ -13,7 +13,10 @@ export class UserQuestionRepository extends RepositoryBase {
    * @param exerciseId
    * @returns
    */
-  public async findQuestionsByExerciseId(exerciseId: string) {
+  public async findQuestionsByExerciseId(
+    exerciseId: string,
+    ignoreAnswer: boolean = true,
+  ) {
     return await this.dbConnection.question.findMany({
       select: {
         id: true,
@@ -25,18 +28,20 @@ export class UserQuestionRepository extends RepositoryBase {
           select: {
             content: true,
             hint: true,
-            questionAnswers: {
-              select: {
-                questionId: true,
-                version: true,
+            questionAnswers: !ignoreAnswer
+              ? {
+                  select: {
+                    questionId: true,
+                    version: true,
 
-                answerId: true,
-                isCorrect: false, // ここはfalseで良い
-                selectContent: true,
-                maxLength: true,
-                minLength: true,
-              },
-            },
+                    answerId: true,
+                    isCorrect: false, // ここはfalseで良い
+                    selectContent: true,
+                    maxLength: true,
+                    minLength: true,
+                  },
+                }
+              : undefined,
           },
         },
       },
