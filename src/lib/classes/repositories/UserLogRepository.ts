@@ -22,6 +22,17 @@ export class UserLogRepository extends RepositoryBase {
     }[],
   ) {
     return await this.dbConnection.answerLogSheet.create({
+      select: {
+        answerLogSheetId: true,
+        questionUserLogs: {
+          select: {
+            questionUserLogId: true,
+            questionId: true,
+            version: true,
+            orderIndex: true,
+          },
+        },
+      },
       data: {
         userId: this.userId,
         exerciseId: exerciseId,
@@ -77,12 +88,17 @@ export class UserLogRepository extends RepositoryBase {
     })
   }
 
+  /**
+   * 問題集に紐づく最新の回答中の回答ログシートを取得する
+   */
   public async findLatestAnswerLogSheetByExerciseId(exerciseId: string) {
     return await this.dbConnection.answerLogSheet.findFirst({
       select: {
         answerLogSheetId: true,
+        exerciseId: true,
         questionUserLogs: {
           select: {
+            questionUserLogId: true,
             questionId: true,
             version: true,
             orderIndex: true,

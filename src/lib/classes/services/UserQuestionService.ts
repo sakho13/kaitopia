@@ -38,22 +38,6 @@ export class UserQuestionService extends ServiceBase {
     answerLogSheetId: string | null
   }> {
     if (this._exerciseId) {
-      // const exerciseRepository = new ExerciseRepository(this.dbConnection)
-      // const exercise = await exerciseRepository.findExerciseById(
-      //   this._exerciseId,
-      // )
-      // if (!exercise)
-      //   throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-
-      // if (mode === "restart") {
-      //   const latestAnswerLogSheet =
-      //     await this._getLatestAnswerLogSheetInProgress()
-      //   if (!latestAnswerLogSheet)
-      //     throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-
-      //   // 既出の問題でバージョン更新
-      // }
-
       if (mode === "show") {
         const userQuestionRepository = new UserQuestionRepository(
           this._userId,
@@ -66,8 +50,7 @@ export class UserQuestionService extends ServiceBase {
 
         return {
           questions: questions.map((q) => ({
-            questionId: q.id,
-            version: q.currentVersionId!,
+            questionUserLogId: q.id,
 
             title: q.title,
             questionType: q.questionType,
@@ -85,13 +68,17 @@ export class UserQuestionService extends ServiceBase {
         }
       }
 
-      if (mode === "answer") {
+      if (mode === "answer" || mode === "restart") {
         const { questions, sheet, exercise } =
           await this._insertAnswerLogSheetAndPropertyByExercise(
             this._exerciseId,
           )
         return {
           questions: questions.map((q) => {
+            const currentQuestionVersion = q.currentVersion
+            if (!currentQuestionVersion)
+              throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
             const answerType = q.answerType
             const properties: QuestionAnswerForUser<QuestionAnswerTypeType> = [
               "SELECT",
@@ -99,7 +86,7 @@ export class UserQuestionService extends ServiceBase {
             ].includes(answerType)
               ? {
                   selection:
-                    q.currentVersion?.questionAnswers.map((a) => ({
+                    currentQuestionVersion.questionAnswers.map((a) => ({
                       answerId: a.answerId!,
                       selectContent: a.selectContent!,
                     })) ?? [],
@@ -119,10 +106,12 @@ export class UserQuestionService extends ServiceBase {
                 properties.property.minLength = answer.minLength ?? 0
               }
             }
+            const qLog = sheet.questionUserLogs.find(
+              (l) => l.questionId === q.id && l.version === q.currentVersionId,
+            )
 
             return {
-              questionId: q.id,
-              version: q.currentVersionId!,
+              questionUserLogId: qLog ? qLog.questionUserLogId : q.id,
 
               title: q.title,
               questionType: q.questionType,
@@ -199,10 +188,32 @@ export class UserQuestionService extends ServiceBase {
   ) {
     const exercise = await this._getExerciseById(exerciseId)
 
-    if (createNew) {
-      const latest = await this._getLatestAnswerLogSheetInProgressByExerciseId(
-        exerciseId,
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+    const latest = await userLogRepository.findLatestAnswerLogSheetByExerciseId(
+      exerciseId,
+    )
+
+    // 既出ならそれを返す
+    if (latest && !createNew && latest.exerciseId === exerciseId) {
+      const userQuestionRepository = new UserQuestionRepository(
+        this._userId,
+        this.dbConnection,
       )
+      const questions = await userQuestionRepository.findQuestionsByExerciseId(
+        exerciseId,
+        false,
+      )
+      if (questions.length === 0)
+        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+      return { questions, sheet: latest, exercise }
+    }
+
+    // 使用していないため無視
+    if (createNew) {
       if (latest && latest.questionUserLogs.length > 0) {
         // すでに存在し回答していない場合は再度作成する
         if (
@@ -225,7 +236,10 @@ export class UserQuestionService extends ServiceBase {
           t,
         )
         const questions =
-          await userQuestionRepository.findQuestionsByExerciseId(exerciseId)
+          await userQuestionRepository.findQuestionsByExerciseId(
+            exerciseId,
+            false,
+          )
         if (questions.length === 0)
           throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
