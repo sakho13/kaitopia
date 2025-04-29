@@ -6,8 +6,10 @@
  * ユーザが回答するときの問題の型
  */
 export type QuestionForUser = {
-  questionId: string
-  version: number
+  /**
+   * 出題ログID 単純に閲覧する場合 questionId
+   */
+  questionUserLogId: string
 
   title: string
   questionType: QuestionTypeType

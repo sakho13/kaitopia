@@ -151,9 +151,8 @@ export type ApiV1InTypeMap = {
   }
   PatchUserExerciseQuestion: {
     answerLogSheetId: string
+    questionUserLogId: string
     exerciseId: string
-    questionId: string
-    version: number
     answer: QuestionAnswerContent
   }
 }
@@ -188,6 +187,13 @@ export type ApiV1OutTypeMap = {
       SchoolBase &
       ReplacedDateToString<SchoolBaseDate>)[]
   }
+  /**
+   * GET /api/user/v1/result/log?count=10&page=1
+   */
+  GetUserResultLog: {
+    resultLogs: { answerLogSheetId: string }[]
+  }
+
   /**
    * GET /api/manage/v1/own-schools
    */
