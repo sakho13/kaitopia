@@ -21,13 +21,11 @@ export class AnswerLogRepository extends RepositoryBase {
   public async findAnswerLogSheetById(
     userId: string,
     answerLogSheetId: string,
-    isInProgress: boolean = true,
   ) {
     return await this.dbConnection.answerLogSheet.findFirst({
       where: {
         userId,
         answerLogSheetId,
-        isInProgress,
       },
     })
   }
