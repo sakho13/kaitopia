@@ -1,13 +1,14 @@
 "use client"
 
 import { RoundedFrame } from "@/components/atoms/RoundedFrame"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
 import { useGetUserInfo } from "@/hooks/useApiV1"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { useEffect, useState } from "react"
 
 export default function Page() {
-  const { dataTooGetUserInfo } = useGetUserInfo()
+  const { dataTooGetUserInfo, isLoadingToGetUserInfo } = useGetUserInfo()
   const { config } = useUserConfigStore.getState()
 
   // 仮のユーザーデータ（将来はAPIで取得）
@@ -29,6 +30,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!dataTooGetUserInfo?.success) return
+
+    setName(dataTooGetUserInfo.data.user.name)
 
     setUser({
       name: dataTooGetUserInfo.data.user.name,
@@ -60,7 +63,9 @@ export default function Page() {
         {/* 名前 */}
         <div className='mb-4'>
           <label className='block text-sm font-medium mb-1'>名前</label>
-          {editing ? (
+          {isLoadingToGetUserInfo ? (
+            <Skeleton className='w-full h-[50px]' />
+          ) : editing ? (
             <input
               type='text'
               className='w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary'
