@@ -357,3 +357,54 @@ export function useGetUserExerciseQuestions(
     refetchUserExerciseQuestions: mutate,
   } as const
 }
+
+/**
+ * POST: `/api/user/v1/exercise/question`
+ */
+export function usePostUserExerciseQuestion() {
+  const { idToken } = useAuth()
+
+  const requestPostExerciseQuestion = async (
+    exerciseId: string,
+    input: ApiV1InTypeMap["PostUserExerciseQuestion"],
+  ) => {
+    return await requestHttp(
+      "PostUserExerciseQuestion",
+      "PostUserExerciseQuestion",
+      `/api/user/v1/exercise/question?exerciseId=${exerciseId}&answerLogSheetId=${input.answerLogSheetId}`,
+      idToken ?? "",
+      input,
+      "POST",
+    )
+  }
+
+  return {
+    requestPostExerciseQuestion,
+  }
+}
+
+/**
+ * PATCH: `/api/user/v1/exercise/question`
+ */
+export function usePatchUserExerciseQuestion() {
+  const { idToken } = useAuth()
+
+  const requestPatchExerciseQuestion = async (
+    exerciseId: string,
+    answerLogSheetId: string,
+    input: ApiV1InTypeMap["PatchUserExerciseQuestion"],
+  ) => {
+    return await requestHttp(
+      "PatchUserExerciseQuestion",
+      "PatchUserExerciseQuestion",
+      `/api/user/v1/exercise/question?exerciseId=${exerciseId}&answerLogSheetId=${answerLogSheetId}`,
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchExerciseQuestion,
+  }
+}

@@ -144,6 +144,7 @@ export class UserQuestionService extends ServiceBase {
     questionUserLogId: string,
     answer: QuestionAnswerContent,
   ) {
+    // 問題集のトランザクション
     if (this._exerciseId) {
       const userLogRepository = new UserLogRepository(
         this._userId,

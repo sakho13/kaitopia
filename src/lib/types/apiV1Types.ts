@@ -149,6 +149,9 @@ export type ApiV1InTypeMap = {
     answerLogSheetId: string
     exerciseId: string
   }
+  /**
+   * PATCH /api/user/v1/exercise/question
+   */
   PatchUserExerciseQuestion: {
     answerLogSheetId: string
     questionUserLogId: string
