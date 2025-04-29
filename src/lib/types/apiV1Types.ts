@@ -295,8 +295,9 @@ export type ApiV1OutTypeMap = {
   PatchUserExerciseQuestion: {
     /**
      * * `answer`: 採点に必要な情報が不足している
+     * * `total-result`: すべて回答済み
      */
-    fn: "answer" | null
+    fn: "answer" | "total-result" | null
     answerLogSheetId: string
     exerciseId: string
     /**

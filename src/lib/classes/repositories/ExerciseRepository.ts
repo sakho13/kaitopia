@@ -157,27 +157,4 @@ export class ExerciseRepository extends RepositoryBase {
       },
     })
   }
-
-  /**
-   * 進行中の問題集を取得/登録する
-   */
-  public async getLogSheetInProgress(userId: string, exerciseId: string) {
-    // return await this.dbConnection.$transaction(async (tx) => {
-    //   const logSheetInProgress = await tx.answerLogSheet.findFirst({
-    //     where: {
-    //       isInProgress: true,
-    //       userId,
-    //       exerciseId,
-    //     },
-    //   })
-    //   if (logSheetInProgress) return logSheetInProgress
-    //   return await tx.answerLogSheet.create({
-    //     data: {
-    //       userId,
-    //       exerciseId,
-    //       isInProgress: true,
-    //     },
-    //   })
-    // })
-  }
 }

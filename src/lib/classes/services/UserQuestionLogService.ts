@@ -36,6 +36,15 @@ export class UserQuestionLogService extends ServiceBase {
     return answerLogSheets
   }
 
+  /**
+   * 1週間の回答履歴をダッシュボード用で取得する
+   *
+   * - 日曜日開始で各曜日の問題の回答数
+   */
+  // public async getWeeklyAnswerLog() {
+  //   return {}
+  // }
+
   private get _userId() {
     if (this.userController.userId === null)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])

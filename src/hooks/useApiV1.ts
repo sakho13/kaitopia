@@ -390,14 +390,12 @@ export function usePatchUserExerciseQuestion() {
   const { idToken } = useAuth()
 
   const requestPatchExerciseQuestion = async (
-    exerciseId: string,
-    answerLogSheetId: string,
     input: ApiV1InTypeMap["PatchUserExerciseQuestion"],
   ) => {
     return await requestHttp(
       "PatchUserExerciseQuestion",
       "PatchUserExerciseQuestion",
-      `/api/user/v1/exercise/question?exerciseId=${exerciseId}&answerLogSheetId=${answerLogSheetId}`,
+      `/api/user/v1/exercise/question`,
       idToken ?? "",
       input,
       "PATCH",

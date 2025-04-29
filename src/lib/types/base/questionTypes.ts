@@ -123,22 +123,26 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
   properties: QuestionAnswerProperty[T]
 }
 
-export type QuestionAnswerContent =
-  | {
-      type: "SKIP"
-    }
-  | {
-      type: "SELECT"
-      answerId: string
-    }
-  | {
-      type: "MULTI_SELECT"
-      answerIds: string[]
-    }
-  | {
-      type: "TEXT"
-      content: string
-    }
+export type QuestionUserAnswer = {
+  SKIP: object
+  SELECT: {
+    answerId: string
+  }
+  MULTI_SELECT: {
+    answerIds: string[]
+  }
+  TEXT: {
+    content: string
+  }
+}
+
+export type QuestionUserAnswerType<K extends keyof QuestionUserAnswer> = {
+  type: K
+} & QuestionUserAnswer[K]
+
+export type QuestionAnswerContent = QuestionUserAnswerType<
+  keyof QuestionUserAnswer
+>
 
 export const QuestionType = {
   TEXT: "TEXT",
