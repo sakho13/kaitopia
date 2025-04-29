@@ -67,6 +67,10 @@ export class UserLogRepository extends RepositoryBase {
       select: {
         answerLogSheetId: true,
         isInProgress: true,
+        totalCorrectCount: true,
+        totalIncorrectCount: true,
+        totalUnansweredCount: true,
+        _count: { select: { questionUserLogs: true } },
 
         exerciseId: true,
         exercise: {
@@ -89,6 +93,20 @@ export class UserLogRepository extends RepositoryBase {
   }
 
   /**
+   * `findAllAnswerLogSheets()` 検索に合致する総数
+   * @param includeInProgress
+   * @returns
+   */
+  public async countAllAnswerLogSheets(includeInProgress: boolean = false) {
+    return await this.dbConnection.answerLogSheet.count({
+      where: {
+        userId: this.userId,
+        isInProgress: includeInProgress ? true : undefined,
+      },
+    })
+  }
+
+  /**
    * 問題集に紐づく最新の回答中の回答ログシートを取得する
    */
   public async findLatestAnswerLogSheetByExerciseId(exerciseId: string) {
@@ -105,6 +123,11 @@ export class UserLogRepository extends RepositoryBase {
             skipped: true,
             score: true,
             answerUserLogs: true,
+            questionVersion: {
+              select: {
+                question: true,
+              },
+            },
           },
         },
       },
@@ -115,6 +138,28 @@ export class UserLogRepository extends RepositoryBase {
       },
       orderBy: {
         updatedAt: "desc",
+      },
+    })
+  }
+
+  // 回答に関連するクエリ
+
+  /**
+   * 対象の問題をスキップする
+   */
+  public async saveSkipQuestionLog(
+    answerLogSheetId: string,
+    questionUserLogId: string,
+    userId: string,
+  ) {
+    return await this.dbConnection.questionUserLog.update({
+      data: {
+        skipped: true,
+      },
+      where: {
+        answerLogSheetId,
+        questionUserLogId,
+        userId,
       },
     })
   }

@@ -20,7 +20,11 @@ export class UserQuestionLogService extends ServiceBase {
    * @param page
    * @returns
    */
-  public async getAnswerLogSheets(limit: number = 10, page?: number) {
+  public async getAnswerLogSheets(
+    ignoreInProgress: boolean = false,
+    limit: number = 10,
+    page?: number,
+  ) {
     const offset = page ? (page - 1) * limit : undefined
     const userLogRepository = new UserLogRepository(
       this._userId,
@@ -28,12 +32,16 @@ export class UserQuestionLogService extends ServiceBase {
     )
 
     const answerLogSheets = await userLogRepository.findAllAnswerLogSheets(
-      true,
+      !ignoreInProgress,
       limit,
       offset,
     )
+    const totalCount = await userLogRepository.countAllAnswerLogSheets(
+      !ignoreInProgress,
+    )
+    const nextPage = answerLogSheets.length < limit ? null : page ? page + 1 : 2
 
-    return answerLogSheets
+    return { answerLogSheets, totalCount, nextPage }
   }
 
   /**

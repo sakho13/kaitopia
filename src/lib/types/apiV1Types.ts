@@ -1,5 +1,8 @@
 import { ApiV1Error } from "../classes/common/ApiV1Error"
-import { AnswerLogSheetBase } from "./base/answerLogSheetTypes"
+import {
+  AnswerLogSheetBase,
+  AnswerLogSheetBaseDate,
+} from "./base/answerLogSheetTypes"
 import {
   ExerciseBase,
   ExerciseBaseDate,
@@ -292,6 +295,9 @@ export type ApiV1OutTypeMap = {
     exerciseId: string
     result: AnswerLogSheetBase
   }
+  /**
+   * PATCH /api/user/v1/exercise/question
+   */
   PatchUserExerciseQuestion: {
     /**
      * * `answer`: 採点に必要な情報が不足している
@@ -304,6 +310,19 @@ export type ApiV1OutTypeMap = {
      * 一括採点の場合は `null` を返す
      */
     result: AnswerLogSheetBase | null
+  }
+  /**
+   * GET /api/user/v1/exercise/results?ignoreInProgress=xxx?count=xxx&page=xxx
+   */
+  GetUserExerciseResults: {
+    answerLogSheets: ({
+      answerLogSheetId: string
+      exerciseId: string
+      totalQuestionCount: number
+    } & AnswerLogSheetBase &
+      ReplacedDateToString<AnswerLogSheetBaseDate>)[]
+    nextPage: number | null
+    totalCount: number
   }
 }
 
