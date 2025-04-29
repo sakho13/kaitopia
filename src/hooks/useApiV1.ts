@@ -303,11 +303,108 @@ export function usePostUserLogin() {
   }
 }
 
-// export function useGetExercise(exerciseId: string) {
-//   const { idToken } = useAuth()
-//   const [loading, setLoading] = useState(true)
+/**
+ * GET: `/api/user/v1/exercise?exerciseId=xxxxx`
+ */
+export function useGetUserExercise(exerciseId: string) {
+  const { idToken } = useAuth()
 
-//   return {
-//     isLoadingToGetExercise: loading,
-//   }
-// }
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/exercise", idToken, exerciseId],
+    async ([url, token, eid]) =>
+      token && eid
+        ? fetcher(
+            "GetUserExerciseInfo",
+            "GET",
+            `${url}?exerciseId=${eid}`,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetUserExercise: data,
+    isLoadingToGetUserExercise: isLoading,
+    refetchUserExercise: mutate,
+  } as const
+}
+
+/**
+ * GET: `/api/user/v1/exercise/question?exerciseId=xxxxx&mode=xxxxx`
+ */
+export function useGetUserExerciseQuestions(
+  exerciseId: string,
+  mode: "answer" | "show",
+) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/exercise/question", idToken, exerciseId, mode],
+    async ([url, token, eid, mode]) =>
+      token && eid
+        ? fetcher(
+            "GetUserExerciseQuestion",
+            "GET",
+            `${url}?exerciseId=${eid}&mode=${mode}`,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetUserExerciseQuestions: data,
+    isLoadingToGetUserExerciseQuestions: isLoading,
+    refetchUserExerciseQuestions: mutate,
+  } as const
+}
+
+/**
+ * POST: `/api/user/v1/exercise/question`
+ */
+export function usePostUserExerciseQuestion() {
+  const { idToken } = useAuth()
+
+  const requestPostExerciseQuestion = async (
+    exerciseId: string,
+    input: ApiV1InTypeMap["PostUserExerciseQuestion"],
+  ) => {
+    return await requestHttp(
+      "PostUserExerciseQuestion",
+      "PostUserExerciseQuestion",
+      `/api/user/v1/exercise/question?exerciseId=${exerciseId}&answerLogSheetId=${input.answerLogSheetId}`,
+      idToken ?? "",
+      input,
+      "POST",
+    )
+  }
+
+  return {
+    requestPostExerciseQuestion,
+  }
+}
+
+/**
+ * PATCH: `/api/user/v1/exercise/question`
+ */
+export function usePatchUserExerciseQuestion() {
+  const { idToken } = useAuth()
+
+  const requestPatchExerciseQuestion = async (
+    exerciseId: string,
+    answerLogSheetId: string,
+    input: ApiV1InTypeMap["PatchUserExerciseQuestion"],
+  ) => {
+    return await requestHttp(
+      "PatchUserExerciseQuestion",
+      "PatchUserExerciseQuestion",
+      `/api/user/v1/exercise/question?exerciseId=${exerciseId}&answerLogSheetId=${answerLogSheetId}`,
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchExerciseQuestion,
+  }
+}

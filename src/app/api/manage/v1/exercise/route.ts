@@ -39,6 +39,9 @@ export async function GET(request: NextRequest) {
         questionId: q.question.id,
         title: q.question.title,
         questionType: q.question.questionType,
+        answerType: q.question.answerType,
+        currentVersion: q.question.currentVersionId,
+        draftVersion: q.question.draftVersionId,
       })),
     }
   })

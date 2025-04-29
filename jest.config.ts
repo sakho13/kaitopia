@@ -13,6 +13,7 @@ const config: Config = {
     "@/(.*)$": "<rootDir>/src/$1",
   },
   testMatch: ["**/tests/**/*.test.[jt]s?(x)"],
+  testTimeout: 30000,
 }
 
 export default createJestConfig(config)

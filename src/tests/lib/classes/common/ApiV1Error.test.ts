@@ -12,6 +12,7 @@ describe("lib/classes/common/ApiV1Error", () => {
     expect(error.getStatus()).toBe(401)
     expect(error.getError()).toEqual([
       {
+        code: "AuthenticationError",
         message: "認証に失敗しました。再ログインしてください。",
       },
     ])

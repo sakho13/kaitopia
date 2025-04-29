@@ -21,7 +21,10 @@ export class QuestionRepository extends RepositoryBase {
     })
   }
 
-  public async findQuestionsByExerciseId(exerciseId: string) {
+  public async findQuestionsByExerciseId(
+    exerciseId: string,
+    onlyPublished: boolean = false,
+  ) {
     return await this.dbConnection.exerciseQuestion.findMany({
       select: {
         question: {
@@ -30,13 +33,58 @@ export class QuestionRepository extends RepositoryBase {
             title: true,
             questionType: true,
             answerType: true,
+            isPublished: true,
             draftVersion: true,
             currentVersion: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
           },
         },
       },
       where: {
-        exerciseId: exerciseId,
+        AND: [
+          { exerciseId: exerciseId },
+          { exercise: { deletedAt: null } },
+          {
+            question: {
+              AND: [{ deletedAt: null }],
+            },
+          },
+        ],
+      },
+    })
+  }
+
+  public async findQuestionAnswersByExerciseId(exerciseId: string) {
+    return await this.dbConnection.exerciseQuestion.findMany({
+      select: {
+        question: {
+          select: {
+            currentVersionId: true,
+            id: true,
+            title: true,
+            questionType: true,
+            currentVersion: {
+              select: {
+                questionAnswers: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        exerciseId,
+      },
+    })
+  }
+
+  public async findQuestionVersionByQuestionIds(questionIds: string[]) {
+    return await this.dbConnection.questionVersion.findMany({
+      where: {
+        questionId: {
+          in: questionIds,
+        },
       },
     })
   }

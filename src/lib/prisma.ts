@@ -6,7 +6,7 @@ export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     log:
-      process.env.NODE_ENV === "production"
+      process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
         ? ["error"]
         : ["query", "info", "warn", "error"],
   })

@@ -26,7 +26,7 @@ describe("API /api/manage/v1/exercise", () => {
         const result = await TestUtility.runApi(
           GET,
           "GET",
-          "/api/manage/v1/exercise?exerciseId=it_passport_1",
+          "/api/manage/v1/exercise?exerciseId=intro_programming_1",
           {
             Authorization: `Bearer ${token}`,
           },
@@ -39,10 +39,12 @@ describe("API /api/manage/v1/exercise", () => {
           success: true,
           data: expect.objectContaining({
             exercise: expect.objectContaining({
-              exerciseId: "it_passport_1",
+              exerciseId: "intro_programming_1",
             }),
           }),
         })
+        expect(json.data.questions).toBeDefined()
+        expect(json.data.questions.length).toBeGreaterThan(0)
       })
 
       test("USERユーザ グローバルスクールに所属する問題集へのアクセス", async () => {
@@ -66,6 +68,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -138,6 +141,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -171,6 +175,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -259,6 +264,7 @@ describe("API /api/manage/v1/exercise", () => {
         success: false,
         errors: expect.arrayContaining([
           {
+            code: "RoleTypeError",
             message: "アクセス権限がありません",
           },
         ]),
@@ -267,6 +273,35 @@ describe("API /api/manage/v1/exercise", () => {
   })
 
   describe("バリデーション", () => {
+    describe("GET", () => {
+      test("exerciseIdが指定されていない", async () => {
+        const token = await TestUtility.getTokenByEmailAndLogin(
+          AdminUserEmail,
+          AdminUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          GET,
+          "GET",
+          "/api/manage/v1/exercise",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+        )
+
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(400)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            {
+              code: "RequiredValueError",
+              message: "問題集IDは必須です",
+            },
+          ]),
+        })
+      })
+    })
     describe("POST", () => {
       test("必須項目が不足している キーが存在しない", async () => {
         const token = await TestUtility.getTokenByEmailAndLogin(
@@ -293,6 +328,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集のプロパティは必須です",
             },
           ]),
@@ -327,6 +363,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "問題集タイトルの形式が不正です",
             },
           ]),
@@ -361,6 +398,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "問題集タイトルの形式が不正です",
             },
           ]),
@@ -395,6 +433,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "問題集説明の形式が不正です",
             },
           ]),
@@ -428,6 +467,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集IDは必須です",
             },
           ]),
@@ -460,6 +500,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "NotFoundError",
               message:
                 "リソースが見つかりません。再読み込みしても解決しない場合は、お問い合わせください。",
             },
@@ -515,6 +556,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "InvalidFormatError",
               message: "公開状態の形式が不正です",
             },
           ]),
@@ -540,6 +582,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RoleTypeError",
               message: "アクセス権限がありません",
             },
           ]),
@@ -569,6 +612,7 @@ describe("API /api/manage/v1/exercise", () => {
           success: false,
           errors: expect.arrayContaining([
             {
+              code: "RequiredValueError",
               message: "問題集IDは必須です",
             },
           ]),

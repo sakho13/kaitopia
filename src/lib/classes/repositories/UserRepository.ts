@@ -27,7 +27,7 @@ export class UserRepository extends RepositoryBase {
   }
 
   public async findUserByFirebaseUid(firebaseUid: string) {
-    return await this.dbConnection.user.findFirst({
+    return await this.dbConnection.user.findUnique({
       select: {
         id: true,
         name: true,

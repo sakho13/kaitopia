@@ -73,6 +73,11 @@ export class ExerciseService extends ServiceBase {
     }
   }
 
+  /**
+   * 管理用問題集の単品取得
+   *
+   * @category manage
+   */
   public async getExerciseById(exerciseId: string) {
     const exerciseRepository = new ExerciseRepository(this.dbConnection)
 
@@ -110,6 +115,12 @@ export class ExerciseService extends ServiceBase {
     })
   }
 
+  /**
+   * 問題集の設定を更新する
+   * @param exerciseId
+   * @param property
+   * @returns
+   */
   public async updateExercise(
     exerciseId: string,
     property: Partial<ExerciseBase & { isPublished: boolean }>,

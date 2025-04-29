@@ -1,3 +1,4 @@
+import { POST } from "@/app/api/user/v1/login/route"
 import {
   handleGuestLoginByFirebase,
   handleLoginByFirebase,
@@ -40,5 +41,11 @@ export class TestUtility {
       body: body ? JSON.stringify(body) : undefined,
     })
     return await api(request)
+  }
+
+  public static async signUpByToken(token: string) {
+    return await TestUtility.runApi(POST, "POST", "/api/user/v1/user/login", {
+      Authorization: `Bearer ${token}`,
+    })
   }
 }
