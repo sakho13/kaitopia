@@ -48,8 +48,8 @@ export function UserRecommendExerciseSection() {
                         )}
                         onClick={() =>
                           router.push(
-                            `/v1/user/exercise?eid=${encodeBase64(
-                              exercise.id,
+                            `/v1/user/exercise?eid=${encodeURIComponent(
+                              encodeBase64(exercise.id),
                             )}`,
                           )
                         }
