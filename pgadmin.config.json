@@ -3,12 +3,10 @@
     "1": {
       "Name": "PostgreSQL",
       "Group": "Servers",
-      "Host": "localhost",
+      "Host": "db",
       "Port": 5432,
       "MaintenanceDB": "postgres",
-      "Username": "kaitopia_user",
-      "Password": "devkaitopia",
-      "SSLMode": "prefer"
+      "Username": "kaitopia_user"
     }
   }
 }
