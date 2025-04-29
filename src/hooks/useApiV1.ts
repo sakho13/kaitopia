@@ -328,3 +328,32 @@ export function useGetUserExercise(exerciseId: string) {
     refetchUserExercise: mutate,
   } as const
 }
+
+/**
+ * GET: `/api/user/v1/exercise/question?exerciseId=xxxxx&mode=xxxxx`
+ */
+export function useGetUserExerciseQuestions(
+  exerciseId: string,
+  mode: "answer" | "show",
+) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/exercise/question", idToken, exerciseId, mode],
+    async ([url, token, eid, mode]) =>
+      token && eid
+        ? fetcher(
+            "GetUserExerciseQuestion",
+            "GET",
+            `${url}?exerciseId=${eid}&mode=${mode}`,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetUserExerciseQuestions: data,
+    isLoadingToGetUserExerciseQuestions: isLoading,
+    refetchUserExerciseQuestions: mutate,
+  } as const
+}
