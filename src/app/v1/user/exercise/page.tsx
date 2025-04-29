@@ -3,13 +3,13 @@
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { InfoArea } from "@/components/atoms/InfoArea"
 import { SectionTitle } from "@/components/atoms/SectionTitle"
+import { BackButton } from "@/components/molecules/BackButton"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
 import { useGetRecommendExercises, useGetUserExercise } from "@/hooks/useApiV1"
 import { decodeBase64 } from "@/lib/functions/decodeBase64"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
 import { DialogTitle } from "@radix-ui/react-dialog"
-import { Undo } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 
@@ -17,7 +17,6 @@ export default function Page() {
   const {
     dataToGetUserExercise,
     dataTooGetRecommendExercises,
-    onBack,
     startExercise,
     openExerciseInfoDialog,
     onOpenExerciseInfoDialog,
@@ -27,10 +26,7 @@ export default function Page() {
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='mb-6'>
-        <ButtonBase colorMode='ghost' className='px-4' onClick={onBack}>
-          <Undo />
-          戻る
-        </ButtonBase>
+        <BackButton />
       </div>
 
       <div>
@@ -123,10 +119,6 @@ function usePage() {
     }
   }, [searchParam])
 
-  const onBack = () => {
-    router.back()
-  }
-
   const startExercise = () => {
     router.push(
       `/v1/user/exercise/venue?eid=${encodeURIComponent(
@@ -156,7 +148,6 @@ function usePage() {
   return {
     dataToGetUserExercise,
     dataTooGetRecommendExercises,
-    onBack,
     startExercise,
     openExerciseInfoDialog,
     onOpenExerciseInfoDialog,
