@@ -87,8 +87,7 @@ describe("API /api/user/v1/exercise", () => {
           }),
           questions: expect.arrayContaining([
             expect.objectContaining({
-              questionId: expect.any(String),
-              version: expect.any(Number),
+              questionUserLogId: expect.any(String),
               title: expect.any(String),
             }),
           ]),
@@ -118,8 +117,7 @@ describe("API /api/user/v1/exercise", () => {
           }),
           questions: expect.arrayContaining([
             expect.objectContaining({
-              questionId: expect.any(String),
-              version: expect.any(Number),
+              questionUserLogId: expect.any(String),
               title: expect.any(String),
             }),
           ]),
@@ -159,8 +157,7 @@ describe("API /api/user/v1/exercise", () => {
           }),
           questions: expect.arrayContaining([
             expect.objectContaining({
-              questionId: expect.any(String),
-              version: expect.any(Number),
+              questionUserLogId: expect.any(String),
               title: expect.any(String),
             }),
           ]),
@@ -194,8 +191,7 @@ describe("API /api/user/v1/exercise", () => {
           }),
           questions: expect.arrayContaining([
             expect.objectContaining({
-              questionId: expect.any(String),
-              version: expect.any(Number),
+              questionUserLogId: expect.any(String),
               title: expect.any(String),
             }),
           ]),

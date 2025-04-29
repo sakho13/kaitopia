@@ -17,7 +17,7 @@
     "prisma:seed": "npx prisma db seed",
     "prisma:init": "npm run prisma:generate && npm run prisma:deploy && npm run prisma:seed",
     "prisma:studio": "npx prisma studio",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:cov": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e-report": "playwright show-report"
