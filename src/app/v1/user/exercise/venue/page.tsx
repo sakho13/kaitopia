@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ExerciseManager } from "@/components/organisms/ExerciseManager"
 import { decodeBase64 } from "@/lib/functions/decodeBase64"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ExerciseAnswerPage() {
   const router = useRouter()
@@ -23,7 +24,11 @@ export default function ExerciseAnswerPage() {
 
   return (
     <div className='min-h-screen bg-kaitopia-background text-kaitopia-text p-8 font-sans'>
-      <ExerciseManager exerciseId={exerciseId || ""} />
+      {exerciseId === null || exerciseId === "" ? (
+        <Skeleton className='w-full h-[400px]' />
+      ) : (
+        <ExerciseManager exerciseId={exerciseId} />
+      )}
     </div>
   )
 }
