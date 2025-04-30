@@ -7,7 +7,7 @@ export abstract class ControllerBase {
     this.dbConnection = dbConnection
   }
 
-  public set resetDbConnection(dbConnection: PrismaClient) {
+  public resetDbConnection(dbConnection: PrismaClient) {
     this.dbConnection = dbConnection
   }
 }

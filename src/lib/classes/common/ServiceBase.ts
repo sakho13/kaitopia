@@ -7,7 +7,7 @@ export abstract class ServiceBase {
     this.dbConnection = connection
   }
 
-  protected set resetDbConnection(dbConnection: PrismaClient) {
+  public resetDbConnection(dbConnection: PrismaClient) {
     this.dbConnection = dbConnection
   }
 
