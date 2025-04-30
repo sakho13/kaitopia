@@ -299,6 +299,60 @@ export class UserQuestionService extends ServiceBase {
     return exercise
   }
 
+  private _checkAnswerFormat(
+    questionType: QuestionTypeType,
+    answerType: QuestionAnswerTypeType,
+    answer: QuestionAnswerContent,
+    props: Partial<{
+      minLength: number
+      maxLength: number
+    }>,
+  ) {
+    // 文章問題
+    if (questionType === "TEXT") {
+      try {
+        if (answerType === "SELECT") {
+          if (answer.type !== "SELECT") throw new Error("InvalidFormatError")
+          if (!("answerId" in answer)) throw new Error("InvalidFormatError")
+          if (typeof answer.answerId !== "string")
+            throw new Error("InvalidFormatError")
+          if (answer.answerId.length < 1) throw new Error("InvalidFormatError")
+        }
+
+        if (answerType === "MULTI_SELECT") {
+          if (answer.type !== "MULTI_SELECT")
+            throw new Error("InvalidFormatError")
+          if (!("answerId" in answer)) throw new Error("InvalidFormatError")
+
+          if (!Array.isArray(answer.answerId))
+            throw new Error("InvalidFormatError")
+          if (answer.answerId.length < 1) throw new Error("InvalidFormatError")
+          if (
+            answer.answerId.some((a) => typeof a !== "string" || a.length < 1)
+          )
+            throw new Error("InvalidFormatError")
+        }
+
+        if (answerType === "TEXT") {
+          if (answer.type !== "TEXT") throw new Error("InvalidFormatError")
+          if (!("content" in answer)) throw new Error("InvalidFormatError")
+          if (typeof answer.content !== "string")
+            throw new Error("InvalidFormatError")
+          if (answer.content.length < 1) throw new Error("InvalidFormatError")
+
+          if (props.minLength && answer.content.length < props.minLength)
+            throw new Error("InvalidFormatError")
+          if (props.maxLength && answer.content.length > props.maxLength)
+            throw new Error("InvalidFormatError")
+        }
+      } catch {
+        throw new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "回答形式" } },
+        ])
+      }
+    }
+  }
+
   private get _userId() {
     if (this.userController.userId === null)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
