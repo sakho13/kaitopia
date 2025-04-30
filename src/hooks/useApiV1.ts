@@ -406,3 +406,60 @@ export function usePatchUserExerciseQuestion() {
     requestPatchExerciseQuestion,
   }
 }
+
+/**
+ * GET: `/api/user/v1/result/logs`
+ */
+export function useGetUserResultsLogs() {
+  const { idToken } = useAuth()
+
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ApiV1OutTypeMap["GetManageExercises"] | null,
+  ) => {
+    const PAGE_SIZE = 20
+
+    if (!idToken) return null
+
+    const isFirstFetch = pageIndex === 0
+    if (isFirstFetch)
+      return [`/api/user/v1/result/logs?count=${PAGE_SIZE}&page=1`, idToken]
+
+    if (previousPageData?.nextPage === null || !previousPageData) return null
+
+    const page = pageIndex + 1
+    return [`/api/user/v1/result/logs?count=${PAGE_SIZE}&page=${page}`, idToken]
+  }
+
+  const { data, isLoading, setSize, isValidating, mutate } = useSWRInfinite(
+    getKey,
+    async ([url, token]) =>
+      token ? fetcher("GetUserExerciseResults", "GET", url, token) : null,
+  )
+
+  const loadMore = () => {
+    if (isLoading || isValidating) return
+    if (!data) {
+      setSize(1)
+      return
+    }
+    const latest = data[data.length - 1]
+    if (!latest?.success) {
+      setSize(1)
+      return
+    }
+    if (latest.data.nextPage === null) return
+    setSize((prev) => (prev ? prev + 1 : 1))
+  }
+
+  return {
+    dataToGetUserResultLogs: data
+      ? data.flatMap((d) => (d?.success ? d.data.answerLogSheets : []))
+      : [],
+    totalCountToGetUserResultLogs:
+      data && data[0]?.success ? data[0].data.totalCount : 0,
+    isLoadingToGetUserResultLogs: isLoading || isValidating,
+    loadMoreToGetUserResultLogs: loadMore,
+    refetchGetUserResultLogs: mutate,
+  }
+}
