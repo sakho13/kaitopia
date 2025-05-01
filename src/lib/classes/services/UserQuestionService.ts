@@ -3,6 +3,7 @@ import {
   QuestionAnswerForUser,
   QuestionAnswerTypeType,
   QuestionForUser,
+  QuestionTypeType,
 } from "@/lib/types/base/questionTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ServiceBase } from "../common/ServiceBase"
@@ -165,12 +166,58 @@ export class UserQuestionService extends ServiceBase {
     }
   }
 
+  /**
+   * 回答を保存する(採点はしない)
+   * @param userLogRepository
+   * @param answerLogSheetId
+   * @param userQuestionLogId
+   * @param answer
+   * @returns
+   */
   private async saveUserAnswerLog(
+    userLogRepository: UserLogRepository,
     answerLogSheetId: string,
+    userQuestionLogId: string,
     answer: QuestionAnswerContent,
   ) {
-    console.log(answerLogSheetId, answer)
-    return true
+    if (answer.type === "SKIP") {
+      return await userLogRepository.saveSkipQuestionLog(
+        answerLogSheetId,
+        userQuestionLogId,
+        this._userId,
+      )
+    }
+
+    if (answer.type === "SELECT" && "answerId" in answer) {
+      await userLogRepository.deleteSelectQuestionLog(userQuestionLogId)
+      return await userLogRepository.saveSelectQuestionLog(
+        answerLogSheetId,
+        userQuestionLogId,
+        this._userId,
+        [answer.answerId],
+      )
+    }
+
+    if (answer.type === "MULTI_SELECT" && "answerIds" in answer) {
+      await userLogRepository.deleteSelectQuestionLog(userQuestionLogId)
+      return await userLogRepository.saveSelectQuestionLog(
+        answerLogSheetId,
+        userQuestionLogId,
+        this._userId,
+        answer.answerIds,
+      )
+    }
+
+    if (answer.type === "TEXT" && "content" in answer) {
+      return await userLogRepository.saveTextQuestionLog(
+        answerLogSheetId,
+        userQuestionLogId,
+        this._userId,
+        answer.content,
+      )
+    }
+
+    return null
   }
 
   private async _checkAnswerResult(answerLogSheetId: string) {
@@ -258,37 +305,6 @@ export class UserQuestionService extends ServiceBase {
       },
     )
     return { questions, sheet, exercise }
-  }
-
-  /**
-   * 最新の回答中の回答ログシートを取得する
-   */
-  private async _getLatestAnswerLogSheetInProgressByExerciseId(
-    exerciseId: string,
-  ) {
-    return await this.dbConnection.answerLogSheet.findFirst({
-      select: {
-        answerLogSheetId: true,
-        questionUserLogs: {
-          select: {
-            questionId: true,
-            version: true,
-            orderIndex: true,
-            skipped: true,
-            score: true,
-            answerUserLogs: true,
-          },
-        },
-      },
-      where: {
-        userId: this._userId,
-        exerciseId: exerciseId,
-        isInProgress: true,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    })
   }
 
   private async _getExerciseById(exerciseId: string) {
