@@ -75,6 +75,16 @@ export const ApiV1ErrorMapObj = {
     message: "システムエラーが発生しました。公式アナウンスを確認してください。",
     status: 500,
   },
+
+  // 問題集固有エラー
+  ExerciseCannotSkipError: {
+    message: "この問題集はスキップできません",
+    status: 400,
+  },
+  ExerciseUnAnsweredError: {
+    message: "未回答の問題があります",
+    status: 400,
+  },
 } as const
 
 export type ApiV1ErrorMap = {
