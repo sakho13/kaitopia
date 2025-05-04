@@ -236,10 +236,11 @@ model QuestionUserLog {
   // スキップされたかどうか
   skipped Boolean @default(false) @map("skipped")
 
-  // QuestionTypeがSELECT/MULTI_SELECTの場合は正解が100点
-  // QuestionTypeがTEXTの場合は内容によって変わる
+  // QuestionTypeがSELECT/MULTI_SELECTの場合
+  isCorrect Boolean @default(false) @map("is_correct")
+  // QuestionTypeがTEXTの場合
   // 0点から100点の間でスコアをつける
-  score Int @default(0) @map("score")
+  score     Int     @default(0) @map("score")
 
   // TYPE: TEXT の場合
   textAnswer String? @map("text_answer")
