@@ -177,6 +177,7 @@ export class UserLogRepository extends RepositoryBase {
             isAnswered: true,
             orderIndex: true,
             skipped: true,
+            isCorrect: true,
             score: true,
             questionVersion: {
               select: {
@@ -250,11 +251,12 @@ export class UserLogRepository extends RepositoryBase {
   ) {
     return await this.dbConnection.questionUserLog.update({
       data: {
+        isCorrect: false, // 採点は後で行う
         answerSelectUserLogs: {
           createMany: {
             data: answer.map((a) => ({
               selectAnswerId: a,
-              isCorrect: null,
+              isCorrect: false,
             })),
             skipDuplicates: true,
           },
@@ -291,6 +293,7 @@ export class UserLogRepository extends RepositoryBase {
     return await this.dbConnection.questionUserLog.update({
       data: {
         textAnswer: answer,
+        score: 0, // 採点は後で行う
       },
       where: {
         answerLogSheetId,
@@ -301,6 +304,26 @@ export class UserLogRepository extends RepositoryBase {
   }
 
   // 採点に関連するクエリ
+
+  /**
+   * TYPEが`SELECT/MULTI_SELECT`の問題が正答と判断された場合に実行する
+   */
+  public async saveSelectQuestionScore(
+    answerLogSheetId: string,
+    questionUserLogId: string,
+  ) {
+    return await this.dbConnection.questionUserLog.update({
+      data: {
+        isAnswered: true,
+        isCorrect: true,
+      },
+      where: {
+        answerLogSheetId,
+        questionUserLogId,
+        userId: this.userId,
+      },
+    })
+  }
 
   public async saveScore(
     answerLogSheetId: string,
