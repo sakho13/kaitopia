@@ -230,6 +230,9 @@ model QuestionUserLog {
   questionId String @map("question_id")
   version    Int    @map("version") // 問題のバージョン
 
+  // 採点に利用したかどうか
+  isAnswered Boolean @default(false) @map("is_answered")
+
   // スキップされたかどうか
   skipped Boolean @default(false) @map("skipped")
 
