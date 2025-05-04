@@ -174,6 +174,7 @@ export class UserLogRepository extends RepositoryBase {
             questionUserLogId: true,
             questionId: true,
             version: true,
+            isAnswered: true,
             orderIndex: true,
             skipped: true,
             score: true,
@@ -182,6 +183,10 @@ export class UserLogRepository extends RepositoryBase {
                 question: true,
                 questionAnswers: {
                   select: {
+                    answerId: true,
+                    selectContent: true,
+                    isCorrect: true,
+
                     maxLength: true,
                     minLength: true,
                   },
@@ -196,6 +201,10 @@ export class UserLogRepository extends RepositoryBase {
             isCanSkip: true,
           },
         },
+        totalCorrectCount: true,
+        totalIncorrectCount: true,
+        totalUnansweredCount: true,
+        isInProgress: true,
       },
       where: {
         userId: this.userId,
@@ -287,6 +296,88 @@ export class UserLogRepository extends RepositoryBase {
         answerLogSheetId,
         questionUserLogId,
         userId,
+      },
+    })
+  }
+
+  // 採点に関連するクエリ
+
+  public async saveScore(
+    answerLogSheetId: string,
+    questionUserLogId: string,
+    score: number,
+  ) {
+    return await this.dbConnection.questionUserLog.update({
+      data: {
+        isAnswered: true,
+        score: score,
+      },
+      where: {
+        answerLogSheetId,
+        questionUserLogId,
+        userId: this.userId,
+      },
+    })
+  }
+
+  public async completeAnswerLogSheet(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.update({
+      data: {
+        isInProgress: false,
+      },
+      where: {
+        userId_answerLogSheetId: {
+          answerLogSheetId,
+          userId: this.userId,
+        },
+      },
+    })
+  }
+
+  public async updateTotalCorrectCount(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.update({
+      data: {
+        totalCorrectCount: {
+          increment: 1,
+        },
+      },
+      where: {
+        userId_answerLogSheetId: {
+          answerLogSheetId,
+          userId: this.userId,
+        },
+      },
+    })
+  }
+
+  public async updateTotalIncorrectCount(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.update({
+      data: {
+        totalIncorrectCount: {
+          increment: 1,
+        },
+      },
+      where: {
+        userId_answerLogSheetId: {
+          answerLogSheetId,
+          userId: this.userId,
+        },
+      },
+    })
+  }
+
+  public async updateTotalUnansweredCount(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.update({
+      data: {
+        totalUnansweredCount: {
+          increment: 1,
+        },
+      },
+      where: {
+        userId_answerLogSheetId: {
+          answerLogSheetId,
+          userId: this.userId,
+        },
       },
     })
   }
