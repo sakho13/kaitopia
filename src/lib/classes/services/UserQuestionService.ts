@@ -52,6 +52,7 @@ export class UserQuestionService extends ServiceBase {
         return {
           questions: questions.map((q) => ({
             questionUserLogId: q.id,
+            questionId: q.id,
 
             title: q.title,
             questionType: q.questionType,
@@ -113,6 +114,7 @@ export class UserQuestionService extends ServiceBase {
 
             return {
               questionUserLogId: qLog ? qLog.questionUserLogId : q.id,
+              questionId: q.id,
 
               title: q.title,
               questionType: q.questionType,
@@ -144,26 +146,137 @@ export class UserQuestionService extends ServiceBase {
     answerLogSheetId: string,
     questionUserLogId: string,
     answer: QuestionAnswerContent,
-  ) {
+  ): Promise<{
+    score: number | null
+    totalQuestions: number
+    isCorrect: boolean | null
+    totalCorrectCount: number
+    totalIncorrectCount: number
+    totalUnansweredCount: number
+  } | null> {
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+    const latest = await userLogRepository.findLatestAnswerLogSheetByExerciseId(
+      this._exerciseId!,
+    )
+    if (!latest || latest.answerLogSheetId !== answerLogSheetId)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    const userQuestionLog = latest.questionUserLogs.find(
+      (q) => q.questionUserLogId === questionUserLogId,
+    )
+    if (!userQuestionLog)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    const totalQuestions = latest.questionUserLogs.length
+
     // 問題集のトランザクション
     if (this._exerciseId) {
-      const userLogRepository = new UserLogRepository(
-        this._userId,
-        this.dbConnection,
-      )
-      const latest =
-        await userLogRepository.findLatestAnswerLogSheetByExerciseId(
-          this._exerciseId,
-        )
-      if (!latest)
-        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      // 一括採点の場合は実行NG
+      if (latest.exercise?.isScoringBatch) {
+        return {
+          score: null,
+          totalQuestions,
+          isCorrect: null,
+          totalCorrectCount: 0,
+          totalIncorrectCount: 0,
+          totalUnansweredCount: 0,
+        }
+      }
 
-      const created = await this.saveUserAnswerLog(
-        latest.answerLogSheetId,
-        answer,
-      )
-      console.log(created)
+      // 回答済みの問題は採点登録処理を行わず、結果を返す（冪等性の実現のため）
+      if (userQuestionLog.isAnswered) {
+        return {
+          score: userQuestionLog.score,
+          totalQuestions,
+          isCorrect: userQuestionLog.isCorrect,
+          totalCorrectCount: latest.totalCorrectCount,
+          totalIncorrectCount: latest.totalIncorrectCount,
+          totalUnansweredCount: latest.totalUnansweredCount,
+        }
+      }
+
+      // スキップが無効
+      if (latest.exercise && !latest.exercise.isCanSkip) {
+        if (answer.type === "SKIP")
+          throw new ApiV1Error([
+            { key: "ExerciseCannotSkipError", params: null },
+          ])
+      }
+
+      // 回答を保存できないケース
+      // * 都度採点で回答済み
+      // * 一括採点で回答済み
+      // if (!latest.exercise?.isScoringBatch) {}
+
+      // 回答トランザクション
+      const answerResult = await this.dbConnection.$transaction(async (t) => {
+        userLogRepository.resetDbConnection(t)
+
+        if (
+          answer.type !== "SKIP" &&
+          userQuestionLog.questionVersion.question.answerType !== answer.type
+        )
+          throw new ApiV1Error([
+            { key: "InvalidFormatError", params: { key: "回答形式" } },
+          ])
+
+        this._checkAnswerFormat(
+          userQuestionLog.questionVersion.question.questionType,
+          userQuestionLog.questionVersion.question.answerType,
+          answer,
+          {
+            minLength:
+              userQuestionLog.questionVersion.questionAnswers[0].minLength ||
+              undefined,
+            maxLength:
+              userQuestionLog.questionVersion.questionAnswers[0].maxLength ||
+              undefined,
+          },
+        )
+
+        return await this.saveUserAnswerLog(
+          userLogRepository,
+          latest.answerLogSheetId,
+          userQuestionLog.questionUserLogId,
+          answer,
+        )
+      })
+
+      // 都度採点の場合は、採点を行う
+      if (
+        latest.exercise &&
+        !latest.exercise.isScoringBatch &&
+        answerResult?.questionUserLogId
+      ) {
+        const scoreResult = await this._scorePerAnswer(
+          latest.answerLogSheetId,
+          answerResult.questionUserLogId,
+        )
+
+        return {
+          score: scoreResult.score,
+          totalQuestions,
+          isCorrect: scoreResult.isCorrect,
+          totalCorrectCount: scoreResult.totalCorrectCount,
+          totalIncorrectCount: scoreResult.totalIncorrectCount,
+          totalUnansweredCount: scoreResult.totalUnansweredCount,
+        }
+      }
+
+      return {
+        score: answerResult?.score ?? 0,
+        totalQuestions,
+        isCorrect: null,
+        totalCorrectCount: 0,
+        totalIncorrectCount: 0,
+        totalUnansweredCount: 0,
+      }
     }
+
+    return null
   }
 
   /**
@@ -220,8 +333,156 @@ export class UserQuestionService extends ServiceBase {
     return null
   }
 
-  private async _checkAnswerResult(answerLogSheetId: string) {
-    console.log(answerLogSheetId)
+  // private async _scoreBatchAnswer(
+  //   answerLogSheetId: string,
+  // ): Promise<AnswerLogSheetBase> {
+  //   return {
+  //     isInProgress: false,
+  //     totalCorrectCount: 0,
+  //     totalIncorrectCount: 0,
+  //     totalUnansweredCount: 0,
+  //   }
+  // }
+
+  /**
+   * 都度採点を行う
+   */
+  private async _scorePerAnswer(
+    answerLogSheetId: string,
+    questionUserLogId: string,
+  ) {
+    const result = await this.dbConnection.$transaction(async (t) => {
+      const questionUserLog = await t.questionUserLog.findUnique({
+        select: {
+          userId: true,
+          answerLogSheet: {
+            select: { isInProgress: true },
+          },
+          questionVersion: {
+            select: {
+              question: {
+                select: {
+                  answerType: true,
+                },
+              },
+              questionAnswers: {
+                select: {
+                  answerId: true,
+                  isCorrect: true,
+                  maxLength: true,
+                  minLength: true,
+                },
+              },
+            },
+          },
+
+          skipped: true,
+          textAnswer: true,
+          answerSelectUserLogs: {
+            select: {
+              selectAnswerId: true,
+            },
+          },
+        },
+        where: {
+          answerLogSheetId,
+          questionUserLogId,
+        },
+      })
+      if (!questionUserLog) return undefined
+
+      const userLogRepository = new UserLogRepository(questionUserLog.userId, t)
+
+      // スキップされた問題
+      if (questionUserLog.skipped) {
+        const { totalCorrectCount, totalIncorrectCount, totalUnansweredCount } =
+          await userLogRepository.updateTotalUnansweredCount(answerLogSheetId)
+        return {
+          score: 0,
+          isCorrect: null,
+          totalCorrectCount,
+          totalIncorrectCount,
+          totalUnansweredCount,
+        }
+      }
+
+      const answerType = questionUserLog.questionVersion.question.answerType
+
+      if (answerType === "SELECT" || answerType === "MULTI_SELECT") {
+        // 採点処理
+        const correctAnswers = questionUserLog.questionVersion.questionAnswers
+          .filter((a) => a.isCorrect)
+          .map((a) => a.answerId)
+        const userAnswers = questionUserLog.answerSelectUserLogs.map(
+          (a) => a.selectAnswerId,
+        )
+        if (correctAnswers.length !== userAnswers.length) return null
+
+        const isAllCorrect = correctAnswers.every((correctAnswer) =>
+          userAnswers.includes(correctAnswer),
+        )
+
+        // 採点結果を記録
+        if (isAllCorrect) {
+          const score = Math.floor(
+            (userAnswers.length / correctAnswers.length) * 100,
+          )
+          // 正解数を更新する
+          await userLogRepository.saveSelectQuestionScore(
+            answerLogSheetId,
+            questionUserLogId,
+          )
+          const {
+            totalCorrectCount,
+            totalIncorrectCount,
+            totalUnansweredCount,
+          } = await userLogRepository.updateTotalCorrectCount(answerLogSheetId)
+
+          return {
+            score,
+            isCorrect: true,
+            totalCorrectCount,
+            totalIncorrectCount,
+            totalUnansweredCount,
+          }
+        } else {
+          // 不正解数を更新する
+          const {
+            totalCorrectCount,
+            totalIncorrectCount,
+            totalUnansweredCount,
+          } = await userLogRepository.updateTotalIncorrectCount(
+            answerLogSheetId,
+          )
+
+          return {
+            score: 0,
+            isCorrect: false,
+            totalCorrectCount,
+            totalIncorrectCount,
+            totalUnansweredCount,
+          }
+        }
+      }
+
+      if (answerType === "TEXT") {
+        // 未実装
+
+        return {
+          score: 0,
+          isCorrect: null,
+          totalCorrectCount: 0,
+          totalIncorrectCount: 0,
+          totalUnansweredCount: 0,
+        }
+      }
+
+      return null
+    })
+
+    if (!result) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    return result
   }
 
   /**
@@ -264,13 +525,12 @@ export class UserQuestionService extends ServiceBase {
     if (createNew) {
       if (latest && latest.questionUserLogs.length > 0) {
         // すでに存在し回答していない場合は再度作成する
-        if (
-          latest.questionUserLogs.every(
-            (q) => q.answerUserLogs.length === 0 || q.skipped,
-          )
-        ) {
-          // this.dbConnection.questionUserLog
-        }
+        // if (
+        //   latest.questionUserLogs.every(
+        //     (q) => q.answerUserLogs.length === 0 || q.skipped,
+        //   )
+        // ) {
+        // }
 
         return { sheet: latest, questions: [], exercise }
       }
