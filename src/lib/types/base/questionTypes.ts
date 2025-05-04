@@ -10,6 +10,7 @@ export type QuestionForUser = {
    * 出題ログID 単純に閲覧する場合 questionId
    */
   questionUserLogId: string
+  questionId: string
 
   title: string
   questionType: QuestionTypeType

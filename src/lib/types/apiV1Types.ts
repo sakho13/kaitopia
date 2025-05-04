@@ -85,6 +85,10 @@ export const ApiV1ErrorMapObj = {
     message: "未回答の問題があります",
     status: 400,
   },
+  ExerciseAlreadyAnsweredError: {
+    message: "すでに回答済みの問題集です",
+    status: 400,
+  },
 } as const
 
 export type ApiV1ErrorMap = {
@@ -303,7 +307,7 @@ export type ApiV1OutTypeMap = {
     fn: "answer" | null
     answerLogSheetId: string
     exerciseId: string
-    result: AnswerLogSheetBase
+    result: AnswerLogSheetBase & { totalQuestion: number }
   }
   /**
    * PATCH /api/user/v1/exercise/question
@@ -316,10 +320,19 @@ export type ApiV1OutTypeMap = {
     fn: "answer" | "total-result" | null
     answerLogSheetId: string
     exerciseId: string
+    skipped: boolean
+    totalQuestionCount: number
+    totalAnsweredCount: number
+    /**
+     * 一括採点の場合は `null` を返す
+     *
+     * TYPEが`SELECT/MULTI_SELECT`の場合にTrue/falseを返す
+     */
+    isCorrect: boolean | null
     /**
      * 一括採点の場合は `null` を返す
      */
-    result: AnswerLogSheetBase | null
+    questionScore: number | null
   }
   /**
    * GET /api/user/v1/exercise/results?ignoreInProgress=xxx?count=xxx&page=xxx
