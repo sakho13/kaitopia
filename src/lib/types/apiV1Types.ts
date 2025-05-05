@@ -211,7 +211,83 @@ export type ApiV1OutTypeMap = {
    * GET /api/user/v1/result/log?count=10&page=1
    */
   GetUserResultLog: {
-    resultLogs: { answerLogSheetId: string }[]
+    resultLogs: {
+      answerLogSheetId: string
+      exercise: { exerciseId: string; title: string } | null
+      isInProgress: boolean
+      totalQuestionCount: number
+      totalCorrectCount: number
+      totalIncorrectCount: number
+      totalUnansweredCount: number
+      createdAt: string
+    }[]
+  }
+
+  /**
+   * GET /api/user/v1/exercise
+   */
+  GetUserExerciseInfo: {
+    exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
+    questions: QuestionBase[]
+  }
+  /**
+   * GET /api/user/v1/exercise/question?exerciseId=xxxx&mode=xxxx
+   */
+  GetUserExerciseQuestion: {
+    fn: "answer" | "back" | null
+    answerLogSheetId: string | null
+    exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
+    questions: QuestionForUser[]
+  }
+  /**
+   * POST /api/user/v1/exercise/question
+   */
+  PostUserExerciseQuestion: {
+    /**
+     * * `answer`: 採点に必要な情報が不足している
+     */
+    fn: "answer" | null
+    answerLogSheetId: string
+    exerciseId: string
+    result: AnswerLogSheetBase & { totalQuestion: number }
+  }
+  /**
+   * PATCH /api/user/v1/exercise/question
+   */
+  PatchUserExerciseQuestion: {
+    /**
+     * * `answer`: 採点に必要な情報が不足している
+     * * `total-result`: すべて回答済み
+     */
+    fn: "answer" | "total-result" | null
+    answerLogSheetId: string
+    exerciseId: string
+    skipped: boolean
+    totalQuestionCount: number
+    totalAnsweredCount: number
+    /**
+     * 一括採点の場合は `null` を返す
+     *
+     * TYPEが`SELECT/MULTI_SELECT`の場合にTrue/falseを返す
+     */
+    isCorrect: boolean | null
+    /**
+     * 一括採点の場合は `null` を返す
+     */
+    questionScore: number | null
+  }
+  /**
+   * GET /api/user/v1/exercise/results?ignoreInProgress=xxx?count=xxx&page=xxx
+   */
+  GetUserExerciseResults: {
+    answerLogSheets: ({
+      answerLogSheetId: string
+      exerciseId: string
+      totalQuestionCount: number
+    } & AnswerLogSheetBase &
+      ReplacedDateToString<AnswerLogSheetBaseDate>)[]
+    nextPage: number | null
+    totalCount: number
   }
 
   /**
@@ -280,73 +356,6 @@ export type ApiV1OutTypeMap = {
   } & QuestionBase &
     QuestionBaseStatus &
     ReplacedDateToString<QuestionBaseDate>
-
-  /**
-   * GET /api/user/v1/exercise
-   */
-  GetUserExerciseInfo: {
-    exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
-    questions: QuestionBase[]
-  }
-  /**
-   * GET /api/user/v1/exercise/question?exerciseId=xxxx&mode=xxxx
-   */
-  GetUserExerciseQuestion: {
-    fn: "answer" | "back" | null
-    answerLogSheetId: string | null
-    exercise: ExerciseBase & Omit<ExerciseBaseProperty, "schoolId">
-    questions: QuestionForUser[]
-  }
-  /**
-   * POST /api/user/v1/exercise/question
-   */
-  PostUserExerciseQuestion: {
-    /**
-     * * `answer`: 採点に必要な情報が不足している
-     */
-    fn: "answer" | null
-    answerLogSheetId: string
-    exerciseId: string
-    result: AnswerLogSheetBase & { totalQuestion: number }
-  }
-  /**
-   * PATCH /api/user/v1/exercise/question
-   */
-  PatchUserExerciseQuestion: {
-    /**
-     * * `answer`: 採点に必要な情報が不足している
-     * * `total-result`: すべて回答済み
-     */
-    fn: "answer" | "total-result" | null
-    answerLogSheetId: string
-    exerciseId: string
-    skipped: boolean
-    totalQuestionCount: number
-    totalAnsweredCount: number
-    /**
-     * 一括採点の場合は `null` を返す
-     *
-     * TYPEが`SELECT/MULTI_SELECT`の場合にTrue/falseを返す
-     */
-    isCorrect: boolean | null
-    /**
-     * 一括採点の場合は `null` を返す
-     */
-    questionScore: number | null
-  }
-  /**
-   * GET /api/user/v1/exercise/results?ignoreInProgress=xxx?count=xxx&page=xxx
-   */
-  GetUserExerciseResults: {
-    answerLogSheets: ({
-      answerLogSheetId: string
-      exerciseId: string
-      totalQuestionCount: number
-    } & AnswerLogSheetBase &
-      ReplacedDateToString<AnswerLogSheetBaseDate>)[]
-    nextPage: number | null
-    totalCount: number
-  }
 }
 
 export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =
