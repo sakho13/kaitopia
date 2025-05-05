@@ -30,7 +30,7 @@ export default function UserPopover() {
           {userConfig.canAccessManagePage ? (
             <button
               onClick={() => handleNavigate("/v1/manage")}
-              className='w-full text-text text-left px-4 py-2 hover:bg-gray-100 transition'
+              className='w-full text-text text-left px-4 py-2 hover:bg-gray-100 rounded-xl transition'
             >
               管理画面
             </button>
@@ -38,14 +38,14 @@ export default function UserPopover() {
 
           <button
             onClick={() => handleNavigate("/v1/user/profile")}
-            className='w-full text-text text-left px-4 py-2 hover:bg-gray-100 transition'
+            className='w-full text-text text-left px-4 py-2 hover:bg-gray-100 rounded-xl transition'
           >
             ユーザ情報
           </button>
 
           <button
             onClick={signOut}
-            className='w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 transition'
+            className='w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 rounded-xl transition'
           >
             ログアウト
           </button>
