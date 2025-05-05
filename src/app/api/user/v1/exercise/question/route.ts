@@ -7,10 +7,10 @@ import { prisma } from "@/lib/prisma"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 import { NextRequest } from "next/server"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
-  return api.execute("GetUserExerciseQuestion", async () => {
+  return await api.execute("GetUserExerciseQuestion", async () => {
     await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
