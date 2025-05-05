@@ -30,6 +30,18 @@ export function GET(request: NextRequest) {
     return {
       resultLogs: answerLogSheets.map((log) => ({
         answerLogSheetId: log.answerLogSheetId,
+        exercise: log.exercise
+          ? {
+              exerciseId: log.exercise.id,
+              title: log.exercise.title,
+            }
+          : null,
+        isInProgress: log.isInProgress,
+        totalQuestionCount: log._count.questionUserLogs,
+        totalCorrectCount: log.totalCorrectCount,
+        totalIncorrectCount: log.totalIncorrectCount,
+        totalUnansweredCount: log.totalUnansweredCount,
+        createdAt: log.createdAt.toISOString(),
       })),
       nextPage,
       totalCount,

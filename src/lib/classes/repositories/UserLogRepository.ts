@@ -75,6 +75,7 @@ export class UserLogRepository extends RepositoryBase {
         exerciseId: true,
         exercise: {
           select: {
+            id: true,
             title: true,
           },
         },
