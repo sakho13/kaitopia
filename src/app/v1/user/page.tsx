@@ -1,3 +1,4 @@
+import { UserLatestResultLogs } from "@/components/organisms/UserLatestResultLogs"
 import { UserRecommendExerciseSection } from "@/components/organisms/UserRecommendExerciseSection"
 
 export default function Page() {
@@ -5,7 +6,7 @@ export default function Page() {
     <div className='p-6 max-w-6xl mx-auto'>
       <UserRecommendExerciseSection />
 
-      <section className='mb-8'>
+      {/* <section className='mb-8'>
         <h2 className='text-xl font-semibold mb-4'>今日の学習</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='bg-background-subtle p-4 rounded-2xl shadow hover:shadow-lg transition'>
@@ -24,9 +25,9 @@ export default function Page() {
             </button>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <section className='mb-8'>
+      {/* <section className='mb-8'>
         <h2 className='text-xl font-semibold mb-4'>スキル</h2>
         <div className='flex space-x-4 mb-4'>
           <button className='bg-highlight text-text-on-color py-1 px-3 rounded-full'>
@@ -39,15 +40,23 @@ export default function Page() {
             語彙
           </button>
         </div>
-      </section>
+      </section> */}
 
-      <section>
+      {/* <section>
         <h2 className='text-xl font-semibold mb-4'>進捗</h2>
         <div className='flex items-end space-x-4 h-40'>
           <div className='w-6 bg-fun h-20 rounded-md'></div>
           <div className='w-6 bg-smart h-32 rounded-md'></div>
           <div className='w-6 bg-primary h-28 rounded-md'></div>
         </div>
+      </section> */}
+
+      <section>
+        <h2 className='text-xl font-semibold mb-4 select-none'>
+          最近のアクティビティ
+        </h2>
+
+        <UserLatestResultLogs />
       </section>
     </div>
   )
