@@ -62,6 +62,11 @@ export const ApiV1ErrorMapObj = {
     message: "認証に失敗しました。再ログインしてください。",
     status: 401,
   },
+  TokenExpiredError: {
+    // ユーザに表示してはならない
+    message: "認証有効期限が切れました。再ログインしてください。",
+    status: 401,
+  },
   RoleTypeError: {
     message: "アクセス権限がありません",
     status: 403,
@@ -72,6 +77,7 @@ export const ApiV1ErrorMapObj = {
     status: 404,
   },
   SystemError: {
+    // ユーザに表示してはならない
     message: "システムエラーが発生しました。公式アナウンスを確認してください。",
     status: 500,
   },
