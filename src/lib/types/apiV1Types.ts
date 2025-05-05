@@ -208,7 +208,7 @@ export type ApiV1OutTypeMap = {
       ReplacedDateToString<SchoolBaseDate>)[]
   }
   /**
-   * GET /api/user/v1/result/log?count=10&page=1
+   * GET /api/user/v1/result/logs?count=10&page=1
    */
   GetUserResultLog: {
     resultLogs: {
@@ -221,6 +221,8 @@ export type ApiV1OutTypeMap = {
       totalUnansweredCount: number
       createdAt: string
     }[]
+    nextPage: number | null
+    totalCount: number
   }
 
   /**

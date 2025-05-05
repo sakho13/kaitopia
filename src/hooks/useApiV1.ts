@@ -340,12 +340,12 @@ export function useGetUserExerciseQuestions(
 
   const { data, isLoading, mutate } = useSWRImmutable(
     ["/api/user/v1/exercise/question", idToken, exerciseId, mode],
-    async ([url, token, eid, mode]) =>
-      token && eid
+    async ([url, token, eid, md]) =>
+      token && eid && md
         ? fetcher(
             "GetUserExerciseQuestion",
             "GET",
-            `${url}?exerciseId=${eid}&mode=${mode}`,
+            `${url}?exerciseId=${eid}&mode=${md}`,
             token,
           )
         : null,
@@ -434,7 +434,7 @@ export function useGetUserResultsLogs() {
   const { data, isLoading, setSize, isValidating, mutate } = useSWRInfinite(
     getKey,
     async ([url, token]) =>
-      token ? fetcher("GetUserExerciseResults", "GET", url, token) : null,
+      token ? fetcher("GetUserResultLog", "GET", url, token) : null,
   )
 
   const loadMore = () => {
@@ -454,7 +454,7 @@ export function useGetUserResultsLogs() {
 
   return {
     dataToGetUserResultLogs: data
-      ? data.flatMap((d) => (d?.success ? d.data.answerLogSheets : []))
+      ? data.flatMap((d) => (d?.success ? d.data.resultLogs : []))
       : [],
     totalCountToGetUserResultLogs:
       data && data[0]?.success ? data[0].data.totalCount : 0,
