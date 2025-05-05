@@ -32,95 +32,93 @@ export default function LoginPage() {
   }
 
   return (
-    <div className='min-h-screen bg-background flex items-center justify-center px-4'>
-      <div className='w-full max-w-md bg-white shadow-xl rounded-2xl p-8'>
-        <h1 className='text-3xl font-bold text-center text-primary mb-6'>
-          ログイン
-        </h1>
+    <div className='w-full max-w-md bg-white shadow-xl rounded-2xl p-8'>
+      <h1 className='text-3xl font-bold text-center text-primary mb-6'>
+        ログイン
+      </h1>
 
-        <form onSubmit={onSubmit} className='space-y-4'>
-          <div>
-            <label
-              htmlFor='email'
-              className='block text-sm font-medium text-text mb-1'
-            >
-              メールアドレス
-            </label>
-            <input
-              type='email'
-              id='email'
-              required
-              className={joincn(
-                "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
-                emailError ? "border-red-500" : "",
-              )}
-              value={email}
-              onChange={(e) => onChangeEmail(e.target.value)}
-            />
-            {emailError && (
-              <p className='text-red-500 text-sm mt-1'>{emailError}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor='password'
-              className='block text-sm font-medium text-text mb-1'
-            >
-              パスワード
-            </label>
-            <input
-              type='password'
-              id='password'
-              required
-              className={joincn(
-                "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
-                passwordError ? "border-red-500" : "",
-              )}
-              value={password}
-              onChange={(e) => onChangePassword(e.target.value)}
-            />
-            {passwordError && (
-              <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
-            )}
-          </div>
-
-          <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
-            ログイン
-          </ButtonBase>
-        </form>
-
-        <div className='mt-6 text-center text-sm text-gray-500'>または</div>
-
-        <ButtonBase
-          colorMode='ghost'
-          sizeMode='full'
-          className='mt-4'
-          onClick={() => login("GUEST")}
-        >
-          ゲストでログイン
-        </ButtonBase>
-
-        <ButtonBase
-          colorMode='outline'
-          sizeMode='full'
-          className='mt-4'
-          onClick={() => login("GOOGLE")}
-        >
-          <img src='/google-logo.svg' alt='Google' className='w-5 h-5' />
-          Googleでログイン
-        </ButtonBase>
-
-        <p className='mt-6 text-center text-sm text-gray-500'>
-          アカウントをお持ちでない方は{" "}
-          <a
-            href='/public/signup'
-            className='text-primary font-medium hover:underline'
+      <form onSubmit={onSubmit} className='space-y-4'>
+        <div>
+          <label
+            htmlFor='email'
+            className='block text-sm font-medium text-text mb-1'
           >
-            サインアップ
-          </a>
-        </p>
-      </div>
+            メールアドレス
+          </label>
+          <input
+            type='email'
+            id='email'
+            required
+            className={joincn(
+              "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
+              emailError ? "border-red-500" : "",
+            )}
+            value={email}
+            onChange={(e) => onChangeEmail(e.target.value)}
+          />
+          {emailError && (
+            <p className='text-red-500 text-sm mt-1'>{emailError}</p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor='password'
+            className='block text-sm font-medium text-text mb-1'
+          >
+            パスワード
+          </label>
+          <input
+            type='password'
+            id='password'
+            required
+            className={joincn(
+              "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
+              passwordError ? "border-red-500" : "",
+            )}
+            value={password}
+            onChange={(e) => onChangePassword(e.target.value)}
+          />
+          {passwordError && (
+            <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
+          )}
+        </div>
+
+        <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
+          ログイン
+        </ButtonBase>
+      </form>
+
+      <div className='mt-6 text-center text-sm text-gray-500'>または</div>
+
+      <ButtonBase
+        colorMode='ghost'
+        sizeMode='full'
+        className='mt-4'
+        onClick={() => login("GUEST")}
+      >
+        ゲストでログイン
+      </ButtonBase>
+
+      <ButtonBase
+        colorMode='outline'
+        sizeMode='full'
+        className='mt-4'
+        onClick={() => login("GOOGLE")}
+      >
+        <img src='/google-logo.svg' alt='Google' className='w-5 h-5' />
+        Googleでログイン
+      </ButtonBase>
+
+      <p className='mt-6 text-center text-sm text-gray-500'>
+        アカウントをお持ちでない方は{" "}
+        <a
+          href='/public/signup'
+          className='text-primary font-medium hover:underline'
+        >
+          サインアップ
+        </a>
+      </p>
     </div>
   )
 }

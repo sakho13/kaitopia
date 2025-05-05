@@ -1,5 +1,6 @@
 "use client"
 
+import { BackButton } from "@/components/molecules/BackButton"
 import { useAuth } from "@/hooks/useAuth"
 import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -34,5 +35,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     )
   }
 
-  return children
+  return (
+    <div className='min-h-screen bg-background flex items-center justify-center px-4'>
+      <div className='absolute top-4 left-10'>
+        <BackButton to={(r) => r.push("/")} />
+      </div>
+
+      {children}
+    </div>
+  )
 }
