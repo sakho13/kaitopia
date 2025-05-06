@@ -28,6 +28,7 @@ import {
 } from "./base/schoolTypes"
 import {
   UserBaseDate,
+  UserBaseIdentity,
   UserBaseInfo,
   UserBaseInfoOption,
 } from "./base/userTypes"
@@ -364,6 +365,17 @@ export type ApiV1OutTypeMap = {
   } & QuestionBase &
     QuestionBaseStatus &
     ReplacedDateToString<QuestionBaseDate>
+  /**
+   * GET /api/manage/v1/users?count=10&page=1
+   */
+  GetManageUsers: {
+    users: (UserBaseIdentity &
+      UserBaseInfo &
+      ReplacedDateToString<UserBaseInfoOption> &
+      ReplacedDateToString<UserBaseDate>)[]
+    nextPage: number | null
+    totalCount: number
+  }
 }
 
 export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =

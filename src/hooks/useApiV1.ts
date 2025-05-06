@@ -245,6 +245,63 @@ export function useDeleteManageExercise() {
   return { requestDeleteExercise }
 }
 
+/**
+ * GET: `/api/manage/v1/users?page=1&count=10`
+ */
+export function useGetManageUsers() {
+  const { idToken } = useAuth()
+
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ApiV1OutTypeMap["GetManageUsers"] | null,
+  ) => {
+    const PAGE_SIZE = 20
+
+    if (!idToken) return null
+
+    const isFirstFetch = pageIndex === 0
+    if (isFirstFetch)
+      return [`/api/manage/v1/users?count=${PAGE_SIZE}&page=1`, idToken]
+
+    if (previousPageData?.nextPage === null || !previousPageData) return null
+
+    const page = pageIndex + 1
+    return [`/api/manage/v1/users?count=${PAGE_SIZE}&page=${page}`, idToken]
+  }
+
+  const { data, isLoading, setSize, isValidating, mutate } = useSWRInfinite(
+    getKey,
+    async ([url, token]) =>
+      token ? fetcher("GetManageUsers", "GET", url, token) : null,
+  )
+
+  const loadMore = () => {
+    if (isLoading || isValidating) return
+    if (!data) {
+      setSize(1)
+      return
+    }
+    const latest = data[data.length - 1]
+    if (!latest?.success) {
+      setSize(1)
+      return
+    }
+    if (latest.data.nextPage === null) return
+    setSize((prev) => (prev ? prev + 1 : 1))
+  }
+
+  return {
+    dataToGetManageUsers: data
+      ? data.flatMap((d) => (d?.success ? d.data.users : []))
+      : [],
+    totalCountToGetManageUsers:
+      data && data[0]?.success ? data[0].data.totalCount : 0,
+    isLoadingToGetManageUsers: isLoading || isValidating,
+    loadMoreToGetManageUsers: loadMore,
+    refetchGetManageUsers: mutate,
+  }
+}
+
 // *******************
 //      user
 // *******************
