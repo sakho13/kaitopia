@@ -257,7 +257,7 @@ export type ApiV1OutTypeMap = {
     fn: "answer" | null
     answerLogSheetId: string
     exerciseId: string
-    result: AnswerLogSheetBase & { totalQuestion: number }
+    result: AnswerLogSheetBase & { totalQuestionCount: number }
   }
   /**
    * PATCH /api/user/v1/exercise/question

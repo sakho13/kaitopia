@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { redirect } from "next/navigation"
 import {
   useGetUserExerciseQuestions,
   usePostUserExerciseQuestion,
@@ -42,30 +43,112 @@ export function ExerciseManager({ exerciseId }: Props) {
   }
 
   if (state === "result") {
+    const correctPercent = Math.round(
+      ((postResult?.result.totalCorrectCount ?? 0) /
+        (postResult?.result.totalQuestionCount ?? 1)) *
+        100,
+    )
+    const incorrectPercent = Math.round(
+      ((postResult?.result.totalIncorrectCount ?? 0) /
+        (postResult?.result.totalQuestionCount ?? 1)) *
+        100,
+    )
+    const unansweredPercent = Math.round(
+      ((postResult?.result.totalUnansweredCount ?? 0) /
+        (postResult?.result.totalQuestionCount ?? 1)) *
+        100,
+    )
+
     return (
       <div className='max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
-        <h1>結果&nbsp;{exercise.title}</h1>
+        <h1 className='text-lg font-bold text-text'>
+          回答結果&nbsp;「{exercise.title}」
+        </h1>
 
-        <div className='select-none'>
-          <p>
-            <span>全問題数:</span>&nbsp;
-            <span>{postResult?.result.totalQuestion ?? 0}</span>
-          </p>
+        <div className='select-none grid grid-cols-2 gap-4'>
+          <div className='border rounded-lg px-4 py-2'>
+            <p className='text-text'>
+              <span className='font-semibold'>全問題数:</span>&nbsp;
+              <span className='text-2xl'>
+                {postResult?.result.totalQuestionCount ?? 0}
+              </span>
+            </p>
+          </div>
 
-          <p>
-            <span>正解数:</span>&nbsp;
-            <span>{postResult?.result.totalCorrectCount ?? 0}</span>
-          </p>
+          <div className='border rounded-lg px-4 py-2 relative'>
+            <div
+              className={joincn(
+                `h-full bg-green-100 opacity-30`,
+                "absolute top-0 left-0",
+                "rounded-lg",
+                "transition delay-75",
+              )}
+              style={{
+                width: `${correctPercent}%`,
+              }}
+            />
 
-          <p>
-            <span>不正解数:</span>&nbsp;
-            <span>{postResult?.result.totalIncorrectCount ?? 0}</span>
-          </p>
+            <p className='text-green-600'>
+              <span className='font-semibold'>正解数:</span>&nbsp;
+              <span className='text-2xl'>
+                {postResult?.result.totalCorrectCount ?? 0}
+              </span>
+            </p>
+          </div>
 
-          <p>
-            <span>未回答数:</span>&nbsp;
-            <span>{postResult?.result.totalUnansweredCount ?? 0}</span>
-          </p>
+          <div className='border rounded-lg px-4 py-2 relative'>
+            <div
+              className={joincn(
+                `h-full bg-red-100 opacity-30`,
+                "absolute top-0 left-0",
+                "rounded-lg",
+                "transition delay-100",
+              )}
+              style={{
+                width: `${incorrectPercent}%`,
+              }}
+            />
+
+            <p className='text-red-600'>
+              <span className='font-semibold'>不正解数:</span>
+              &nbsp;
+              <span className='text-2xl'>
+                {postResult?.result.totalIncorrectCount ?? 0}
+              </span>
+            </p>
+          </div>
+
+          <div className='border rounded-lg px-4 py-2 relative'>
+            <div
+              className={joincn(
+                `h-full bg-gray-100 opacity-30`,
+                "absolute top-0 left-0",
+                "rounded-lg",
+                "transition delay-150",
+              )}
+              style={{
+                width: `${unansweredPercent}%`,
+              }}
+            />
+
+            <p className='text-gray-600'>
+              <span className='font-semibold'>未回答数:</span>&nbsp;
+              <span className='text-2xl'>
+                {postResult?.result.totalUnansweredCount ?? 0}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <ButtonBase
+            onClick={() => redirect("/v1/user")}
+            sizeMode='full'
+            colorMode='primary'
+            className='font-semibold py-4'
+          >
+            トップに戻る
+          </ButtonBase>
         </div>
       </div>
     )
