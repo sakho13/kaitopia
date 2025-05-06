@@ -69,11 +69,7 @@ export class UserLogRepository extends RepositoryBase {
    * @param offset
    * @returns
    */
-  public async findAllAnswerLogSheets(
-    includeInProgress: boolean = false,
-    limit: number = 100,
-    offset: number = 0,
-  ) {
+  public async findAllAnswerLogSheets(limit: number = 100, offset: number = 0) {
     return await this.dbConnection.answerLogSheet.findMany({
       select: {
         answerLogSheetId: true,
@@ -96,7 +92,6 @@ export class UserLogRepository extends RepositoryBase {
       },
       where: {
         userId: this.userId,
-        isInProgress: includeInProgress ? true : undefined,
       },
       take: limit,
       skip: offset,

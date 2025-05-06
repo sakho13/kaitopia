@@ -36,11 +36,7 @@ export async function GET(request: NextRequest) {
       prisma,
     )
     const { answerLogSheets, totalCount, nextPage } =
-      await userLogService.getAnswerLogSheets(
-        ignoreInProgress === "true",
-        count,
-        page,
-      )
+      await userLogService.getAnswerLogSheets(count, page)
 
     return {
       answerLogSheets: answerLogSheets.map((r) => ({

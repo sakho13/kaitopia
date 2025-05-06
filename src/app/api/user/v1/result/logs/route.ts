@@ -25,7 +25,7 @@ export function GET(request: NextRequest) {
       prisma,
     )
     const { answerLogSheets, nextPage, totalCount } =
-      await userLogService.getAnswerLogSheets(false, count, page)
+      await userLogService.getAnswerLogSheets(count, page)
 
     return {
       resultLogs: answerLogSheets.map((log) => ({
