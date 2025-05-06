@@ -1,11 +1,16 @@
 "use client"
 
+import { joincn } from "@/lib/functions/joincn"
 import {
   QuestionAnswerContent,
   QuestionForUser,
   QuestionUserAnswer,
 } from "@/lib/types/base/questionTypes"
-import { useEffect, useState } from "react"
+
+type AnswerState = {
+  selectedAnswerIds: string[]
+  textAnswer: string
+}
 
 type Props = {
   question: QuestionForUser
@@ -13,29 +18,14 @@ type Props = {
     type: T,
     userAnswer: QuestionUserAnswer[T],
   ) => void
+  answerState: AnswerState
 }
 
-export function ExerciseManageAnswerPart({ question, onAnswer }: Props) {
-  const [answerMultiSelect, setAnswerMultiSelect] = useState<string[]>([])
-  const [answerText, setAnswerText] = useState<string>("")
-
-  const _clearAll = () => {
-    setAnswerMultiSelect([])
-    setAnswerText("")
-  }
-
-  const _resetState = () => {
-    _clearAll()
-
-    //
-  }
-
-  useEffect(() => {
-    //
-  }, [question.questionUserLogId])
-
-  //
-
+export function ExerciseManageAnswerPart({
+  question,
+  onAnswer,
+  answerState,
+}: Props) {
   if (
     (question.answerType === "SELECT" ||
       question.answerType === "MULTI_SELECT") &&
@@ -43,22 +33,40 @@ export function ExerciseManageAnswerPart({ question, onAnswer }: Props) {
   )
     return (
       <div className='space-y-3'>
-        {question.answer.selection.map(({ answerId, selectContent }, index) => (
-          <button
-            key={index}
-            onClick={() =>
-              onAnswer(
-                question.answerType,
-                question.answerType === "SELECT"
-                  ? { answerId }
-                  : { answerIds: [] },
-              )
-            }
-            className='w-full border border-gray-300 px-4 py-3 rounded-xl text-left hover:bg-gray-50 transition'
-          >
-            {selectContent}
-          </button>
-        ))}
+        <p className='select-none text-sm text-gray-500'>
+          {question.answerType === "SELECT" ? "単一選択" : "複数選択"}
+        </p>
+
+        {question.answer.selection.map(({ answerId, selectContent }, index) => {
+          const selected = answerState.selectedAnswerIds.includes(answerId)
+
+          return (
+            <button
+              key={index}
+              onClick={() => {
+                if (question.answerType === "SELECT") {
+                  onAnswer("SELECT", { answerId })
+                }
+
+                if (question.answerType === "MULTI_SELECT") {
+                  onAnswer("MULTI_SELECT", {
+                    answerIds: [answerId],
+                  })
+                }
+              }}
+              className={joincn(
+                "w-full px-4 py-3 rounded-xl text-left",
+                "cursor-pointer transition",
+                "border border-gray-300",
+                selected
+                  ? "bg-secondary text-text font-bold"
+                  : "hover:bg-gray-50",
+              )}
+            >
+              {selectContent}
+            </button>
+          )
+        })}
       </div>
     )
 
@@ -66,6 +74,10 @@ export function ExerciseManageAnswerPart({ question, onAnswer }: Props) {
     return (
       <div>
         <textarea
+          value={answerState.textAnswer}
+          onChange={(e) => {
+            onAnswer("TEXT", { content: e.target.value })
+          }}
           minLength={question.answer.property.minLength}
           maxLength={question.answer.property.maxLength}
         />
