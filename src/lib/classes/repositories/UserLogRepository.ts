@@ -51,6 +51,17 @@ export class UserLogRepository extends RepositoryBase {
     })
   }
 
+  public async resetAnswerLogSheetById(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.delete({
+      where: {
+        userId_answerLogSheetId: {
+          userId: this.userId,
+          answerLogSheetId: answerLogSheetId,
+        },
+      },
+    })
+  }
+
   /**
    * ユーザが回答した履歴も確認できるように
    * @param includeInProgress

@@ -175,7 +175,7 @@ export class UserQuestionService extends ServiceBase {
     // 問題集のトランザクション
     if (this._exerciseId) {
       // 一括採点の場合は実行NG
-      if (latest.exercise?.isScoringBatch) {
+      if (latest.exercise?.isScoringBatch === true) {
         return {
           score: null,
           totalQuestions,
@@ -199,17 +199,16 @@ export class UserQuestionService extends ServiceBase {
       }
 
       // スキップが無効
-      if (latest.exercise && !latest.exercise.isCanSkip) {
+      if (latest.exercise && latest.exercise.isCanSkip === false) {
         if (answer.type === "SKIP")
           throw new ApiV1Error([
             { key: "ExerciseCannotSkipError", params: null },
           ])
       }
 
-      // 回答を保存できないケース
+      // 回答を保存できないケース(未実装)
       // * 都度採点で回答済み
       // * 一括採点で回答済み
-      // if (!latest.exercise?.isScoringBatch) {}
 
       // 回答トランザクション
       const answerResult = await this.dbConnection.$transaction(async (t) => {
@@ -247,9 +246,9 @@ export class UserQuestionService extends ServiceBase {
 
       // 都度採点の場合は、採点を行う
       if (
-        latest.exercise &&
-        !latest.exercise.isScoringBatch &&
-        answerResult?.questionUserLogId
+        !!latest.exercise &&
+        latest.exercise.isScoringBatch === false &&
+        !!answerResult?.questionUserLogId
       ) {
         const scoreResult = await this._scorePerAnswer(
           latest.answerLogSheetId,
@@ -505,32 +504,19 @@ export class UserQuestionService extends ServiceBase {
       exerciseId,
     )
 
-    // 既出ならそれを返す
+    // 既出なら過去分を削除して新しいものを作成する
     if (latest && !createNew && latest.exerciseId === exerciseId) {
-      const userQuestionRepository = new UserQuestionRepository(
+      const userLogRepository = new UserLogRepository(
         this._userId,
         this.dbConnection,
       )
-      const questions = await userQuestionRepository.findQuestionsByExerciseId(
-        exerciseId,
-        false,
-      )
-      if (questions.length === 0)
-        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-
-      return { questions, sheet: latest, exercise }
+      await userLogRepository.resetAnswerLogSheetById(latest.answerLogSheetId)
     }
 
     // 使用していないため無視
     if (createNew) {
       if (latest && latest.questionUserLogs.length > 0) {
         // すでに存在し回答していない場合は再度作成する
-        // if (
-        //   latest.questionUserLogs.every(
-        //     (q) => q.answerUserLogs.length === 0 || q.skipped,
-        //   )
-        // ) {
-        // }
 
         return { sheet: latest, questions: [], exercise }
       }
