@@ -112,6 +112,15 @@ export class UserQuestionService extends ServiceBase {
               (l) => l.questionId === q.id && l.version === q.currentVersionId,
             )
 
+            if (!exercise.isScoringBatch) {
+              // 都度採点の場合は選択肢をランダムに並び替える
+              if ("selection" in properties && exercise.random) {
+                properties.selection = properties.selection.sort(
+                  () => Math.random() - 0.5,
+                )
+              }
+            }
+
             return {
               questionUserLogId: qLog ? qLog.questionUserLogId : q.id,
               questionId: q.id,
