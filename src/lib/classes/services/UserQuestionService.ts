@@ -283,38 +283,37 @@ export class UserQuestionService extends ServiceBase {
    * 回答状態を固定/保存する
    */
   public async submitAnswerState(answerLogSheetId: string) {
-    const userLogRepository = new UserLogRepository(
-      this._userId,
-      this.dbConnection,
-    )
-    const sheet = await userLogRepository.findAnswerLogSheetById(
-      answerLogSheetId,
-      this._userId,
-    )
+    return await this.dbConnection.$transaction(async (t) => {
+      const userLogRepository = new UserLogRepository(this._userId, t)
+      const sheet = await userLogRepository.findAnswerLogSheetById(
+        answerLogSheetId,
+        this._userId,
+      )
 
-    if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-    const totalQuestion = sheet.questionUserLogs.length
+      if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      const totalQuestion = sheet.questionUserLogs.length
 
-    if (sheet.isInProgress) {
-      return {
-        isInProgress: sheet.isInProgress,
-        totalQuestion,
-        totalCorrectCount: sheet.totalCorrectCount,
-        totalIncorrectCount: sheet.totalIncorrectCount,
-        totalUnansweredCount: sheet.totalUnansweredCount,
+      if (!sheet.isInProgress) {
+        return {
+          isInProgress: sheet.isInProgress,
+          totalQuestion,
+          totalCorrectCount: sheet.totalCorrectCount,
+          totalIncorrectCount: sheet.totalIncorrectCount,
+          totalUnansweredCount: sheet.totalUnansweredCount,
+        }
       }
-    }
 
-    const result = await userLogRepository.completeAnswerLogSheet(
-      answerLogSheetId,
-    )
-    return {
-      isInProgress: result.isInProgress,
-      totalQuestion,
-      totalCorrectCount: result.totalCorrectCount,
-      totalIncorrectCount: result.totalIncorrectCount,
-      totalUnansweredCount: result.totalUnansweredCount,
-    }
+      const result = await userLogRepository.completeAnswerLogSheet(
+        answerLogSheetId,
+      )
+      return {
+        isInProgress: result.isInProgress,
+        totalQuestion,
+        totalCorrectCount: result.totalCorrectCount,
+        totalIncorrectCount: result.totalIncorrectCount,
+        totalUnansweredCount: result.totalUnansweredCount,
+      }
+    })
   }
 
   /**
