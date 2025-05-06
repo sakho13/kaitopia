@@ -34,7 +34,21 @@ model User {
   ownerSchools SchoolOwner[]
   // memberSchools SchoolMember[]
   SchoolMember SchoolMember[]
+  // userAuthProviders UserAuthProvider[]
 }
+
+// model UserAuthProvider {
+//   userId   String          @map("user_id")
+//   provider UserSSOProvider @map("provider")
+
+//   email String? @map("email")
+
+//   createdAt DateTime @default(now()) @map("created_at")
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@id([userId, provider])
+// }
 
 model School {
   id String @id @default(cuid(2))
@@ -164,10 +178,11 @@ model Exercise {
   isCanSkip      Boolean @default(false) @map("is_can_skip") // スキップ可能かどうか
   isScoringBatch Boolean @default(false) @map("is_scoring_batch") // 一括採点可能かどうか
 
-  // ランダム出題選択可能かどうか
-  isSelectRandom Boolean @default(false) @map("is_select_random")
   // ランダム出題かどうか
-  random         Boolean @default(false) @map("random")
+  random        Boolean @default(false) @map("random")
+  // 出題数
+  // nullの場合は全て出題
+  questionCount Int?    @map("question_count")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -278,6 +293,12 @@ enum Role {
 
   ADMIN // developer
 }
+
+// enum UserSSOProvider {
+//   EMAIL
+//   GITHUB
+//   GOOGLE
+// }
 
 /**
  * 問題の種類

@@ -50,6 +50,8 @@ export class ExerciseRepository extends RepositoryBase {
         isPublished: true,
         isCanSkip: true,
         isScoringBatch: true,
+        random: true,
+        questionCount: true,
         _count: {
           select: {
             exerciseQuestions: true,

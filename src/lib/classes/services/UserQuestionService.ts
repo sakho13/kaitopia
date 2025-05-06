@@ -566,13 +566,20 @@ export class UserQuestionService extends ServiceBase {
           this._userId,
           t,
         )
-        const questions =
-          await userQuestionRepository.findQuestionsByExerciseId(
-            exerciseId,
-            false,
-          )
+        let questions = await userQuestionRepository.findQuestionsByExerciseId(
+          exerciseId,
+          false,
+        )
         if (questions.length === 0)
           throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+        if (exercise.random) {
+          questions = questions.sort(() => Math.random() - 0.5)
+        }
+
+        if (exercise.questionCount !== null) {
+          questions = questions.slice(0, exercise.questionCount)
+        }
 
         const userLogRepository = new UserLogRepository(this._userId, t)
         const sheet =
