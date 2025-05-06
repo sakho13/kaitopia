@@ -58,9 +58,11 @@ export function useQuestionAnswer({
     if (!result) return
     if (!result.success) return
 
-    _initAnswerState()
-
     return result.data
+  }
+
+  const resetAnswer = () => {
+    _initAnswerState()
   }
 
   const _sendAnswerByExercise = async () => {
@@ -158,5 +160,6 @@ export function useQuestionAnswer({
 
     onAnswer,
     onSubmitAnswer,
+    resetAnswer,
   }
 }

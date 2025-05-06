@@ -7,6 +7,7 @@ import {
   ApiV1OutBase,
   ApiV1OutTypeMap,
 } from "@/lib/types/apiV1Types"
+import { useEffect, useState } from "react"
 
 const fetcher = async <T extends keyof ApiV1OutTypeMap>(
   _label: T,
@@ -338,23 +339,32 @@ export function useGetUserExerciseQuestions(
 ) {
   const { idToken } = useAuth()
 
-  const { data, isLoading, mutate } = useSWRImmutable(
-    ["/api/user/v1/exercise/question", idToken, exerciseId, mode],
-    async ([url, token, eid, md]) =>
-      token && eid && md
-        ? fetcher(
-            "GetUserExerciseQuestion",
-            "GET",
-            `${url}?exerciseId=${eid}&mode=${md}`,
-            token,
-          )
-        : null,
-  )
+  const [data, setData] =
+    useState<ApiV1OutBase<ApiV1OutTypeMap["GetUserExerciseQuestion"]>>()
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!exerciseId) return
+    const fetchData = async () => {
+      if (!idToken) return
+      if (isLoading) return
+
+      const res = await fetcher(
+        "GetUserExerciseQuestion",
+        "GET",
+        `/api/user/v1/exercise/question?exerciseId=${exerciseId}&mode=${mode}`,
+        idToken,
+      )
+      setData(res)
+      setIsLoading(false)
+    }
+
+    fetchData()
+  }, [idToken, exerciseId, mode])
 
   return {
     dataToGetUserExerciseQuestions: data,
     isLoadingToGetUserExerciseQuestions: isLoading,
-    refetchUserExerciseQuestions: mutate,
   } as const
 }
 
