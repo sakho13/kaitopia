@@ -76,26 +76,38 @@ export async function GET(request: NextRequest) {
 /**
  * 一括採点or結果を取得したい場合に実行される
  */
-export function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集として採点")
 
-  return api.execute("PostUserExerciseQuestion", async () => {
+  return await api.execute("PostUserExerciseQuestion", async () => {
     await api.authorize(request)
 
-    const { error, result } = validatePost(await request.json())
+    const { error, result: body } = validatePost(await request.json())
     if (error) throw error
 
-    //
+    const userService = new UserService(prisma)
+    await userService.getUserInfo(api.getFirebaseUid())
+
+    const userQuestionService = new UserQuestionService(
+      userService.userController,
+      prisma,
+    )
+
+    userQuestionService.exerciseId = body.exerciseId
+    const completeResult = await userQuestionService.submitAnswerState(
+      body.answerLogSheetId,
+    )
 
     return {
       fn: null,
-      answerLogSheetId: result.answerLogSheetId,
-      exerciseId: result.exerciseId,
+      answerLogSheetId: body.answerLogSheetId,
+      exerciseId: body.exerciseId,
       result: {
         isInProgress: true,
-        totalCorrectCount: 0,
-        totalIncorrectCount: 0,
-        totalUnansweredCount: 0,
+        totalQuestionCount: completeResult.totalQuestion,
+        totalCorrectCount: completeResult.totalCorrectCount,
+        totalIncorrectCount: completeResult.totalIncorrectCount,
+        totalUnansweredCount: completeResult.totalUnansweredCount,
       },
     }
   })
@@ -104,10 +116,10 @@ export function POST(request: NextRequest) {
 /**
  * 問題ごとに実行される
  */
-export function PATCH(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の回答")
 
-  return api.execute("PatchUserExerciseQuestion", async () => {
+  return await api.execute("PatchUserExerciseQuestion", async () => {
     await api.authorize(request)
 
     const { error, result } = validatePatch(await request.json())
@@ -144,8 +156,8 @@ export function PATCH(request: NextRequest) {
       skipped: result.answer.type === "SKIP",
       totalQuestionCount: saveResult?.totalQuestions ?? 0,
       totalAnsweredCount,
-      isCorrect: saveResult?.isCorrect || null,
-      questionScore: saveResult?.score || null,
+      isCorrect: saveResult?.isCorrect === null ? null : saveResult?.isCorrect,
+      questionScore: saveResult?.score === null ? null : saveResult?.score,
     }
   })
 }

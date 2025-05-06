@@ -217,10 +217,11 @@ export class UserQuestionService extends ServiceBase {
         if (
           answer.type !== "SKIP" &&
           userQuestionLog.questionVersion.question.answerType !== answer.type
-        )
+        ) {
           throw new ApiV1Error([
             { key: "InvalidFormatError", params: { key: "回答形式" } },
           ])
+        }
 
         this._checkAnswerFormat(
           userQuestionLog.questionVersion.question.questionType,
@@ -236,7 +237,7 @@ export class UserQuestionService extends ServiceBase {
           },
         )
 
-        return await this.saveUserAnswerLog(
+        return await this._saveUserAnswerLog(
           userLogRepository,
           latest.answerLogSheetId,
           userQuestionLog.questionUserLogId,
@@ -279,6 +280,44 @@ export class UserQuestionService extends ServiceBase {
   }
 
   /**
+   * 回答状態を固定/保存する
+   */
+  public async submitAnswerState(answerLogSheetId: string) {
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+    const sheet = await userLogRepository.findAnswerLogSheetById(
+      answerLogSheetId,
+      this._userId,
+    )
+
+    if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+    const totalQuestion = sheet.questionUserLogs.length
+
+    if (sheet.isInProgress) {
+      return {
+        isInProgress: sheet.isInProgress,
+        totalQuestion,
+        totalCorrectCount: sheet.totalCorrectCount,
+        totalIncorrectCount: sheet.totalIncorrectCount,
+        totalUnansweredCount: sheet.totalUnansweredCount,
+      }
+    }
+
+    const result = await userLogRepository.completeAnswerLogSheet(
+      answerLogSheetId,
+    )
+    return {
+      isInProgress: result.isInProgress,
+      totalQuestion,
+      totalCorrectCount: result.totalCorrectCount,
+      totalIncorrectCount: result.totalIncorrectCount,
+      totalUnansweredCount: result.totalUnansweredCount,
+    }
+  }
+
+  /**
    * 回答を保存する(採点はしない)
    * @param userLogRepository
    * @param answerLogSheetId
@@ -286,7 +325,7 @@ export class UserQuestionService extends ServiceBase {
    * @param answer
    * @returns
    */
-  private async saveUserAnswerLog(
+  private async _saveUserAnswerLog(
     userLogRepository: UserLogRepository,
     answerLogSheetId: string,
     userQuestionLogId: string,
@@ -415,7 +454,6 @@ export class UserQuestionService extends ServiceBase {
         const userAnswers = questionUserLog.answerSelectUserLogs.map(
           (a) => a.selectAnswerId,
         )
-        if (correctAnswers.length !== userAnswers.length) return null
 
         const isAllCorrect = correctAnswers.every((correctAnswer) =>
           userAnswers.includes(correctAnswer),
@@ -584,13 +622,13 @@ export class UserQuestionService extends ServiceBase {
         if (answerType === "MULTI_SELECT") {
           if (answer.type !== "MULTI_SELECT")
             throw new Error("InvalidFormatError")
-          if (!("answerId" in answer)) throw new Error("InvalidFormatError")
+          if (!("answerIds" in answer)) throw new Error("InvalidFormatError")
 
-          if (!Array.isArray(answer.answerId))
+          if (!Array.isArray(answer.answerIds))
             throw new Error("InvalidFormatError")
-          if (answer.answerId.length < 1) throw new Error("InvalidFormatError")
+          if (answer.answerIds.length < 1) throw new Error("InvalidFormatError")
           if (
-            answer.answerId.some((a) => typeof a !== "string" || a.length < 1)
+            answer.answerIds.some((a) => typeof a !== "string" || a.length < 1)
           )
             throw new Error("InvalidFormatError")
         }
