@@ -10,7 +10,7 @@ export default function Home() {
           学びの未来を、もっと楽しくスマートに。
         </h1>
         <p className='text-lg md:text-xl mb-8'>
-          Kaitopiaは、学習者と教育者のためのe-learningプラットフォームです。
+          {/* Kaitopiaは、学習者と教育者のためのe-learningプラットフォームです。 */}
         </p>
 
         <Link
