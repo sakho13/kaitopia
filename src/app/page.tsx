@@ -51,16 +51,19 @@ export default function Home() {
       </section> */}
 
       {/* CTA */}
-      <section className='bg-smart text-white py-20 px-4 text-center'>
+      <section className='bg-smart text-white py-20 px-4 text-center select-none'>
         <h2 className='text-3xl md:text-4xl font-bold mb-6'>
           今すぐKaitopiaを使ってみよう！
         </h2>
         {/* <p className='mb-6'>
           最初の30日間は無料。法人・個人問わずご利用いただけます。
         </p> */}
-        <button className='bg-white text-smart font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition'>
+        <Link
+          href={"/public/signup"}
+          className='bg-white text-smart font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition'
+        >
           サインアップする
-        </button>
+        </Link>
       </section>
 
       {/* Footer */}
