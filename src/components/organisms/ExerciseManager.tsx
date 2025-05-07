@@ -13,6 +13,7 @@ import { joincn } from "@/lib/functions/joincn"
 import { ButtonBase } from "../atoms/ButtonBase"
 import { ExerciseManageAnswerPart } from "../molecules/ExerciseManageAnswerPart"
 import { Skeleton } from "../ui/skeleton"
+import { ThinProgressBar } from "../atoms/ThinProgressBar"
 
 type Props = {
   exerciseId: string
@@ -156,6 +157,15 @@ export function ExerciseManager({ exerciseId }: Props) {
 
   return (
     <div className='max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
+      <ThinProgressBar
+        progress={((currentIndex + 1) / questions.length) * 100}
+        colorBorders={[
+          { progress: 10, color: "#d3d3d3" },
+          { progress: 50, color: "#98d0ff" },
+          { progress: 80, color: "#95daaf" },
+        ]}
+      />
+
       <h1 className='text-xl font-bold select-none'>
         <span>{exercise.title}</span>
 
