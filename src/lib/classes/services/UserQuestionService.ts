@@ -463,9 +463,11 @@ export class UserQuestionService extends ServiceBase {
           (a) => a.selectAnswerId,
         )
 
-        const isAllCorrect = correctAnswers.every((correctAnswer) =>
-          userAnswers.includes(correctAnswer),
-        )
+        const isAllCorrect =
+          correctAnswers.every((correctAnswer) =>
+            userAnswers.includes(correctAnswer),
+          ) &&
+          userAnswers.every((userAnswer) => correctAnswers.includes(userAnswer))
 
         // 採点結果を記録
         if (isAllCorrect) {
