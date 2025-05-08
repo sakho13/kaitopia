@@ -91,6 +91,127 @@ const questionList: QuestionTypeFor[] = [
     content: "走行中、右にハンドルを切ると車には左に飛び出そうとする力が働く。",
     correct: true,
   },
+  {
+    questionId: "moped_license_1_12",
+    title: "天候による運転1",
+    content:
+      "雨の日は視界が悪く路面がすべりやすいので、晴れの日よりも速度を落とし、車間距離をおおめにとって運転することが大切である。",
+    hint: "車間距離をおおめにとる理由を考えてみましょう。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_13",
+    title: "運転中の携帯電話1",
+    content:
+      "携帯電話は、運転する前に電源をきるか、ドライブモードに設定して、呼び出し音がならないようにしておく。",
+    hint: "運転中に呼び出し音がなると、あなたはどうしますか？",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_14",
+    title: "二輪車の特性1",
+    content:
+      "二輪車は、身体で安定を保ちながら走り、停止すれば安定を失うという構造上の特性があり、これが四輪車と根本的に違うところである。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_15",
+    title: "運転前のタイヤ点検1",
+    content:
+      "タイヤの点検は、空気圧、亀裂や損傷、クギや石などの異物の有無、異常な摩擦、溝の深さなどを点検する。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_16",
+    title: "自分本位の運転1",
+    content:
+      "交通規則にないことは運転者の自由であるから、自分本位の判断で運転してもよい。",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_17",
+    title: "カーブの運転1",
+    content: "二輪車でカーブを曲がるときは、車体をカーブの外側に傾ける。",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_18",
+    title: "かもしれない運転1",
+    content:
+      "運転中は「大丈夫だろう」と自分に都合よく考えず「ひょっとしたら危ないかもしれない」と考え運転するほうが安全である。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_19",
+    title: "右左折の合図1",
+    content: "右折や左折の合図は、右折や左折をしようとする3秒前に出す。",
+    hint: "車線変更の合図と右左折の合図のタイミングは同じですか？",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_20",
+    title: "後退の禁止1",
+    content:
+      "標識や標示によって横断や転回が禁止されているところでは、後退も禁止されている。",
+    hint: "「後退」は禁止されていますか？",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_21",
+    title: "危険防止のための警音器1",
+    content:
+      "霧が発生したときは、危険を防止するために、必要に応じて警音器を使用するとよい。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_22",
+    title: "ブレーキのかけ方1",
+    content:
+      "原動機付自転車のブレーキは、やむを得ない場合を除き、はじめはやわらかく、その後必要な強さまで徐々にかけていくのがよい。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_23",
+    title: "対向車の死角1",
+    content: "対向車によってできる死角は、対向車が接近するほど大きくなる。",
+    correct: true,
+  },
+  {
+    questionId: "moped_license_1_24",
+    title: "半ヘルメット1",
+    content:
+      "原動機付自転車を運転するときのヘルメットは、工事用安全帽（通称、半ヘル）でもかまわない。",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_25",
+    title: "自転車横断帯の通行1",
+    content:
+      "自転車横断帯の直前で停止している車があっても、進路の前方を横断している自転車が見えないときは、そのまま通過してもよい。",
+    hint: "かもしれない運転を思い出しましょう。",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_26",
+    title: "発進時の合図1",
+    content:
+      "道路の端から発信する場合は、後方から車が来ないことを確かめなければ、とくに合図をする必要はない。",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_27",
+    title: "環状交差点の合図1",
+    content: "環状交差点に入るときは合図を行うが、出るときは合図を行わない。",
+    hint: "環状交差点に入るときと出るときの合図は同じですか？",
+    correct: false,
+  },
+  {
+    questionId: "moped_license_1_28",
+    title: "転回時の合図1",
+    content: "転回するときの合図をする時期は、転回しようとする3秒前である。",
+    hint: "右左折の合図と転回の合図のタイミングは同じですか？",
+    correct: false,
+  },
 ]
 
 export const SeedDataMopedLicense1 = {
