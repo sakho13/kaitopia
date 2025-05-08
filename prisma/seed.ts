@@ -16,7 +16,10 @@ async function main() {
       data: { currentVersionId: 1 },
       where: {
         id: {
-          in: SeedDataIntroProgramming1.questions.map((q) => q.id),
+          in: [
+            ...SeedDataIntroProgramming1.questions.map((q) => q.id),
+            ...SeedDataMopedLicense1.questions.map((q) => q.id),
+          ],
         },
         schoolId: SeedDataIntroProgramming1.exercise.schoolId,
       },
@@ -43,6 +46,7 @@ async function transferUsers(db: Prisma.TransactionClient) {
         id: "kaitopia-user+001",
         firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
         name: "Kaitopia User 001",
+        email: "kaitopia-user+001@kaitopia.com",
         isGuest: false,
         role: "USER",
       },
@@ -50,6 +54,7 @@ async function transferUsers(db: Prisma.TransactionClient) {
         id: "kaitopia-admin+001",
         firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
         name: "Kaitopia Admin 001",
+        email: "kaitopia-admin+001@kaitopia.com",
         isGuest: false,
         role: "ADMIN",
       },
@@ -207,30 +212,4 @@ async function transferQuestions(db: Prisma.TransactionClient) {
       questionId: q.id,
     })),
   })
-
-  // 公開バージョン
-  await Promise.all(
-    SeedDataIntroProgramming1.questionCurrentVersion.map((q) =>
-      db.question.update({
-        data: {
-          currentVersionId: q.version,
-        },
-        where: {
-          id: q.questionId,
-        },
-      }),
-    ),
-  )
-  await Promise.all(
-    SeedDataMopedLicense1.questionCurrentVersion.map((q) =>
-      db.question.update({
-        data: {
-          currentVersionId: q.version,
-        },
-        where: {
-          id: q.questionId,
-        },
-      }),
-    ),
-  )
 }

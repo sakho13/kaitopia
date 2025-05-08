@@ -32,16 +32,17 @@ export default function Page() {
       <div>
         <SectionTitle title='おすすめの問題集' />
 
-        <section className='mb-6 flex gap-x-3'>
+        <section className='mb-6 flex md:flex-row flex-col gap-x-3 gap-y-3'>
           {dataTooGetRecommendExercises && dataTooGetRecommendExercises.success
             ? dataTooGetRecommendExercises.data.recommendExercises.map(
                 (exercise) => (
                   <InfoArea
                     key={encodeBase64(exercise.id)}
                     className={joincn(
-                      `bg-background-subtle p-4 rounded-2xl shadow h-[160px]`,
+                      `bg-background-subtle rounded-2xl shadow h-[160px]`,
                       `hover:shadow-lg transition`,
                       `cursor-pointer`,
+                      "md:basis-1/3  sm:w-full",
                     )}
                     onClick={() => {
                       onOpenExerciseInfoDialog(exercise.id)

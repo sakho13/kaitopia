@@ -118,5 +118,19 @@ describe("API /api/user/v1/login/", () => {
         isGuest: true,
       }),
     })
+
+    // user-configを取得
+    const resultGetUserConfig = await TestUtility.runApi(
+      UserConfigGET,
+      "GET",
+      "/api/user/v1/user-config",
+      {
+        Authorization: `Bearer ${token}`,
+      },
+    )
+    expect(resultGetUserConfig.ok).toBe(true)
+    expect(resultGetUserConfig.status).toBe(200)
+    const jsonGetUserConfig = await resultGetUserConfig.json()
+    expect(jsonGetUserConfig.success).toBe(true)
   })
 })

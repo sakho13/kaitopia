@@ -36,7 +36,8 @@ export function useAuth() {
       firebaseAuthClient,
       async (firebaseUser) => {
         if (firebaseUser) {
-          setAuth(firebaseUser, (await firebaseUser?.getIdToken()) ?? "")
+          const token = await firebaseUser.getIdToken()
+          setAuth(firebaseUser, token)
           fetchUserConfig()
         } else {
           clearAuth()

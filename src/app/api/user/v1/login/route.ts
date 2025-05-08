@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   // ケース２：ユーザ存在確認
 
   return await api.execute("PostUserLogin", async () => {
-    await api.authorize(request)
+    const { email, phone_number } = await api.authorize(request)
 
     const userService = new UserService(prisma)
 
@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
         user: {
           id: userInfo.id,
           name: userInfo.name,
+          email: userInfo.email,
+          phoneNumber: userInfo.phoneNumber,
           birthDayDate: userInfo.birthDayDate
             ? userInfo.birthDayDate.toISOString()
             : null,
@@ -43,6 +45,8 @@ export async function POST(request: NextRequest) {
       {
         name: userName,
         role: "USER",
+        email: email ?? null,
+        phoneNumber: phone_number ?? null,
       },
     )
 
@@ -51,6 +55,8 @@ export async function POST(request: NextRequest) {
       user: {
         id: user.id,
         name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
         birthDayDate: user.birthDayDate
           ? user.birthDayDate.toISOString()
           : null,

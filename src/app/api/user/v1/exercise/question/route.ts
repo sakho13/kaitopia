@@ -7,10 +7,10 @@ import { prisma } from "@/lib/prisma"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 import { NextRequest } from "next/server"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
-  return api.execute("GetUserExerciseQuestion", async () => {
+  return await api.execute("GetUserExerciseQuestion", async () => {
     await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
@@ -76,26 +76,38 @@ export function GET(request: NextRequest) {
 /**
  * 一括採点or結果を取得したい場合に実行される
  */
-export function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集として採点")
 
-  return api.execute("PostUserExerciseQuestion", async () => {
+  return await api.execute("PostUserExerciseQuestion", async () => {
     await api.authorize(request)
 
-    const { error, result } = validatePost(await request.json())
+    const { error, result: body } = validatePost(await request.json())
     if (error) throw error
 
-    //
+    const userService = new UserService(prisma)
+    await userService.getUserInfo(api.getFirebaseUid())
+
+    const userQuestionService = new UserQuestionService(
+      userService.userController,
+      prisma,
+    )
+
+    userQuestionService.exerciseId = body.exerciseId
+    const completeResult = await userQuestionService.submitAnswerState(
+      body.answerLogSheetId,
+    )
 
     return {
       fn: null,
-      answerLogSheetId: result.answerLogSheetId,
-      exerciseId: result.exerciseId,
+      answerLogSheetId: body.answerLogSheetId,
+      exerciseId: body.exerciseId,
       result: {
         isInProgress: true,
-        totalCorrectCount: 0,
-        totalIncorrectCount: 0,
-        totalUnansweredCount: 0,
+        totalQuestionCount: completeResult.totalQuestion,
+        totalCorrectCount: completeResult.totalCorrectCount,
+        totalIncorrectCount: completeResult.totalIncorrectCount,
+        totalUnansweredCount: completeResult.totalUnansweredCount,
       },
     }
   })
@@ -104,27 +116,48 @@ export function POST(request: NextRequest) {
 /**
  * 問題ごとに実行される
  */
-export function PATCH(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の回答")
 
-  return api.execute("PatchUserExerciseQuestion", async () => {
+  return await api.execute("PatchUserExerciseQuestion", async () => {
     await api.authorize(request)
 
-    const { error, result } = validatePatch(await api.authorize(request))
+    const { error, result } = validatePatch(await request.json())
     if (error) throw error
 
-    //
+    const userService = new UserService(prisma)
+    await userService.getUserInfo(api.getFirebaseUid())
+
+    const userQuestionService = new UserQuestionService(
+      userService.userController,
+      prisma,
+    )
+
+    const { answerLogSheetId, exerciseId, questionUserLogId } = result
+    userQuestionService.exerciseId = exerciseId
+
+    const saveResult = await userQuestionService.saveAnswerLog(
+      answerLogSheetId,
+      questionUserLogId,
+      result.answer,
+    )
+    const totalQuestions = saveResult?.totalQuestions ?? 0
+    const totalAnsweredCount =
+      (saveResult?.totalCorrectCount ?? 0) +
+      (saveResult?.totalIncorrectCount ?? 0) +
+      (saveResult?.totalUnansweredCount ?? 0)
+
+    const allAnswered = totalAnsweredCount >= totalQuestions
 
     return {
-      fn: null,
+      fn: allAnswered ? "total-result" : "answer",
       answerLogSheetId: result.answerLogSheetId,
       exerciseId: result.exerciseId,
-      result: {
-        isInProgress: true,
-        totalCorrectCount: 0,
-        totalIncorrectCount: 0,
-        totalUnansweredCount: 0,
-      },
+      skipped: result.answer.type === "SKIP",
+      totalQuestionCount: saveResult?.totalQuestions ?? 0,
+      totalAnsweredCount,
+      isCorrect: saveResult?.isCorrect === null ? null : saveResult?.isCorrect,
+      questionScore: saveResult?.score === null ? null : saveResult?.score,
     }
   })
 }
@@ -197,7 +230,12 @@ function validatePatch(
       result: null,
     }
 
-  if (!("answerLogSheetId" in body) || !("exerciseId" in body)) {
+  if (
+    !("answerLogSheetId" in body) ||
+    !("questionUserLogId" in body) ||
+    !("exerciseId" in body) ||
+    !("answer" in body)
+  ) {
     return {
       error: new ApiV1Error([
         { key: "RequiredValueError", params: { key: "問題集のプロパティ" } },
@@ -206,7 +244,7 @@ function validatePatch(
     }
   }
 
-  const { answerLogSheetId, exerciseId } = body
+  const { answerLogSheetId, questionUserLogId, exerciseId, answer } = body
 
   if (typeof answerLogSheetId !== "string" || typeof exerciseId !== "string")
     return {
@@ -235,23 +273,15 @@ function validatePatch(
 
   // 回答情報チェック
 
-  if (!("questionId" in body) || typeof body.questionId !== "string")
+  if (typeof questionUserLogId !== "string")
     return {
       error: new ApiV1Error([
-        { key: "RequiredValueError", params: { key: "問題ID" } },
+        { key: "RequiredValueError", params: { key: "問題ログID" } },
       ]),
       result: null,
     }
 
-  if (!("version" in body) || typeof body.version !== "number")
-    return {
-      error: new ApiV1Error([
-        { key: "RequiredValueError", params: { key: "バージョン" } },
-      ]),
-      result: null,
-    }
-
-  if (!("answer" in body) || typeof body.answer !== "object")
+  if (typeof answer !== "object")
     return {
       error: new ApiV1Error([
         { key: "RequiredValueError", params: { key: "回答" } },
@@ -260,7 +290,6 @@ function validatePatch(
     }
 
   // 回答の型チェック
-  const answer = body.answer
   if (!answer || !("type" in answer) || typeof answer.type !== "string")
     return {
       error: new ApiV1Error([

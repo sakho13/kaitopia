@@ -2,7 +2,6 @@ import { ExerciseBase } from "@/lib/types/base/exerciseTypes"
 import { ServiceBase } from "../common/ServiceBase"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
-import { AnswerLogRepository } from "../repositories/AnswerLogRepository"
 import { UserController } from "../controller/UserController"
 
 export class ExerciseService extends ServiceBase {
@@ -158,63 +157,6 @@ export class ExerciseService extends ServiceBase {
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     return await exerciseRepository.deleteExercise(exerciseId)
-  }
-
-  /**
-   * 問題集の回答を開始する
-   *
-   * @description
-   * 1. 回答ログシートが存在すれば、そのIDを返す
-   * 2. 存在しなければ、回答ログシートを登録する
-   * 3. 回答ログシートと出題する問題を紐付ける
-   */
-  public async startExercise(userId: string, exerciseId: string) {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
-    const exercise = await exerciseRepository.findExerciseById(exerciseId)
-    if (!exercise)
-      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-
-    const { answerLogSheetId, createdAt, updatedAt } =
-      await this.dbConnection.$transaction(async (tx) => {
-        const answerLogRepository = new AnswerLogRepository(tx)
-
-        // 回答ログシートが存在するか確認
-        const logSheet =
-          await answerLogRepository.findLatestAnswerLogSheetByExerciseId(
-            userId,
-            exerciseId,
-          )
-        if (logSheet)
-          return {
-            answerLogSheetId: logSheet.answerLogSheetId,
-            createdAt: logSheet.createdAt,
-            updatedAt: logSheet.updatedAt,
-          }
-
-        // 回答ログシートが存在しない場合は新規作成
-        const created =
-          await answerLogRepository.createAnswerLogSheetByExerciseId(
-            userId,
-            exerciseId,
-          )
-
-        // 出題する問題を選出して紐づける
-        // const questionRepository = new QuestionRepository(tx)
-        // const questions =
-        //   await questionRepository.findQuestionAnswersByExerciseId(exerciseId)
-
-        return {
-          answerLogSheetId: created.answerLogSheetId,
-          createdAt: created.createdAt,
-          updatedAt: created.updatedAt,
-        }
-      })
-
-    return {
-      answerLogSheetId: answerLogSheetId,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    }
   }
 
   public setUserController(userController: UserController) {

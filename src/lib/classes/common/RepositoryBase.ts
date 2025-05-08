@@ -7,7 +7,7 @@ export abstract class RepositoryBase {
     this.dbConnection = dbConnection
   }
 
-  public set resetDbConnection(
+  public resetDbConnection(
     dbConnection: PrismaClient | Prisma.TransactionClient,
   ) {
     this.dbConnection = dbConnection

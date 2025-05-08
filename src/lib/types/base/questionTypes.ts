@@ -10,6 +10,7 @@ export type QuestionForUser = {
    * 出題ログID 単純に閲覧する場合 questionId
    */
   questionUserLogId: string
+  questionId: string
 
   title: string
   questionType: QuestionTypeType
@@ -123,22 +124,26 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
   properties: QuestionAnswerProperty[T]
 }
 
-export type QuestionAnswerContent =
-  | {
-      type: "SKIP"
-    }
-  | {
-      type: "SELECT"
-      answerId: string
-    }
-  | {
-      type: "MULTI_SELECT"
-      answerIds: string[]
-    }
-  | {
-      type: "TEXT"
-      content: string
-    }
+export type QuestionUserAnswer = {
+  SKIP: object
+  SELECT: {
+    answerId: string
+  }
+  MULTI_SELECT: {
+    answerIds: string[]
+  }
+  TEXT: {
+    content: string
+  }
+}
+
+export type QuestionUserAnswerType<K extends keyof QuestionUserAnswer> = {
+  type: K
+} & QuestionUserAnswer[K]
+
+export type QuestionAnswerContent = QuestionUserAnswerType<
+  keyof QuestionUserAnswer
+>
 
 export const QuestionType = {
   TEXT: "TEXT",

@@ -2,7 +2,8 @@
  * @jest-environment node
  */
 
-import { GET } from "@/app/api/user/v1/exercise/question/route"
+import { GET, PATCH } from "@/app/api/user/v1/exercise/question/route"
+import { GET as GetUserV1ExerciseResults } from "@/app/api/user/v1/exercise/results/route"
 import { TestUtility } from "../TestUtility"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
@@ -195,6 +196,132 @@ describe("API /api/user/v1/exercise", () => {
               title: expect.any(String),
             }),
           ]),
+        }),
+      })
+    })
+
+    test("通常ユーザで回答を送信しログとして記録される", async () => {
+      const exerciseId = "intro_programming_1"
+      const token = await TestUtility.getTokenByEmailAndSignUp(
+        `test-user-${DateUtility.generateDateStringNow()}+${generateRandomLenNumber(
+          3,
+        )}@kaitopia.com`,
+        "password",
+      )
+      await TestUtility.signUpByToken(token)
+      const beforeResult = await TestUtility.runApi(
+        GetUserV1ExerciseResults,
+        "GET",
+        "/api/user/v1/exercise/results?ignoreInProgress=false&count=10&page=1",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(beforeResult.ok).toBe(true)
+      expect(beforeResult.status).toBe(200)
+      const beforeJson = await beforeResult.json()
+      expect(beforeJson).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          answerLogSheets: [],
+          nextPage: null,
+          totalCount: 0,
+        }),
+      })
+
+      const startAnswerResult = await TestUtility.runApi(
+        GET,
+        "GET",
+        `/api/user/v1/exercise/question?exerciseId=${exerciseId}&mode=answer`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(startAnswerResult.ok).toBe(true)
+      expect(startAnswerResult.status).toBe(200)
+      const startAnswerJson = await startAnswerResult.json()
+      expect(startAnswerJson).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          fn: "answer",
+          answerLogSheetId: expect.any(String),
+          exercise: expect.objectContaining({
+            title: expect.any(String),
+          }),
+          questions: expect.arrayContaining([
+            expect.objectContaining({
+              questionUserLogId: expect.any(String),
+              title: expect.any(String),
+              content: expect.any(String),
+            }),
+          ]),
+        }),
+      })
+
+      const answerLogSheetId = startAnswerJson.data.answerLogSheetId
+      const firstQuestionUserLogId = startAnswerJson.data.questions.find(
+        (q: { questionId: string }) => q.questionId === "intro_programming_1_1",
+      ).questionUserLogId
+
+      const patchResult = await TestUtility.runApi(
+        PATCH,
+        "PATCH",
+        "/api/user/v1/exercise/question",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          answerLogSheetId,
+          questionUserLogId: firstQuestionUserLogId,
+          exerciseId,
+          answer: {
+            type: "SELECT",
+            answerId: "3",
+          },
+        },
+      )
+      expect(patchResult.ok).toBe(true)
+      expect(patchResult.status).toBe(200)
+      const patchJson = await patchResult.json()
+      expect(patchJson).toEqual(
+        expect.objectContaining({
+          success: true,
+          data: expect.objectContaining({
+            fn: "answer",
+            answerLogSheetId: expect.any(String),
+            exerciseId,
+            skipped: false,
+            totalQuestionCount: startAnswerJson.data.questions.length,
+            totalAnsweredCount: 1,
+            isCorrect: true,
+            questionScore: 100,
+          }),
+        }),
+      )
+
+      const afterResult = await TestUtility.runApi(
+        GetUserV1ExerciseResults,
+        "GET",
+        "/api/user/v1/exercise/results?ignoreInProgress=false&count=10&page=1",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(afterResult.ok).toBe(true)
+      expect(afterResult.status).toBe(200)
+      const afterJson = await afterResult.json()
+      expect(afterJson).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          answerLogSheets: expect.arrayContaining([
+            expect.objectContaining({
+              answerLogSheetId: startAnswerJson.data.answerLogSheetId,
+              exerciseId,
+              totalQuestionCount: startAnswerJson.data.questions.length,
+            }),
+          ]),
+          nextPage: null,
+          totalCount: 1,
         }),
       })
     })

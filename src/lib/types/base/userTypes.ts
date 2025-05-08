@@ -8,6 +8,8 @@ export type User = UserBaseInfo &
 
 export type UserBaseInfo = {
   name: string
+  email: string | null
+  phoneNumber: string | null
 
   role: UserRoleType
 }

@@ -18,7 +18,7 @@ export class ExerciseRepository extends RepositoryBase {
         isPublished: isPublished,
       },
       orderBy: {
-        createdAt: "desc",
+        updatedAt: "desc",
       },
       take: count,
     })
@@ -50,6 +50,8 @@ export class ExerciseRepository extends RepositoryBase {
         isPublished: true,
         isCanSkip: true,
         isScoringBatch: true,
+        random: true,
+        questionCount: true,
         _count: {
           select: {
             exerciseQuestions: true,
@@ -156,28 +158,5 @@ export class ExerciseRepository extends RepositoryBase {
         deletedAt: new Date(),
       },
     })
-  }
-
-  /**
-   * 進行中の問題集を取得/登録する
-   */
-  public async getLogSheetInProgress(userId: string, exerciseId: string) {
-    // return await this.dbConnection.$transaction(async (tx) => {
-    //   const logSheetInProgress = await tx.answerLogSheet.findFirst({
-    //     where: {
-    //       isInProgress: true,
-    //       userId,
-    //       exerciseId,
-    //     },
-    //   })
-    //   if (logSheetInProgress) return logSheetInProgress
-    //   return await tx.answerLogSheet.create({
-    //     data: {
-    //       userId,
-    //       exerciseId,
-    //       isInProgress: true,
-    //     },
-    //   })
-    // })
   }
 }

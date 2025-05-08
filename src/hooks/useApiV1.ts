@@ -7,6 +7,7 @@ import {
   ApiV1OutBase,
   ApiV1OutTypeMap,
 } from "@/lib/types/apiV1Types"
+import { useEffect, useState } from "react"
 
 const fetcher = async <T extends keyof ApiV1OutTypeMap>(
   _label: T,
@@ -244,6 +245,63 @@ export function useDeleteManageExercise() {
   return { requestDeleteExercise }
 }
 
+/**
+ * GET: `/api/manage/v1/users?page=1&count=10`
+ */
+export function useGetManageUsers() {
+  const { idToken } = useAuth()
+
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ApiV1OutTypeMap["GetManageUsers"] | null,
+  ) => {
+    const PAGE_SIZE = 20
+
+    if (!idToken) return null
+
+    const isFirstFetch = pageIndex === 0
+    if (isFirstFetch)
+      return [`/api/manage/v1/users?count=${PAGE_SIZE}&page=1`, idToken]
+
+    if (previousPageData?.nextPage === null || !previousPageData) return null
+
+    const page = pageIndex + 1
+    return [`/api/manage/v1/users?count=${PAGE_SIZE}&page=${page}`, idToken]
+  }
+
+  const { data, isLoading, setSize, isValidating, mutate } = useSWRInfinite(
+    getKey,
+    async ([url, token]) =>
+      token ? fetcher("GetManageUsers", "GET", url, token) : null,
+  )
+
+  const loadMore = () => {
+    if (isLoading || isValidating) return
+    if (!data) {
+      setSize(1)
+      return
+    }
+    const latest = data[data.length - 1]
+    if (!latest?.success) {
+      setSize(1)
+      return
+    }
+    if (latest.data.nextPage === null) return
+    setSize((prev) => (prev ? prev + 1 : 1))
+  }
+
+  return {
+    dataToGetManageUsers: data
+      ? data.flatMap((d) => (d?.success ? d.data.users : []))
+      : [],
+    totalCountToGetManageUsers:
+      data && data[0]?.success ? data[0].data.totalCount : 0,
+    isLoadingToGetManageUsers: isLoading || isValidating,
+    loadMoreToGetManageUsers: loadMore,
+    refetchGetManageUsers: mutate,
+  }
+}
+
 // *******************
 //      user
 // *******************
@@ -338,23 +396,33 @@ export function useGetUserExerciseQuestions(
 ) {
   const { idToken } = useAuth()
 
-  const { data, isLoading, mutate } = useSWRImmutable(
-    ["/api/user/v1/exercise/question", idToken, exerciseId, mode],
-    async ([url, token, eid, mode]) =>
-      token && eid
-        ? fetcher(
-            "GetUserExerciseQuestion",
-            "GET",
-            `${url}?exerciseId=${eid}&mode=${mode}`,
-            token,
-          )
-        : null,
-  )
+  const [data, setData] =
+    useState<ApiV1OutBase<ApiV1OutTypeMap["GetUserExerciseQuestion"]>>()
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!exerciseId) return
+    const fetchData = async () => {
+      if (!idToken) return
+      if (isLoading) return
+
+      const res = await fetcher(
+        "GetUserExerciseQuestion",
+        "GET",
+        `/api/user/v1/exercise/question?exerciseId=${exerciseId}&mode=${mode}`,
+        idToken,
+      )
+      setData(res)
+      setIsLoading(false)
+    }
+
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idToken, exerciseId, mode])
 
   return {
     dataToGetUserExerciseQuestions: data,
     isLoadingToGetUserExerciseQuestions: isLoading,
-    refetchUserExerciseQuestions: mutate,
   } as const
 }
 
@@ -390,14 +458,12 @@ export function usePatchUserExerciseQuestion() {
   const { idToken } = useAuth()
 
   const requestPatchExerciseQuestion = async (
-    exerciseId: string,
-    answerLogSheetId: string,
     input: ApiV1InTypeMap["PatchUserExerciseQuestion"],
   ) => {
     return await requestHttp(
       "PatchUserExerciseQuestion",
       "PatchUserExerciseQuestion",
-      `/api/user/v1/exercise/question?exerciseId=${exerciseId}&answerLogSheetId=${answerLogSheetId}`,
+      `/api/user/v1/exercise/question`,
       idToken ?? "",
       input,
       "PATCH",
@@ -406,5 +472,62 @@ export function usePatchUserExerciseQuestion() {
 
   return {
     requestPatchExerciseQuestion,
+  }
+}
+
+/**
+ * GET: `/api/user/v1/result/logs`
+ */
+export function useGetUserResultsLogs() {
+  const { idToken } = useAuth()
+
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ApiV1OutTypeMap["GetManageExercises"] | null,
+  ) => {
+    const PAGE_SIZE = 20
+
+    if (!idToken) return null
+
+    const isFirstFetch = pageIndex === 0
+    if (isFirstFetch)
+      return [`/api/user/v1/result/logs?count=${PAGE_SIZE}&page=1`, idToken]
+
+    if (previousPageData?.nextPage === null || !previousPageData) return null
+
+    const page = pageIndex + 1
+    return [`/api/user/v1/result/logs?count=${PAGE_SIZE}&page=${page}`, idToken]
+  }
+
+  const { data, isLoading, setSize, isValidating, mutate } = useSWRInfinite(
+    getKey,
+    async ([url, token]) =>
+      token ? fetcher("GetUserResultLog", "GET", url, token) : null,
+  )
+
+  const loadMore = () => {
+    if (isLoading || isValidating) return
+    if (!data) {
+      setSize(1)
+      return
+    }
+    const latest = data[data.length - 1]
+    if (!latest?.success) {
+      setSize(1)
+      return
+    }
+    if (latest.data.nextPage === null) return
+    setSize((prev) => (prev ? prev + 1 : 1))
+  }
+
+  return {
+    dataToGetUserResultLogs: data
+      ? data.flatMap((d) => (d?.success ? d.data.resultLogs : []))
+      : [],
+    totalCountToGetUserResultLogs:
+      data && data[0]?.success ? data[0].data.totalCount : 0,
+    isLoadingToGetUserResultLogs: isLoading || isValidating,
+    loadMoreToGetUserResultLogs: loadMore,
+    refetchGetUserResultLogs: mutate,
   }
 }
