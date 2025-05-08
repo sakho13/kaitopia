@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { FeaturesCarousel } from "@/components/organisms/FeaturesCarousel"
+import { STATICS } from "@/lib/statics"
 
 export default function Home() {
   return (
@@ -67,7 +68,15 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className='bg-primary text-text-on-color text-center p-6 mt-10'>
+      <footer className='bg-primary text-text-on-color text-center p-6 mt-10 select-none'>
+        <div className='mb-4 gap-y-2'>
+          <Link href={STATICS.GOOGLE_CONTACT_FORM_URL} target='_blank'>
+            問い合わせ
+          </Link>
+
+          <p>開発者: SaKho</p>
+        </div>
+
         <p>© 2025 Kaitopia Inc. All rights reserved.</p>
       </footer>
     </div>
