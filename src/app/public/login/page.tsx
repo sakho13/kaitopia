@@ -100,7 +100,7 @@ export default function LoginPage() {
         ゲストでログイン
       </ButtonBase>
 
-      <ButtonBase
+      {/* <ButtonBase
         colorMode='outline'
         sizeMode='full'
         className='mt-4'
@@ -108,7 +108,7 @@ export default function LoginPage() {
       >
         <img src='/google-logo.svg' alt='Google' className='w-5 h-5' />
         Googleでログイン
-      </ButtonBase>
+      </ButtonBase> */}
 
       <p className='mt-6 text-center text-sm text-gray-500'>
         アカウントをお持ちでない方は{" "}

@@ -97,10 +97,10 @@ export default function SignupPage() {
 
       <div className='mt-6 text-center text-sm text-gray-500'>または</div>
 
-      <ButtonBase className='mt-4' colorMode='outline' sizeMode='full'>
+      {/* <ButtonBase className='mt-4' colorMode='outline' sizeMode='full'>
         <img src='/google-logo.svg' alt='Google' className='w-5 h-5' />
         Googleでサインアップ
-      </ButtonBase>
+      </ButtonBase> */}
 
       <p className='mt-6 text-center text-sm text-gray-500'>
         すでにアカウントをお持ちの方は{" "}
