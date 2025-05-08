@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
         id: u.id,
         firebaseUid: u.firebaseUid,
         name: u.name,
+        email: u.email,
+        phoneNumber: u.phoneNumber,
         role: u.role,
         birthDayDate: u.birthDayDate?.toISOString() ?? null,
         createdAt: u.createdAt.toISOString(),
