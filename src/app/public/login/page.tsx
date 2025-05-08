@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import {
   handleGoogleLoginByFirebase,
@@ -151,8 +151,6 @@ function useLoginPage() {
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
-        redirect("/v1/user")
-        return
       }
 
       if (mode === "EMAIL") {
