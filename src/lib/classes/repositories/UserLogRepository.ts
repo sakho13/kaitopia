@@ -19,6 +19,7 @@ export class UserLogRepository extends RepositoryBase {
     questions: {
       questionId: string
       version: number
+      answerIds: string[]
     }[],
   ) {
     return await this.dbConnection.answerLogSheet.create({
@@ -30,6 +31,7 @@ export class UserLogRepository extends RepositoryBase {
             questionId: true,
             version: true,
             orderIndex: true,
+            selectAnswerOrder: true,
           },
         },
       },
@@ -44,6 +46,7 @@ export class UserLogRepository extends RepositoryBase {
               questionId: q.questionId,
               version: q.version,
               orderIndex: i + 1,
+              selectAnswerOrder: q.answerIds,
             })),
           },
         },
@@ -183,6 +186,7 @@ export class UserLogRepository extends RepositoryBase {
             version: true,
             isAnswered: true,
             orderIndex: true,
+            selectAnswerOrder: true,
             skipped: true,
             isCorrect: true,
             score: true,

@@ -78,7 +78,10 @@ export class UserQuestionService extends ServiceBase {
         return {
           questions: questions.map((q) => {
             const currentQuestionVersion = q.currentVersion
-            if (!currentQuestionVersion)
+            const currentQuestionUserLog = sheet.questionUserLogs.find(
+              (l) => l.questionId === q.id,
+            )
+            if (!currentQuestionVersion || !currentQuestionUserLog)
               throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
             const answerType = q.answerType
@@ -87,11 +90,23 @@ export class UserQuestionService extends ServiceBase {
               "MULTI_SELECT",
             ].includes(answerType)
               ? {
-                  selection:
-                    currentQuestionVersion.questionAnswers.map((a) => ({
-                      answerId: a.answerId!,
-                      selectContent: a.selectContent!,
-                    })) ?? [],
+                  selection: currentQuestionUserLog.selectAnswerOrder.reduce(
+                    (p, c) => {
+                      const a = currentQuestionVersion.questionAnswers.find(
+                        (a) => a.answerId === c,
+                      )
+                      if (a)
+                        return [
+                          ...p,
+                          {
+                            answerId: a.answerId!,
+                            selectContent: a.selectContent!,
+                          },
+                        ]
+                      return p
+                    },
+                    [] as { answerId: string; selectContent: string }[],
+                  ),
                 }
               : {
                   property: {
@@ -585,7 +600,16 @@ export class UserQuestionService extends ServiceBase {
           throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
         if (exercise.random) {
+          // 出題順と選択肢をランダムに並び替える
           questions = questions.sort(() => Math.random() - 0.5)
+          questions.forEach((a) => {
+            if (
+              a.currentVersion?.questionAnswers &&
+              a.currentVersion?.questionAnswers.length > 0
+            ) {
+              a.currentVersion?.questionAnswers.sort(() => Math.random() - 0.5)
+            }
+          })
         }
 
         if (exercise.questionCount !== null) {
@@ -599,6 +623,8 @@ export class UserQuestionService extends ServiceBase {
             questions.map((q) => ({
               questionId: q.id,
               version: q.currentVersionId!,
+              answerIds:
+                q.currentVersion?.questionAnswers.map((a) => a.answerId!) || [],
             })),
           )
 

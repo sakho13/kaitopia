@@ -18,7 +18,7 @@ export class ExerciseRepository extends RepositoryBase {
         isPublished: isPublished,
       },
       orderBy: {
-        createdAt: "desc",
+        updatedAt: "desc",
       },
       take: count,
     })
