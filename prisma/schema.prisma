@@ -25,6 +25,8 @@ model User {
   role Role @default(USER) @map("role")
 
   name         String    @map("name")
+  email        String?   @map("email")
+  phoneNumber  String?   @map("phone_number")
   birthDayDate DateTime? @map("birth_day_date")
 
   createdAt DateTime  @default(now()) @map("created_at")
