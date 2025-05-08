@@ -251,6 +251,8 @@ model QuestionUserLog {
   // スキップされたかどうか
   skipped Boolean @default(false) @map("skipped")
 
+  selectAnswerOrder String[] @default([]) @map("select_answer_order_id")
+
   // QuestionTypeがSELECT/MULTI_SELECTの場合
   isCorrect Boolean @default(false) @map("is_correct")
   // QuestionTypeがTEXTの場合
