@@ -417,6 +417,7 @@ export function useGetUserExerciseQuestions(
     }
 
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idToken, exerciseId, mode])
 
   return {
