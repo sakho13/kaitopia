@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
       user: {
         id: user.id,
         name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
         birthDayDate: user.birthDayDate
           ? user.birthDayDate.toISOString()
           : null,

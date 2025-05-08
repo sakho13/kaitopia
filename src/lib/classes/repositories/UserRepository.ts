@@ -14,6 +14,8 @@ export class UserRepository extends RepositoryBase {
         id: true,
 
         name: true,
+        email: true,
+        phoneNumber: true,
         birthDayDate: true,
 
         role: true,
