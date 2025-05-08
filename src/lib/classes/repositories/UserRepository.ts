@@ -71,6 +71,8 @@ export class UserRepository extends RepositoryBase {
       select: {
         id: true,
         name: true,
+        email: true,
+        phoneNumber: true,
         birthDayDate: true,
         role: true,
         ownerSchools: true,
@@ -93,6 +95,8 @@ export class UserRepository extends RepositoryBase {
       data: {
         firebaseUid: firebaseUid,
         name: data.name,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
         birthDayDate: data.birthDayDate || null,
         role: data.role,
         isGuest: isGuest,
