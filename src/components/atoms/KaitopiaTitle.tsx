@@ -12,6 +12,7 @@ export function KaitopiaTitle({
 }: Props) {
   return (
     <Link
+      id='kaitopia-title'
       href={href}
       className={joincn(
         "font-bold select-none hover:cursor-pointer",
