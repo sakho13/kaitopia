@@ -78,7 +78,7 @@ export default function Home() {
             問い合わせ
           </Link>
 
-          <p>開発者: SaKho</p>
+          <p>開発者: {STATICS.APP_OWNER}</p>
 
           <p>バージョン: {STATICS.APP_VERSION}</p>
         </div>
