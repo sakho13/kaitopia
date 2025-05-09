@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Kaitopia",
-  description: "テストを手の中で",
+  description: "テスト練習を簡単に",
 }
 
 export default function RootLayout({
