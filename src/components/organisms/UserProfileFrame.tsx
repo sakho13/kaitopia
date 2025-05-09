@@ -76,11 +76,15 @@ export function UserProfileFrame() {
           </>
         ) : (
           <ButtonBase
-            colorMode='smart'
+            colorMode={isGuestUser ? "ghost" : "primary"}
             onClick={toEdit}
-            className='px-4'
-            disabled
-            title='この機能は現在利用できません'
+            className={isGuestUser ? "px-4" : ""}
+            disabled={isGuestUser}
+            title={
+              isGuestUser
+                ? "ゲストユーザは編集できません"
+                : "現在、編集機能はご利用できません。"
+            }
           >
             編集
           </ButtonBase>
