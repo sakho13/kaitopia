@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { onIdTokenChanged } from "firebase/auth"
-import { firebaseAuthClient } from "@/lib/functions/firebaseClient"
+import { getFirebaseClientAuth } from "@/lib/functions/firebaseClient"
 import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
 import { useAuthStore } from "./stores/useAuthStore"
 import { useUserConfigStore } from "./stores/useUserConfigStore"
@@ -32,21 +32,23 @@ export function useAuth() {
   }, [refetchUserConfig, setConfig, clearConfig])
 
   useEffect(() => {
-    const unsubscribe = onIdTokenChanged(
-      firebaseAuthClient,
-      async (firebaseUser) => {
-        if (firebaseUser) {
-          const token = await firebaseUser.getIdToken()
-          setAuth(firebaseUser, token)
-          fetchUserConfig()
-        } else {
-          clearAuth()
-          clearConfig()
-        }
+    const auth = getFirebaseClientAuth()
+    if (!auth) {
+      setLoading(false)
+      return
+    }
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const token = await firebaseUser.getIdToken()
+        setAuth(firebaseUser, token)
+        fetchUserConfig()
+      } else {
+        clearAuth()
+        clearConfig()
+      }
 
-        setLoading(false)
-      },
-    )
+      setLoading(false)
+    })
     return () => {
       unsubscribe()
     }

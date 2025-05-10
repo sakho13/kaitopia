@@ -5,37 +5,43 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth"
-import { firebaseAuthClient } from "./firebaseClient"
+import { getFirebaseClientAuth } from "./firebaseClient"
 
 export const handleRegisterByFirebase = async (
   email: string,
   password: string,
 ) => {
-  return await createUserWithEmailAndPassword(
-    firebaseAuthClient,
-    email,
-    password,
-  )
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error("Firebase auth is not initialized")
+  return await createUserWithEmailAndPassword(auth, email, password)
 }
 
 export const handleLoginByFirebase = async (
   email: string,
   password: string,
 ) => {
-  return await signInWithEmailAndPassword(firebaseAuthClient, email, password)
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error("Firebase auth is not initialized")
+  return await signInWithEmailAndPassword(auth, email, password)
 }
 
 export const handleGuestLoginByFirebase = async () => {
-  return await signInAnonymously(firebaseAuthClient)
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error("Firebase auth is not initialized")
+  return await signInAnonymously(auth)
 }
 
 export const handleGoogleLoginByFirebase = async () => {
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error("Firebase auth is not initialized")
   const provider = new GoogleAuthProvider()
   provider.addScope("profile")
   provider.addScope("email")
-  return await signInWithPopup(firebaseAuthClient, provider)
+  return await signInWithPopup(auth, provider)
 }
 
 export const handleLogoutByFirebase = async () => {
-  return await firebaseAuthClient.signOut()
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error("Firebase auth is not initialized")
+  return await auth.signOut()
 }
