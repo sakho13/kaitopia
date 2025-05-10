@@ -32,6 +32,8 @@ FROM base AS builder
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+RUN apt-get update -y && apt-get install -y openssl
+
 # COPY . .
 
 COPY package.json package-lock.json* ./
