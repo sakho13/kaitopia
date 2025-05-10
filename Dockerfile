@@ -39,7 +39,7 @@ COPY ./src ./src
 COPY ./public ./public
 COPY ./prisma ./prisma
 COPY ./image ./image
-COPY next.config.ts tsconfig.json postcss.config.mjs ./
+COPY next.config.ts tsconfig.json postcss.config.mjs components.json eslint.config.mjs ./
 
 RUN npm run prisma:generate
 
