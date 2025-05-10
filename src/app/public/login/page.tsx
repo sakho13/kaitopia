@@ -15,6 +15,8 @@ import { LoginMode } from "@/lib/types/loginMode"
 import { FirebaseError } from "firebase/app"
 import { joincn } from "@/lib/functions/joincn"
 
+export const dynamic = "force-dynamic"
+
 export default function LoginPage() {
   const {
     email,
