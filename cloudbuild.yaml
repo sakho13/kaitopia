@@ -4,17 +4,16 @@ steps:
     args:
       - "-c"
       - |
-        echo "NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY}" >> .env
-        echo "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}" >> .env
-        echo "NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_NEXT_PUBLIC_FIREBASE_PROJECT_ID}" >> .env
-        echo "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}" >> .env
-        echo "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}" >> .env
-        echo "NEXT_PUBLIC_FIREBASE_APP_ID=${_NEXT_PUBLIC_FIREBASE_APP_ID}" >> .env
-        echo "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}" >> .env
-        echo "NODE_ENV=production" >> .env
-        echo "TZ=Asia/Tokyo" >> .env
-
-        docker build -f Dockerfile -t gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA .
+        docker build \
+          --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY} \
+          --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN} \
+          --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_NEXT_PUBLIC_FIREBASE_PROJECT_ID} \
+          --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET} \
+          --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID} \
+          --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${_NEXT_PUBLIC_FIREBASE_APP_ID} \
+          --build-arg NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID} \
+          -f Dockerfile \
+          -t gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA .
 
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA"]
@@ -24,9 +23,9 @@ steps:
     args:
       - "-c"
       - |
-        DB_URL=$(gcloud secrets versions access latest --secret=prod-database-url) \
-        NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$(gcloud secrets versions access latest --secret=firebase-client-email) \
-        NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$(gcloud secrets versions access latest --secret=firebase-private-key) \
+        DB_URL=$(gcloud secrets versions access latest --secret=prod-database-url)
+        NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$(gcloud secrets versions access latest --secret=firebase-client-email)
+        NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$(gcloud secrets versions access latest --secret=firebase-private-key)
         gcloud run deploy kaitopia \
           --image gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA \
           --region asia-northeast1 \
@@ -34,7 +33,7 @@ steps:
           --allow-unauthenticated \
           --set-env-vars DATABASE_URL=$DB_URL \
           --set-env-vars NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL \
-          --set-env-vars NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$NEXT_PRIVATE_FIREBASE_PRIVATE_KEY \
+          --set-env-vars NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$NEXT_PRIVATE_FIREBASE_PRIVATE_KEY
 
   # - name: "gcr.io/cloud-builders/gcloud"
   #   args:
