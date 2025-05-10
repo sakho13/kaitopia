@@ -31,6 +31,7 @@ steps:
           --region asia-northeast1 \
           --platform managed \
           --allow-unauthenticated \
+          --no-traffic \
           --set-env-vars DATABASE_URL=$DB_URL \
           --set-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY} \
           --set-env-vars NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN} \
