@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
 import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
+import { useAuth } from "@/hooks/useAuth"
+import { UserRound } from "lucide-react"
+import { joincn } from "@/lib/functions/joincn"
 
 export default function UserPopover() {
   const { open, ref, handleNavigate, signOut, toggleOpen, userConfig } =
@@ -13,17 +15,22 @@ export default function UserPopover() {
     <div className='relative' ref={ref}>
       <button
         onClick={toggleOpen}
-        className='w-10 h-10 rounded-full bg-smart flex items-center justify-center text-white hover:opacity-90 hover:cursor-pointer'
+        className={joincn(
+          "w-10 h-10 rounded-full flex items-center justify-center",
+          "bg-smart hover:bg-smart-hover",
+          "text-text-on-color",
+          "hover:cursor-pointer",
+        )}
       >
-        👤
+        <UserRound strokeWidth={3} />
       </button>
 
       {open && (
-        <div className='absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50'>
+        <div className='absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50 transition-all'>
           {userConfig.canAccessManagePage ? (
             <button
               onClick={() => handleNavigate("/v1/manage")}
-              className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
+              className='w-full text-text text-left px-4 py-2 hover:bg-gray-100 rounded-xl transition'
             >
               管理画面
             </button>
@@ -31,14 +38,14 @@ export default function UserPopover() {
 
           <button
             onClick={() => handleNavigate("/v1/user/profile")}
-            className='w-full text-text text-left px-4 py-2 hover:bg-gray-100'
+            className='w-full text-text text-left px-4 py-2 hover:bg-gray-100 rounded-xl transition'
           >
             ユーザ情報
           </button>
 
           <button
             onClick={signOut}
-            className='w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500'
+            className='w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 rounded-xl transition'
           >
             ログアウト
           </button>
@@ -49,6 +56,7 @@ export default function UserPopover() {
 }
 
 function useUserPopover() {
+  const { signOut: handleSignOut } = useAuth()
   const { config: userConfig } = useUserConfigStore.getState()
 
   const [open, setOpen] = useState(false)
@@ -71,7 +79,7 @@ function useUserPopover() {
   }
 
   const signOut = () => {
-    handleLogoutByFirebase()
+    handleSignOut()
     setOpen(false)
     router.push("/public/login")
   }

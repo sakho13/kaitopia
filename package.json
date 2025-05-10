@@ -17,8 +17,10 @@
     "prisma:seed": "npx prisma db seed",
     "prisma:init": "npm run prisma:generate && npm run prisma:deploy && npm run prisma:seed",
     "prisma:studio": "npx prisma studio",
-    "test": "jest",
-    "test:cov": "jest --coverage"
+    "test": "jest --runInBand",
+    "test:cov": "jest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e-report": "playwright show-report"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -29,6 +31,7 @@
     "@radix-ui/react-slot": "1.2.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "embla-carousel-autoplay": "8.6.0",
     "embla-carousel-react": "8.6.0",
     "firebase": "11.6.0",
     "firebase-admin": "13.2.0",
@@ -40,12 +43,13 @@
     "swr": "2.3.3",
     "tailwind-merge": "3.2.0",
     "tw-animate-css": "1.2.5",
-    "zod": "^3.24.2",
+    "zod": "3.24.2",
     "zustand": "5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3",
     "@microsoft/tsdoc": "0.15.1",
+    "@playwright/test": "1.52.0",
     "@tailwindcss/postcss": "4",
     "@testing-library/dom": "10.4.0",
     "@testing-library/jest-dom": "6.6.3",

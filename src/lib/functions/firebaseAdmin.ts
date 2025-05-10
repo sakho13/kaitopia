@@ -1,5 +1,6 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app"
-import { DecodedIdToken, getAuth } from "firebase-admin/auth"
+import { DecodedIdToken, FirebaseAuthError, getAuth } from "firebase-admin/auth"
+import { ApiV1Error } from "../classes/common/ApiV1Error"
 
 const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true"
 if (useEmulator) {
@@ -32,8 +33,12 @@ export async function verifyIdToken(idToken: string) {
   try {
     return await getAuth().verifyIdToken(idToken)
   } catch (error) {
+    if (error instanceof FirebaseAuthError) {
+      if (error.code === "auth/id-token-expired")
+        throw new ApiV1Error([{ key: "TokenExpiredError", params: null }])
+    }
     console.error("Error verifying ID token:", error)
-    throw new Error("Invalid ID token")
+    throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
   }
 }
 

@@ -1,15 +1,13 @@
-import { Prisma, PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 
 export abstract class ControllerBase {
-  protected dbConnection: PrismaClient | Prisma.TransactionClient
+  protected dbConnection: PrismaClient
 
-  constructor(dbConnection: PrismaClient | Prisma.TransactionClient) {
+  constructor(dbConnection: PrismaClient) {
     this.dbConnection = dbConnection
   }
 
-  public set resetDbConnection(
-    dbConnection: PrismaClient | Prisma.TransactionClient,
-  ) {
+  public resetDbConnection(dbConnection: PrismaClient) {
     this.dbConnection = dbConnection
   }
 }

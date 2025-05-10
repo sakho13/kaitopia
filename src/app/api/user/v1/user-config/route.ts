@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
     if (!userInfo)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
+    const schools = await userService.getAccessibleSchools()
+
     return {
       userInfo: {
         name: userInfo.name,
@@ -25,6 +27,16 @@ export async function GET(request: NextRequest) {
       },
       canAccessManagePage: userService.canAccessManagePage,
       isGuest: await api.isGuest(),
+      schools: schools.map((s) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        isGlobal: s.isGlobal,
+        isPublic: s.isPublic,
+        isSelfSchool: s.isSelfSchool,
+        createdAt: s.createdAt.toISOString(),
+        updatedAt: s.updatedAt.toISOString(),
+      })),
     }
   })
 }

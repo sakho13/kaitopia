@@ -1,4 +1,36 @@
 // *********************
+//      ユーザ用
+// *********************
+
+/**
+ * ユーザが回答するときの問題の型
+ */
+export type QuestionForUser = {
+  /**
+   * 出題ログID 単純に閲覧する場合 questionId
+   */
+  questionUserLogId: string
+  questionId: string
+
+  title: string
+  questionType: QuestionTypeType
+
+  content: string
+  hint: string
+
+  isCanSkip: boolean | null
+
+  answerType: QuestionAnswerTypeType
+  answer: QuestionAnswerForUser<QuestionAnswerTypeType>
+} & (QuestionAnswerContent | object) // すでに回答していた場合に現れるオブジェクト
+
+/**
+ * ユーザが回答するときの回答の型(送信するときの型ではない)
+ */
+export type QuestionAnswerForUser<T extends QuestionAnswerTypeType> =
+  QuestionAnswerProperty[T]
+
+// *********************
 //       Question
 // *********************
 
@@ -92,28 +124,32 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
   properties: QuestionAnswerProperty[T]
 }
 
-export type QuestionAnswerContent = QuestionAnswerBaseIdentifier &
-  (
-    | {
-        type: "SKIP"
-      }
-    | {
-        type: "SELECT"
-        answerId: string
-      }
-    | {
-        type: "MULTI_SELECT"
-        answerIds: string[]
-      }
-    | {
-        type: "TEXT"
-        content: string
-      }
-  )
+export type QuestionUserAnswer = {
+  SKIP: object
+  SELECT: {
+    answerId: string
+  }
+  MULTI_SELECT: {
+    answerIds: string[]
+  }
+  TEXT: {
+    content: string
+  }
+}
+
+export type QuestionUserAnswerType<K extends keyof QuestionUserAnswer> = {
+  type: K
+} & QuestionUserAnswer[K]
+
+export type QuestionAnswerContent = QuestionUserAnswerType<
+  keyof QuestionUserAnswer
+>
 
 export const QuestionType = {
   TEXT: "TEXT",
   IMAGE: "IMAGE",
+  VIDEO: "VIDEO",
+  AUDIO: "AUDIO",
 } as const
 
 export type QuestionTypeType = keyof typeof QuestionType

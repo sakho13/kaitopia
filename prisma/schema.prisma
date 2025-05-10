@@ -25,6 +25,8 @@ model User {
   role Role @default(USER) @map("role")
 
   name         String    @map("name")
+  email        String?   @map("email")
+  phoneNumber  String?   @map("phone_number")
   birthDayDate DateTime? @map("birth_day_date")
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -33,7 +35,22 @@ model User {
 
   ownerSchools SchoolOwner[]
   // memberSchools SchoolMember[]
+  SchoolMember SchoolMember[]
+  // userAuthProviders UserAuthProvider[]
 }
+
+// model UserAuthProvider {
+//   userId   String          @map("user_id")
+//   provider UserSSOProvider @map("provider")
+
+//   email String? @map("email")
+
+//   createdAt DateTime @default(now()) @map("created_at")
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@id([userId, provider])
+// }
 
 model School {
   id String @id @default(cuid(2))
@@ -53,8 +70,8 @@ model School {
   question Question[]
   exercise Exercise[]
 
-  owners SchoolOwner[]
-  // members SchoolMember[]
+  owners  SchoolOwner[]
+  members SchoolMember[]
 }
 
 model SchoolOwner {
@@ -71,17 +88,20 @@ model SchoolOwner {
   @@id([schoolId, userId])
 }
 
-// model SchoolMember {
-//   schoolId String @map("school_id")
-//   userId   String @map("user_id")
+model SchoolMember {
+  schoolId String @map("school_id")
+  userId   String @map("user_id")
 
-//   createdAt DateTime @default(now()) @map("created_at")
+  // 利用期限 nullの場合は期限なし
+  limitAt DateTime?
 
-//   school School @relation(fields: [schoolId], references: [id])
-//   member User   @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
 
-//   @@id([schoolId, userId])
-// }
+  school School @relation(fields: [schoolId], references: [id])
+  member User   @relation(fields: [userId], references: [id])
+
+  @@id([schoolId, userId])
+}
 
 model Question {
   id       String @id @default(cuid(2))
@@ -121,10 +141,10 @@ model QuestionVersion {
 
   question Question @relation(fields: [questionId], references: [id])
 
-  currentQuestion Question?        @relation("CurrentVersion")
-  draftQuestion   Question?        @relation("DraftVersion")
+  currentQuestion Question?         @relation("CurrentVersion")
+  draftQuestion   Question?         @relation("DraftVersion")
   questionAnswers QuestionAnswer[]
-  answerLogs      AnswerLog[]
+  questionUserLog QuestionUserLog[]
 
   @@id([questionId, version])
 }
@@ -133,7 +153,7 @@ model QuestionAnswer {
   questionId String @map("question_id")
   version    Int    @map("version")
   // QuestionTypeがTEXTの場合は1のみ
-  answerId   Int    @default(1) @map("answer_id")
+  answerId   String @default(cuid(2)) @map("answer_id")
 
   // QuestionTypeがSELECT/MULTI_SELECTの場合
   selectContent String?  @map("select_content") // 選択肢の内容
@@ -155,8 +175,16 @@ model Exercise {
   title       String @map("title")
   description String @default("") @map("description")
 
+  isPublished Boolean @default(false) @map("is_published") // 公開中かどうか
+
   isCanSkip      Boolean @default(false) @map("is_can_skip") // スキップ可能かどうか
   isScoringBatch Boolean @default(false) @map("is_scoring_batch") // 一括採点可能かどうか
+
+  // ランダム出題かどうか
+  random        Boolean @default(false) @map("random")
+  // 出題数
+  // nullの場合は全て出題
+  questionCount Int?    @map("question_count")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -202,39 +230,60 @@ model AnswerLogSheet {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  exercise   Exercise?   @relation(fields: [exerciseId], references: [id])
-  answerLogs AnswerLog[]
+  exercise         Exercise?         @relation(fields: [exerciseId], references: [id])
+  questionUserLogs QuestionUserLog[]
 
   @@id([userId, answerLogSheetId])
 }
 
-model AnswerLog {
+// 出題した問題の履歴
+model QuestionUserLog {
+  questionUserLogId String @id @default(cuid(2))
+
   userId           String @map("user_id")
   answerLogSheetId String @map("answer_log_sheet_id")
-  questionId       String @map("question_id")
-  version          Int    @map("version")
 
-  wasSkipped Boolean @default(false) @map("was_skipped") // スキップされたかどうか
+  orderIndex Int    @default(1) @map("order_index") // 問題の出題順
+  questionId String @map("question_id")
+  version    Int    @map("version") // 問題のバージョン
+
+  // 採点に利用したかどうか
+  isAnswered Boolean @default(false) @map("is_answered")
+
+  // スキップされたかどうか
+  skipped Boolean @default(false) @map("skipped")
+
+  selectAnswerOrder String[] @default([]) @map("select_answer_order_id")
 
   // QuestionTypeがSELECT/MULTI_SELECTの場合
-  selectContent String?  @map("select_content") // 選択肢の answerId (MULTI_SELECTの場合はカンマ区切り)
-  isCorrect     Boolean? @default(false) @map("is_correct") // 正解かどうか
-
+  isCorrect Boolean @default(false) @map("is_correct")
   // QuestionTypeがTEXTの場合
-  textContent String? @map("text_content") // 回答の内容
-
-  // スコア
-  // QuestionTypeがSELECT/MULTI_SELECTの場合は正解が100点
-  // QuestionTypeがTEXTの場合は内容によって変わる
   // 0点から100点の間でスコアをつける
-  score Int @default(0) @map("score")
+  score     Int     @default(0) @map("score")
+
+  // TYPE: TEXT の場合
+  textAnswer String? @map("text_answer")
 
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  questionVersion QuestionVersion @relation(fields: [questionId, version], references: [questionId, version])
-  answerLogSheet  AnswerLogSheet  @relation(fields: [userId, answerLogSheetId], references: [userId, answerLogSheetId])
+  questionVersion      QuestionVersion       @relation(fields: [questionId, version], references: [questionId, version])
+  answerLogSheet       AnswerLogSheet        @relation(fields: [userId, answerLogSheetId], references: [userId, answerLogSheetId], onDelete: Cascade)
+  // TYPE: SELECT/MULTI_SELECT の場合
+  answerSelectUserLogs AnswerSelectUserLog[]
+}
 
-  @@id([userId, answerLogSheetId, questionId, version])
+model AnswerSelectUserLog {
+  answerSelectUserLogId String @id @default(cuid(2)) @map("answer_select_user_log_id")
+
+  questionUserLogId String   @map("question_user_log_id")
+  selectAnswerId    String   @map("select_answer_id")
+  isCorrect         Boolean? @default(false) @map("is_correct") // 正解かどうか
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  questionUserLog QuestionUserLog @relation(fields: [questionUserLogId], references: [questionUserLogId], onDelete: Cascade)
 }
 
 // ************ MODELS ************
@@ -248,6 +297,12 @@ enum Role {
 
   ADMIN // developer
 }
+
+// enum UserSSOProvider {
+//   EMAIL
+//   GITHUB
+//   GOOGLE
+// }
 
 /**
  * 問題の種類

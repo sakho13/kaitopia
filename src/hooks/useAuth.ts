@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { onIdTokenChanged } from "firebase/auth"
 import { firebaseAuthClient } from "@/lib/functions/firebaseClient"
+import { handleLogoutByFirebase } from "@/lib/functions/firebaseActions"
 import { useAuthStore } from "./stores/useAuthStore"
 import { useUserConfigStore } from "./stores/useUserConfigStore"
 import { useGetUserConfig } from "./useApiV1"
@@ -13,6 +14,8 @@ export function useAuth() {
   const { refetchUserConfig } = useGetUserConfig(idToken)
 
   const [loading, setLoading] = useState(true)
+
+  const onChangeLoading = (loading: boolean) => setLoading(loading)
 
   const fetchUserConfig = useCallback(() => {
     refetchUserConfig()
@@ -33,7 +36,8 @@ export function useAuth() {
       firebaseAuthClient,
       async (firebaseUser) => {
         if (firebaseUser) {
-          setAuth(firebaseUser, (await firebaseUser?.getIdToken()) ?? "")
+          const token = await firebaseUser.getIdToken()
+          setAuth(firebaseUser, token)
           fetchUserConfig()
         } else {
           clearAuth()
@@ -48,5 +52,13 @@ export function useAuth() {
     }
   }, [clearAuth, setAuth, clearConfig, fetchUserConfig])
 
-  return { user, idToken, loading }
+  const signOut = async () => {
+    setLoading(true)
+    await handleLogoutByFirebase()
+    clearAuth()
+    clearConfig()
+    setLoading(false)
+  }
+
+  return { user, idToken, loading, signOut, onChangeLoading }
 }

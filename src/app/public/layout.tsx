@@ -1,11 +1,12 @@
 "use client"
 
+import { BackButton } from "@/components/molecules/BackButton"
 import { useAuth } from "@/hooks/useAuth"
 import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { idToken } = useAuth()
+  const { idToken, signOut } = useAuth()
   const [loading, setLoading] = useState(true)
   const [timerDone, setTimerDone] = useState(false)
 
@@ -18,12 +19,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (timerDone) {
+    if (timerDone && idToken) {
       if (idToken) redirect("/v1/user")
-
-      setLoading(false)
+    } else {
+      signOut()
     }
-  }, [idToken, timerDone])
+    setLoading(false)
+  }, [idToken, timerDone, signOut])
 
   if (loading) {
     return (
@@ -33,5 +35,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     )
   }
 
-  return children
+  return (
+    <div className='min-h-screen bg-background flex items-center justify-center px-4'>
+      <div className='absolute top-4 left-10'>
+        <BackButton to={(r) => r.push("/")} />
+      </div>
+
+      {children}
+    </div>
+  )
 }

@@ -8,7 +8,7 @@ export default function Page() {
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState("")
-  const [difficulty, setDifficulty] = useState<"初級" | "中級" | "上級">("初級")
+  const [difficulty] = useState<"初級" | "中級" | "上級">("初級")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +45,7 @@ export default function Page() {
             <label className='block text-sm font-medium mb-1'>難易度</label>
             <select
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as any)}
+              onChange={() => {}}
               className='w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-kaitopia-primary'
             >
               <option value='初級'>初級</option>

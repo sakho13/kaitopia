@@ -19,6 +19,7 @@ export class ApiV1Error<K extends keyof ApiV1ErrorMap> extends Error {
   }
 
   public getError(): {
+    code: keyof typeof ApiV1ErrorMapObj
     message: string
     columnName?: string
   }[] {
@@ -26,6 +27,7 @@ export class ApiV1Error<K extends keyof ApiV1ErrorMap> extends Error {
       const rawMessage = ApiV1ErrorMapObj[error.key].message
       const message = this.replaceParams(rawMessage, error.params)
       return {
+        code: error.key,
         message,
         columnName: error.columnName,
       }

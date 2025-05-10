@@ -206,7 +206,76 @@
       }
     },
 
-    "/user/v1/exercises": {},
+    "/user/v1/exercises": {
+      "get": {
+        "summary": "ユーザが利用する問題集の一覧を取得する",
+        "description": "ユーザが利用する問題集の一覧を取得する。",
+        "tags": ["UserAPI", "InDevelopment"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "取得する問題集の数。デフォルトは10。",
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "次のページを取得するためのページ番号\nnullの場合は次のページがないことを示す",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の一覧の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercises": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ExerciseBaseType"
+                          }
+                        },
+                        "nextPage": {
+                          "type": "integer",
+                          "description": "次のページを取得するためのページ番号\nnullの場合は次のページがないことを示す"
+                        },
+                        "totalCount": {
+                          "type": "integer",
+                          "description": "問題集の総数"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user/v1/exercise": {
       "get": {
         "summary": "問題集の詳細を取得する",
@@ -418,9 +487,8 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "description": "取得するページ番号。デフォルトは1。"
-            },
-            "example": 1
+              "description": "次のページを取得するためのページ番号\nnullの場合は次のページがないことを示す"
+            }
           }
         ],
         "responses": {
@@ -444,17 +512,13 @@
                             "$ref": "#/components/schemas/ExerciseBaseType"
                           }
                         },
+                        "nextPage": {
+                          "type": "integer",
+                          "description": "次のページを取得するためのページ番号\nnullの場合は次のページがないことを示す"
+                        },
                         "totalCount": {
                           "type": "integer",
                           "description": "問題集の総数"
-                        },
-                        "page": {
-                          "type": "integer",
-                          "description": "現在のページ番号"
-                        },
-                        "count": {
-                          "type": "integer",
-                          "description": "1ページあたりの問題集の数"
                         }
                       }
                     }
@@ -610,6 +674,194 @@
                           }
                         }
                       }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "post": {
+        "summary": "問題集を作成する（スキップ無効、一括採点有効で作成する）",
+        "description": "問題集を作成します",
+        "tags": ["ManageAPI"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "schoolId": {
+                    "type": "string",
+                    "description": "紐づけるスクールID"
+                  },
+                  "property": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "問題集のタイトル"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "問題集の説明\n現実装では空文字"
+                      }
+                    }
+                  }
+                },
+                "required": ["schoolId", "property"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題集の作成に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exerciseId": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "1文字以上、200文字未満",
+                          "minLength": 1,
+                          "maxLength": 199
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "2000文字未満",
+                          "minLength": 0,
+                          "maxLength": 1999
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "作成日時\nJST時間をISO8601形式で返す"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新日時\nJST時間をISO8601形式で返す"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "patch": {
+        "summary": "問題集設定を更新する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "minItems": 1,
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "問題集のタイトル",
+                    "minLength": 1,
+                    "maxLength": 199
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "問題集の説明",
+                    "minLength": 0,
+                    "maxLength": 1999
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "編集に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "exercise": {
+                          "$ref": "#/components/schemas/ExerciseBaseType"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "delete": {
+        "summary": "問題集を削除する",
+        "tags": ["ManageAPI"],
+        "description": "問題集を削除する\n問題集のIDを指定して、問題集を削除する。紐づく問題は削除しない。",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題集のID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題集の削除に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
                     }
                   }
                 }
@@ -806,6 +1058,10 @@
           "isScoringBatch": {
             "type": "boolean",
             "description": "一括採点が可能かどうか。"
+          },
+          "questionCount": {
+            "type": "integer",
+            "description": "登録済みの問題数"
           }
         }
       },

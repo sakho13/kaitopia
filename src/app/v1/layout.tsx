@@ -7,9 +7,9 @@ type Props = {
 }
 
 export default function Layout({ children }: Props) {
-  const { loading } = useAuth()
+  const { loading, idToken } = useAuth()
 
-  if (loading) {
+  if (loading || idToken === null) {
     return (
       <div className='flex justify-center items-center h-screen'>
         Loading...
