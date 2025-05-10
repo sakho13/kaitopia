@@ -32,6 +32,10 @@ FROM base AS builder
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+RUN echo NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}
+RUN echo NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+RUN echo "ENV vars injected:" && cat .env
+
 COPY .env .env
 RUN apt-get update -y && apt-get install -y openssl
 
