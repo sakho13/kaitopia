@@ -7,7 +7,7 @@ export default function Home() {
     <div className='bg-background text-text font-sans'>
       {/* Hero */}
       <section className='bg-primary text-text-on-color py-20 px-4 text-center'>
-        <h1 className='text-4xl md:text-5xl font-bold mb-4'>
+        <h1 className='text-4xl md:text-5xl font-bold mb-4 select-none'>
           学びの未来を、もっと楽しくスマートに。
         </h1>
         <p className='text-lg md:text-xl mb-8'>
@@ -16,14 +16,14 @@ export default function Home() {
 
         <Link
           href={"/public/login"}
-          className='bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition'
+          className='bg-white text-primary font-bold py-3 px-6 rounded-full shadow hover:bg-gray-100 transition select-none'
         >
           無料で始める
         </Link>
       </section>
 
       {/* Features */}
-      <section className='py-16 px-6 max-w-6xl mx-auto'>
+      <section className='py-16 px-6 max-w-6xl mx-auto select-none'>
         <h2 className='text-3xl font-bold text-center mb-12'>主な機能</h2>
         <div>
           <FeaturesCarousel />
@@ -70,11 +70,17 @@ export default function Home() {
       {/* Footer */}
       <footer className='bg-primary text-text-on-color text-center p-6 mt-10 select-none'>
         <div className='mb-4 gap-y-2'>
-          <Link href={STATICS.GOOGLE_CONTACT_FORM_URL} target='_blank'>
+          <Link
+            href={STATICS.GOOGLE_CONTACT_FORM_URL}
+            target='_blank'
+            className='underline'
+          >
             問い合わせ
           </Link>
 
-          <p>開発者: SaKho</p>
+          <p>開発者: {STATICS.APP_OWNER}</p>
+
+          <p>バージョン: {STATICS.APP_VERSION}</p>
         </div>
 
         <p>© 2025 Kaitopia Inc. All rights reserved.</p>

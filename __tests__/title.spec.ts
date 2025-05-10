@@ -19,8 +19,8 @@ test.describe("トップページ関係テスト", () => {
     await page.getByRole("textbox", { name: "メールアドレス" }).press("Tab")
     await page.getByRole("textbox", { name: "パスワード" }).fill("password")
     await page.getByRole("button", { name: "ログイン", exact: true }).click()
-    await expect(page).toHaveURL("http://localhost:3000/v1/user", {
-      timeout: 3000,
-    })
+    await page.waitForURL("http://localhost:3000/v1/user")
+    await expect(page).toHaveURL("http://localhost:3000/v1/user")
+    await expect(page.locator("#kaitopia-title")).toBeVisible()
   })
 })

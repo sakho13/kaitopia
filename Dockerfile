@@ -14,7 +14,16 @@ FROM base AS builder
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# COPY . .
+
+COPY package.json package-lock.json* ./
+COPY ./src ./src
+COPY ./public ./public
+COPY ./prisma ./prisma
+COPY ./image ./image
+COPY next.config.ts tsconfig.json postcss.config.mjs ./
+
+RUN npm run prisma:generate
 
 RUN npm run build
 
