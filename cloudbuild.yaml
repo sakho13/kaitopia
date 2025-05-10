@@ -24,6 +24,10 @@ steps:
     args:
       - "-c"
       - |
+        echo "Deploying to Cloud Run..."
+        gcloud secrets versions access latest --secret=prod-database-url > /dev/null || "❌ NO Database URL"
+        gcloud secrets versions access latest --secret=firebase-client-email > /dev/null || "❌ NO Firebase Client Email"
+        gcloud secrets versions access latest --secret=firebase-private-key > /dev/null || "❌ NO Firebase Private Key"
         _DB_URL=$(gcloud secrets versions access latest --secret=prod-database-url)
         _NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$(gcloud secrets versions access latest --secret=firebase-client-email)
         _NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$(gcloud secrets versions access latest --secret=firebase-private-key)
