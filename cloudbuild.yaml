@@ -29,9 +29,9 @@ steps:
         gcloud run deploy kaitopia \
           --image gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA \
           --region asia-northeast1 \
-          --platform managed \
           --allow-unauthenticated \
           --no-traffic \
+          --tag feature \
           --set-env-vars DATABASE_URL=$DB_URL \
           --set-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY} \
           --set-env-vars NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN} \
@@ -42,16 +42,6 @@ steps:
           --set-env-vars NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID} \
           --set-env-vars NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL \
           --set-env-vars NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$NEXT_PRIVATE_FIREBASE_PRIVATE_KEY
-
-  # - name: "gcr.io/cloud-builders/gcloud"
-  #   args:
-  #     - "run"
-  #     - "deploy"
-  #     - "kaitopia"
-  #     - "--image"
-  #     - "gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA"
-  #     - "--region"
-  #     - "asia-northeast1"
 
 images:
   - "gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA"
