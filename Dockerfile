@@ -18,6 +18,7 @@ ENV TZ=Asia/Tokyo
 WORKDIR /app
 RUN apt-get update -y && apt-get install -y openssl
 
+COPY .env .env
 COPY package.json package-lock.json* ./
 COPY ./src ./src
 COPY ./public ./public
