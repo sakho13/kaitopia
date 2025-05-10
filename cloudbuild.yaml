@@ -28,7 +28,7 @@ steps:
         NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$(gcloud secrets versions access latest --secret=firebase-client-email) \
         NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$(gcloud secrets versions access latest --secret=firebase-private-key) \
         gcloud run deploy kaitopia \
-          --image gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA" \
+          --image gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA \
           --region asia-northeast1 \
           --platform managed \
           --allow-unauthenticated \
