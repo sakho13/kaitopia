@@ -25,18 +25,12 @@ steps:
       - "-c"
       - |
         echo "Deploying to Cloud Run..."
-        gcloud secrets versions access latest --secret=prod-database-url > /dev/null || "❌ NO Database URL"
-        gcloud secrets versions access latest --secret=firebase-client-email > /dev/null || "❌ NO Firebase Client Email"
-        gcloud secrets versions access latest --secret=firebase-private-key > /dev/null || "❌ NO Firebase Private Key"
-        _DB_URL=$(gcloud secrets versions access latest --secret=prod-database-url)
-        _NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=$(gcloud secrets versions access latest --secret=firebase-client-email)
-        _NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=$(gcloud secrets versions access latest --secret=firebase-private-key)
         gcloud run deploy kaitopia \
           --image gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA \
           --region asia-northeast1 \
           --allow-unauthenticated \
           --no-traffic \
-          --set-env-vars DATABASE_URL="$(gcloud secrets versions access latest --secret=prod-database-url)" \
+          --service-account="cloud-run-exec@$PROJECT_ID.iam.gserviceaccount.com" \
           --set-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY} \
           --set-env-vars NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN} \
           --set-env-vars NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_NEXT_PUBLIC_FIREBASE_PROJECT_ID} \
@@ -44,8 +38,7 @@ steps:
           --set-env-vars NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID} \
           --set-env-vars NEXT_PUBLIC_FIREBASE_APP_ID=${_NEXT_PUBLIC_FIREBASE_APP_ID} \
           --set-env-vars NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID} \
-          --set-env-vars NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL="$(gcloud secrets versions access latest --secret=firebase-client-email)" \
-          --set-env-vars NEXT_PRIVATE_FIREBASE_PRIVATE_KEY="$(gcloud secrets versions access latest --secret=firebase-private-key)"
+          --set-secrets="DATABASE_URL=prod-database-url:latest,NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=firebase-client-email:latest,NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=firebase-private-key:latest"
 
 images:
   - "gcr.io/$PROJECT_ID/kaitopia:$COMMIT_SHA"
