@@ -10,6 +10,7 @@ import {
 } from "@/lib/functions/firebaseActions"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
 import { checkEmail, checkPassword } from "@/lib/functions/validators"
 import { LoginMode } from "@/lib/types/loginMode"
 import { FirebaseError } from "firebase/app"
@@ -128,6 +129,7 @@ export default function LoginPage() {
 function useLoginPage() {
   const router = useRouter()
   const { idToken, signOut: handleSignOut } = useAuth()
+  const { showInfo, showSuccessShort, showError } = useToast()
 
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState<string | null>(null)
@@ -153,6 +155,8 @@ function useLoginPage() {
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
+
+        showInfo("ゲストアカウントは5日後に削除されます")
       }
 
       if (mode === "EMAIL") {
@@ -180,6 +184,10 @@ function useLoginPage() {
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
+
+        if (result.data.state === "login") {
+          showSuccessShort("ログインしました。")
+        }
       }
 
       if (mode === "GOOGLE") {
@@ -205,7 +213,7 @@ function useLoginPage() {
           return
         }
       }
-      alert(
+      showError(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
       )
     } finally {
