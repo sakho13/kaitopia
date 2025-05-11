@@ -15,7 +15,7 @@ import {
   useGetManageExercises,
 } from "@/hooks/useApiV1"
 import { useManageStore } from "@/hooks/stores/useManageStore"
-import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { encodeBase64, encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { ManageNewExerciseForm } from "@/components/molecules/ManageNewExerciseForm"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { joincn } from "@/lib/functions/joincn"
@@ -126,8 +126,8 @@ export default function Page() {
                     className='px-4 py-2'
                     onClick={() =>
                       router.push(
-                        `/v1/manage/exercises/${encodeURIComponent(
-                          encodeBase64(exercise.exerciseId),
+                        `/v1/manage/exercises/${encodeBase64ForUrl(
+                          exercise.exerciseId,
                         )}`,
                       )
                     }

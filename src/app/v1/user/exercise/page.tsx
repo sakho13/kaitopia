@@ -6,8 +6,8 @@ import { SectionTitle } from "@/components/atoms/SectionTitle"
 import { BackButton } from "@/components/molecules/BackButton"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
 import { useGetRecommendExercises, useGetUserExercise } from "@/hooks/useApiV1"
-import { decodeBase64 } from "@/lib/functions/decodeBase64"
-import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { decodeBase64ForUrl } from "@/lib/functions/decodeBase64"
+import { encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
 import { DialogTitle } from "@radix-ui/react-dialog"
 import { useSearchParams, useRouter } from "next/navigation"
@@ -37,7 +37,7 @@ export default function Page() {
             ? dataTooGetRecommendExercises.data.recommendExercises.map(
                 (exercise) => (
                   <InfoArea
-                    key={encodeBase64(exercise.id)}
+                    key={encodeBase64ForUrl(exercise.id)}
                     className={joincn(
                       `bg-background-subtle rounded-2xl shadow h-[160px]`,
                       `hover:shadow-lg transition`,
@@ -114,7 +114,7 @@ function usePage() {
   useEffect(() => {
     const eid = searchParam.get("eid")
     if (eid) {
-      setExerciseId(decodeBase64(decodeURIComponent(eid)))
+      setExerciseId(decodeBase64ForUrl(eid))
     } else {
       setExerciseId(null)
     }
@@ -122,9 +122,7 @@ function usePage() {
 
   const startExercise = () => {
     router.push(
-      `/v1/user/exercise/venue?eid=${encodeURIComponent(
-        encodeBase64(exerciseId || ""),
-      )}`,
+      `/v1/user/exercise/venue?eid=${encodeBase64ForUrl(exerciseId || "")}`,
     )
   }
 

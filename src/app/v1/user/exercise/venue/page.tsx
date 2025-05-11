@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { ExerciseManager } from "@/components/organisms/ExerciseManager"
-import { decodeBase64 } from "@/lib/functions/decodeBase64"
+import { decodeBase64ForUrl } from "@/lib/functions/decodeBase64"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ExerciseAnswerPage() {
@@ -14,7 +14,7 @@ export default function ExerciseAnswerPage() {
   useEffect(() => {
     const eid = searchParam.get("eid")
     if (eid) {
-      setExerciseId(decodeBase64(decodeURIComponent(eid)))
+      setExerciseId(decodeBase64ForUrl(eid))
     } else {
       setExerciseId(null)
     }
