@@ -311,7 +311,6 @@ export class UserQuestionService extends ServiceBase {
       const userLogRepository = new UserLogRepository(this._userId, t)
       const sheet = await userLogRepository.findAnswerLogSheetById(
         answerLogSheetId,
-        this._userId,
       )
 
       if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])

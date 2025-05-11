@@ -122,10 +122,7 @@ export class UserLogRepository extends RepositoryBase {
    * @param userId
    * @returns
    */
-  public async findAnswerLogSheetById(
-    answerLogSheetId: string,
-    userId: string,
-  ) {
+  public async findAnswerLogSheetById(answerLogSheetId: string) {
     return await this.dbConnection.answerLogSheet.findUnique({
       select: {
         answerLogSheetId: true,
@@ -164,7 +161,7 @@ export class UserLogRepository extends RepositoryBase {
       },
       where: {
         userId_answerLogSheetId: {
-          userId: userId,
+          userId: this.userId,
           answerLogSheetId: answerLogSheetId,
         },
       },
