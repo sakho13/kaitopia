@@ -62,15 +62,11 @@ export function UserProfileFrame() {
       <div className='mt-6 flex gap-4 justify-end'>
         {isEditing ? (
           <>
-            <ButtonBase
-              colorMode='primary'
-              onClick={handleSave}
-              className='px-4'
-            >
+            <ButtonBase colorMode='primary' onClick={handleSave}>
               保存
             </ButtonBase>
 
-            <ButtonBase colorMode='ghost' onClick={cancelEdit} className='px-4'>
+            <ButtonBase colorMode='ghost' onClick={cancelEdit}>
               キャンセル
             </ButtonBase>
           </>
