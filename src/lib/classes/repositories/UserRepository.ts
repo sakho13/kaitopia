@@ -27,9 +27,6 @@ export class UserRepository extends RepositoryBase {
         firebaseUid: true,
         ownerSchools: true,
       },
-      where: {
-        isGuest: false,
-      },
       take: limit,
       skip: offset,
       orderBy: [{ createdAt: "desc" }],
