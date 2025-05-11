@@ -3,6 +3,7 @@
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
 import { handleRegisterByFirebase } from "@/lib/functions/firebaseActions"
 import { checkEmail, checkPassword } from "@/lib/functions/validators"
 import { LoginMode } from "@/lib/types/loginMode"
@@ -120,6 +121,7 @@ export default function SignupPage() {
 const useSignupPage = () => {
   const router = useRouter()
   const { idToken } = useAuth()
+  const { showSuccess, showError } = useToast()
 
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState<string | null>(null)
@@ -170,11 +172,15 @@ const useSignupPage = () => {
           await credential.user.delete()
           throw new Error(result.errors[0].message)
         }
+
+        if (result.data.state === "register") {
+          showSuccess("ようこそ！ アカウントを登録しました！")
+        }
       }
 
       router.replace("/v1/user")
     } catch {
-      alert(
+      showError(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
       )
     } finally {
