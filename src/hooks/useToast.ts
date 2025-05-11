@@ -32,6 +32,13 @@ export function useToast() {
   }
 
   /**
+   * `toast.warn()`
+   */
+  const showWarn = (message: string) => {
+    toast.warn(message)
+  }
+
+  /**
    * `toast.error()`
    */
   const showError = (message: string) => {
@@ -44,6 +51,8 @@ export function useToast() {
 
     showSuccess,
     showSuccessShort,
+
+    showWarn,
 
     showError,
   }
