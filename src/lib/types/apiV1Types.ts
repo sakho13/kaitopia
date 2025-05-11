@@ -370,8 +370,9 @@ export type ApiV1OutTypeMap = {
    */
   GetManageUsers: {
     users: (UserBaseIdentity &
-      UserBaseInfo &
-      ReplacedDateToString<UserBaseInfoOption> &
+      UserBaseInfo & {
+        isGuest: boolean
+      } & ReplacedDateToString<UserBaseInfoOption> &
       ReplacedDateToString<UserBaseDate>)[]
     nextPage: number | null
     totalCount: number

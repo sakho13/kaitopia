@@ -84,7 +84,7 @@ TEACHER 以上のロールを持つユーザは 2 つ以上のスクールを作
 
 ```plain
 (root)/ ... トップページ (LP)
-  p/ ...
+  public/ ...
     login/
     signup/
   user/ ... ログイン後のトップページ
@@ -101,11 +101,30 @@ TEACHER 以上のロールを持つユーザは 2 つ以上のスクールを作
 
 ### CI/CD
 
-#### テスト実行
+<!-- #### テスト実行
 
 Github Actions にて、PR 単位で自動テストを実行する。
-テストが全て成功しなければ、PR をマージできない。
-
+テストが全て成功しなければ、PR をマージできない。 -->
+<!--
 #### リリース
 
-main へ `vX.X.X` 形式のタグがプッシュされたタイミングで、DB マイグレーションを行い、GCP へのリリースを行う。
+main へ `vX.X.X` 形式のタグがプッシュされたタイミングで、DB マイグレーションを行い、GCP へのリリースを行う。 -->
+
+## 技術
+
+- Next.js
+  - App Router
+- Prisma
+- Firebase
+  - Firebase Auth
+  - Firebase Emulator (for development)
+- Tailwind CSS
+  - Shadcn/UI
+- GCP
+  - Cloud Build
+  - Cloud Run
+- Supabase
+  - PostgreSQL
+- Jest
+- Playwright
+- Docker

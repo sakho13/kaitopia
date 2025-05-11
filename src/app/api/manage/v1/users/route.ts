@@ -6,6 +6,9 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用ユーザ取得API")
 
+  // TYPE=ADMIN はすべてのユーザを取得できる
+  // その他のユーザは今後実装する
+
   return await api.execute("GetManageUsers", async () => {
     const { userService } = await api.checkAccessManagePage(request)
 
@@ -32,6 +35,7 @@ export async function GET(request: NextRequest) {
         email: u.email,
         phoneNumber: u.phoneNumber,
         role: u.role,
+        isGuest: u.isGuest,
         birthDayDate: u.birthDayDate?.toISOString() ?? null,
         createdAt: u.createdAt.toISOString(),
         updatedAt: u.updatedAt.toISOString(),
