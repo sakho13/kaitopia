@@ -340,6 +340,29 @@ export class UserQuestionService extends ServiceBase {
   }
 
   /**
+   * 問題の回答履歴を一覧で取得する(進行中も含む)
+   * @param limit
+   * @param page
+   * @returns
+   */
+  public async getAnswerLogSheets(limit: number = 10, page?: number) {
+    const offset = page ? (page - 1) * limit : undefined
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+
+    const answerLogSheets = await userLogRepository.findAllAnswerLogSheets(
+      limit,
+      offset,
+    )
+    const totalCount = await userLogRepository.countAllAnswerLogSheets()
+    const nextPage = answerLogSheets.length < limit ? null : page ? page + 1 : 2
+
+    return { answerLogSheets, totalCount, nextPage }
+  }
+
+  /**
    * 回答を保存する(採点はしない)
    * @param userLogRepository
    * @param answerLogSheetId

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { UserService } from "@/lib/classes/services/UserService"
 import { prisma } from "@/lib/prisma"
-import { UserQuestionLogService } from "@/lib/classes/services/UserQuestionLogService"
+import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 
 export function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザの回答ログ取得")
@@ -20,12 +20,12 @@ export function GET(request: NextRequest) {
     const userService = new UserService(prisma)
     await userService.getUserInfo(api.getFirebaseUid())
 
-    const userLogService = new UserQuestionLogService(
+    const userQuestionService = new UserQuestionService(
       userService.userController,
       prisma,
     )
     const { answerLogSheets, nextPage, totalCount } =
-      await userLogService.getAnswerLogSheets(count, page)
+      await userQuestionService.getAnswerLogSheets(count, page)
 
     return {
       resultLogs: answerLogSheets.map((log) => ({
