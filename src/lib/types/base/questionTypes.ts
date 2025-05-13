@@ -125,7 +125,9 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
 }
 
 export type QuestionUserAnswer = {
-  SKIP: object
+  SKIP: {
+    skipped: true
+  }
   SELECT: {
     answerId: string
   }
