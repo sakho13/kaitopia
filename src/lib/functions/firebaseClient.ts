@@ -4,8 +4,10 @@ import { connectAuthEmulator, getAuth } from "firebase/auth"
 
 let authInstance: ReturnType<typeof getAuth> | null = null
 
+const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true"
+
 export function getFirebaseClientAuth() {
-  if (typeof window === "undefined") return null
+  if (typeof window === "undefined" && !useEmulator) return null
 
   if (authInstance) return authInstance
 
@@ -17,13 +19,12 @@ export function getFirebaseClientAuth() {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
   }
-  console.log("firebaseConfig", firebaseConfig)
 
-  const app =
-    getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig)
+  const apps = getApps()
+  const app = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig)
   const auth = getAuth(app)
 
-  if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true") {
+  if (useEmulator) {
     connectAuthEmulator(auth, "http://localhost:9099", {
       disableWarnings: true,
     })
