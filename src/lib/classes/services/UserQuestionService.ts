@@ -1,3 +1,4 @@
+import { $Enums } from "@prisma/client"
 import {
   QuestionAnswerContent,
   QuestionAnswerForUser,
@@ -84,57 +85,21 @@ export class UserQuestionService extends ServiceBase {
             if (!currentQuestionVersion || !currentQuestionUserLog)
               throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-            const answerType = q.answerType
-            const properties: QuestionAnswerForUser<QuestionAnswerTypeType> = [
-              "SELECT",
-              "MULTI_SELECT",
-            ].includes(answerType)
-              ? {
-                  selection: currentQuestionUserLog.selectAnswerOrder.reduce(
-                    (p, c) => {
-                      const a = currentQuestionVersion.questionAnswers.find(
-                        (a) => a.answerId === c,
-                      )
-                      if (a)
-                        return [
-                          ...p,
-                          {
-                            answerId: a.answerId!,
-                            selectContent: a.selectContent!,
-                          },
-                        ]
-                      return p
-                    },
-                    [] as { answerId: string; selectContent: string }[],
-                  ),
-                }
-              : {
-                  property: {
-                    answerId: "",
-                    maxLength: 0,
-                    minLength: 0,
-                  },
-                }
-            if (answerType === "TEXT") {
-              const answer = q.currentVersion?.questionAnswers[0]
-              if (answer && "property" in properties) {
-                properties.property.answerId = answer.answerId!
-                properties.property.maxLength = answer.maxLength ?? 0
-                properties.property.minLength = answer.minLength ?? 0
-              }
-            }
+            const answer = this._convertQuestionAnswerProperty(
+              {
+                answerType: q.answerType,
+                selectAnswerOrder: currentQuestionUserLog.selectAnswerOrder,
+                questionAnswers: q.currentVersion!.questionAnswers,
+              },
+              {
+                isScoringBatch: exercise.isScoringBatch,
+                random: exercise.random,
+              },
+            )
+
             const qLog = sheet.questionUserLogs.find(
               (l) => l.questionId === q.id && l.version === q.currentVersionId,
             )
-
-            if (!exercise.isScoringBatch) {
-              // 都度採点の場合は選択肢をランダムに並び替える
-              if ("selection" in properties && exercise.random) {
-                properties.selection = properties.selection.sort(
-                  () => Math.random() - 0.5,
-                )
-              }
-            }
 
             return {
               questionUserLogId: qLog ? qLog.questionUserLogId : q.id,
@@ -149,7 +114,7 @@ export class UserQuestionService extends ServiceBase {
               isCanSkip: exercise.isCanSkip,
 
               answerType: q.answerType,
-              answer: properties,
+              answer,
             }
           }),
           answerLogSheetId: sheet.answerLogSheetId,
@@ -715,6 +680,69 @@ export class UserQuestionService extends ServiceBase {
           { key: "InvalidFormatError", params: { key: "回答形式" } },
         ])
       }
+    }
+  }
+
+  private _convertQuestionAnswerProperty<
+    CQ extends {
+      answerType: $Enums.AnswerType
+      selectAnswerOrder: string[]
+      questionAnswers: T1[]
+    },
+    T1 extends {
+      answerId: string
+      selectContent: string | null
+      minLength: number | null
+      maxLength: number | null
+    },
+  >(
+    currentQuestion: CQ,
+    ext?: Partial<{ isScoringBatch: boolean; random: boolean }>,
+  ): QuestionAnswerForUser<QuestionAnswerTypeType> {
+    const answerType = currentQuestion.answerType
+    if (answerType === "TEXT") {
+      const a = currentQuestion.questionAnswers[0]
+      return {
+        property: {
+          answerId: a.answerId!,
+          maxLength: a.maxLength ?? 0,
+          minLength: a.minLength ?? 0,
+        },
+      }
+    }
+
+    if (["SELECT", "MULTI_SELECT"].includes(answerType)) {
+      const selection = currentQuestion.selectAnswerOrder.reduce((p, c) => {
+        const a = currentQuestion.questionAnswers.find((a) => a.answerId === c)
+        if (a) {
+          return [
+            ...p,
+            {
+              answerId: a.answerId!,
+              selectContent: a.selectContent!,
+            },
+          ]
+        }
+        return p
+      }, [] as { answerId: string; selectContent: string }[])
+
+      if (ext?.isScoringBatch === false) {
+        // 都度採点の場合は選択肢をランダムに並び替える
+        if (ext.random === true) {
+          selection.sort(() => Math.random() - 0.5)
+        }
+      }
+      return {
+        selection,
+      }
+    }
+
+    return {
+      property: {
+        answerId: "",
+        maxLength: 0,
+        minLength: 0,
+      },
     }
   }
 
