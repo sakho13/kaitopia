@@ -531,3 +531,29 @@ export function useGetUserResultsLogs() {
     refetchGetUserResultLogs: mutate,
   }
 }
+
+/**
+ * GET: `/api/user/v1/result/log-sheet?answerLogSheetId=xxxxx`
+ */
+export function useGetUserResultLogSheet(answerLogSheetId: string) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/user/v1/result/log-sheet", idToken, answerLogSheetId],
+    async ([url, token]) =>
+      token
+        ? fetcher(
+            "GetUserResultLogSheet",
+            "GET",
+            `${url}?answerLogSheetId=${answerLogSheetId}`,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetUserResultLogSheet: data,
+    isLoadingToGetUserResultLogSheet: isLoading,
+    refetchUserResultLogSheet: mutate,
+  }
+}
