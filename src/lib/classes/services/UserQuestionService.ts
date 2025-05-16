@@ -228,7 +228,8 @@ export class UserQuestionService extends ServiceBase {
 
         return await this._saveUserAnswerLog(
           userLogRepository,
-          latest.answerLogSheetId,
+          userQuestionLog.questionVersion.questionId,
+          userQuestionLog.questionVersion.version,
           userQuestionLog.questionUserLogId,
           answer,
         )
@@ -337,13 +338,15 @@ export class UserQuestionService extends ServiceBase {
    */
   private async _saveUserAnswerLog(
     userLogRepository: UserLogRepository,
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     userQuestionLogId: string,
     answer: QuestionAnswerContent,
   ) {
     if (answer.type === "SKIP") {
       return await userLogRepository.saveSkipQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
         this._userId,
       )
@@ -352,7 +355,8 @@ export class UserQuestionService extends ServiceBase {
     if (answer.type === "SELECT" && "answerId" in answer) {
       await userLogRepository.deleteSelectQuestionLog(userQuestionLogId)
       return await userLogRepository.saveSelectQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
         this._userId,
         [answer.answerId],
@@ -362,7 +366,8 @@ export class UserQuestionService extends ServiceBase {
     if (answer.type === "MULTI_SELECT" && "answerIds" in answer) {
       await userLogRepository.deleteSelectQuestionLog(userQuestionLogId)
       return await userLogRepository.saveSelectQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
         this._userId,
         answer.answerIds,
@@ -371,7 +376,8 @@ export class UserQuestionService extends ServiceBase {
 
     if (answer.type === "TEXT" && "content" in answer) {
       return await userLogRepository.saveTextQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
         this._userId,
         answer.content,

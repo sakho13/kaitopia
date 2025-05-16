@@ -190,6 +190,8 @@ export class UserLogRepository extends RepositoryBase {
             questionVersion: {
               select: {
                 question: true,
+                questionId: true,
+                version: true,
                 questionAnswers: {
                   select: {
                     answerId: true,
@@ -232,7 +234,8 @@ export class UserLogRepository extends RepositoryBase {
    * 対象の問題をスキップする
    */
   public async saveSkipQuestionLog(
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     questionUserLogId: string,
     userId: string,
   ) {
@@ -241,7 +244,8 @@ export class UserLogRepository extends RepositoryBase {
         skipped: true,
       },
       where: {
-        answerLogSheetId,
+        questionId,
+        version,
         questionUserLogId,
         userId,
       },
@@ -252,7 +256,8 @@ export class UserLogRepository extends RepositoryBase {
    * TYPEが`SELECT/MULTI_SELECT`の問題に回答する
    */
   public async saveSelectQuestionLog(
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     questionUserLogId: string,
     userId: string,
     answer: string[],
@@ -265,13 +270,14 @@ export class UserLogRepository extends RepositoryBase {
             data: answer.map((a) => ({
               selectAnswerId: a,
               isCorrect: false,
+              questionId,
+              version,
             })),
             skipDuplicates: true,
           },
         },
       },
       where: {
-        answerLogSheetId,
         questionUserLogId,
         userId,
       },
@@ -293,7 +299,8 @@ export class UserLogRepository extends RepositoryBase {
    * TYPEが`TEXT`の問題に回答する
    */
   public async saveTextQuestionLog(
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     questionUserLogId: string,
     userId: string,
     answer: string,
@@ -304,7 +311,8 @@ export class UserLogRepository extends RepositoryBase {
         score: 0, // 採点は後で行う
       },
       where: {
-        answerLogSheetId,
+        questionId,
+        version,
         questionUserLogId,
         userId,
       },
