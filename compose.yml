@@ -19,6 +19,7 @@ services:
         reservations:
           cpus: "0.2"
           memory: 256M
+    restart: always
 
   firebase_emulator:
     build:
@@ -40,6 +41,7 @@ services:
         "auth,firestore",
         "--import=./init-data",
       ]
+    restart: always
 
   pgadmin:
     image: dpage/pgadmin4:9.2
