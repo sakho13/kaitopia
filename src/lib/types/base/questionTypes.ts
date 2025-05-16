@@ -30,6 +30,24 @@ export type QuestionForUser = {
 export type QuestionAnswerForUser<T extends QuestionAnswerTypeType> =
   QuestionAnswerProperty[T]
 
+export type QuestionForResult = {
+  questionUserLogId: string
+  questionId: string
+
+  title: string
+  questionType: QuestionTypeType
+
+  content: string
+  hint: string
+
+  score: number
+
+  answerType: QuestionAnswerTypeType
+
+  selectedAnswers: { answerId: string; isCorrect: boolean }[]
+  answers: QuestionAnswerForUser<QuestionAnswerTypeType>
+}
+
 // *********************
 //       Question
 // *********************
