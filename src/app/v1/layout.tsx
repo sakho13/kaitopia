@@ -1,6 +1,6 @@
 "use client"
 
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { useAuth } from "@/hooks/useAuth"
 
@@ -9,6 +9,7 @@ type Props = {
 }
 
 export default function Layout({ children }: Props) {
+  const router = useRouter()
   const { loading, idToken } = useAuth()
 
   if (!loading && idToken === null) {
@@ -16,7 +17,7 @@ export default function Layout({ children }: Props) {
       <div className='flex justify-center items-center flex-col gap-y-8 h-screen'>
         <ButtonBase
           colorMode='primary'
-          onClick={() => redirect("/public/login")}
+          onClick={() => router.push("/public/login")}
         >
           ログイン画面へ
         </ButtonBase>
