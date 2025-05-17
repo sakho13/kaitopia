@@ -328,7 +328,6 @@ export class UserLogRepository extends RepositoryBase {
     questionId: string,
     version: number,
     questionUserLogId: string,
-    userId: string,
   ) {
     return await this.dbConnection.questionUserLog.update({
       data: {
@@ -338,7 +337,7 @@ export class UserLogRepository extends RepositoryBase {
         questionId,
         version,
         questionUserLogId,
-        userId,
+        userId: this.userId,
       },
     })
   }
@@ -350,7 +349,6 @@ export class UserLogRepository extends RepositoryBase {
     questionId: string,
     version: number,
     questionUserLogId: string,
-    userId: string,
     answer: string[],
   ) {
     return await this.dbConnection.questionUserLog.update({
@@ -370,7 +368,7 @@ export class UserLogRepository extends RepositoryBase {
       },
       where: {
         questionUserLogId,
-        userId,
+        userId: this.userId,
       },
     })
   }
@@ -393,7 +391,6 @@ export class UserLogRepository extends RepositoryBase {
     questionId: string,
     version: number,
     questionUserLogId: string,
-    userId: string,
     answer: string,
   ) {
     return await this.dbConnection.questionUserLog.update({
@@ -405,7 +402,7 @@ export class UserLogRepository extends RepositoryBase {
         questionId,
         version,
         questionUserLogId,
-        userId,
+        userId: this.userId,
       },
     })
   }

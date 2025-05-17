@@ -415,7 +415,6 @@ export class UserQuestionService extends ServiceBase {
         questionId,
         version,
         userQuestionLogId,
-        this._userId,
       )
     }
 
@@ -425,7 +424,6 @@ export class UserQuestionService extends ServiceBase {
         questionId,
         version,
         userQuestionLogId,
-        this._userId,
         [answer.answerId],
       )
     }
@@ -436,7 +434,6 @@ export class UserQuestionService extends ServiceBase {
         questionId,
         version,
         userQuestionLogId,
-        this._userId,
         answer.answerIds,
       )
     }
@@ -446,7 +443,6 @@ export class UserQuestionService extends ServiceBase {
         questionId,
         version,
         userQuestionLogId,
-        this._userId,
         answer.content,
       )
     }
