@@ -15,6 +15,7 @@ import { checkEmail, checkPassword } from "@/lib/functions/validators"
 import { LoginMode } from "@/lib/types/loginMode"
 import { FirebaseError } from "firebase/app"
 import { joincn } from "@/lib/functions/joincn"
+import { useAnalytics } from "@/hooks/useAnalytics"
 
 export const dynamic = "force-dynamic"
 
@@ -129,6 +130,7 @@ export default function LoginPage() {
 function useLoginPage() {
   const router = useRouter()
   const { idToken, signOut: handleSignOut } = useAuth()
+  const { sendAnalyticsEvent } = useAnalytics()
   const { showInfo, showSuccessShort, showError } = useToast()
 
   const [email, setEmail] = useState("")
@@ -152,10 +154,16 @@ function useLoginPage() {
           await credential.user.getIdToken(),
         )
         if (!result.success) {
+          sendAnalyticsEvent("guestLoginError", {
+            error_message: JSON.stringify(result.errors),
+          })
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
 
+        sendAnalyticsEvent("guestLogin", {
+          uid: credential.user.uid,
+        })
         showInfo("ゲストアカウントは5日後に削除されます")
       }
 
@@ -181,11 +189,17 @@ function useLoginPage() {
           await credential.user.getIdToken(),
         )
         if (!result.success) {
+          sendAnalyticsEvent("emailLoginError", {
+            error_message: JSON.stringify(result.errors),
+          })
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
 
         if (result.data.state === "login") {
+          sendAnalyticsEvent("emailLogin", {
+            uid: credential.user.uid,
+          })
           showSuccessShort("ログインしました。")
         }
       }
@@ -213,6 +227,10 @@ function useLoginPage() {
           return
         }
       }
+
+      sendAnalyticsEvent("authenticationError", {
+        error_message: JSON.stringify(error),
+      })
       showError(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
       )
