@@ -1,7 +1,7 @@
 "use client"
 
 import { UserLayoutSection } from "../molecules/UserLayoutSection"
-import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
 import { useRouter } from "next/navigation"
 import { useGetRecommendExercises } from "@/hooks/useApiV1"
@@ -37,7 +37,7 @@ export function UserRecommendExerciseSection() {
               ? dataTooGetRecommendExercises.data.recommendExercises.map(
                   (exercise) => (
                     <CarouselItem
-                      key={encodeBase64(exercise.id)}
+                      key={encodeBase64ForUrl(exercise.id)}
                       className='md:basis-1/3'
                     >
                       <InfoArea
@@ -48,8 +48,8 @@ export function UserRecommendExerciseSection() {
                         )}
                         onClick={() =>
                           router.push(
-                            `/v1/user/exercise?eid=${encodeURIComponent(
-                              encodeBase64(exercise.id),
+                            `/v1/user/exercise?eid=${encodeBase64ForUrl(
+                              exercise.id,
                             )}`,
                           )
                         }

@@ -117,15 +117,103 @@ export class UserLogRepository extends RepositoryBase {
   }
 
   /**
+   * 結果確認用の回答ログシートを取得する
+   */
+  public async findAnswerLogSheetForResultById(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.findUnique({
+      select: {
+        answerLogSheetId: true,
+        exerciseId: true,
+        isInProgress: true,
+        totalCorrectCount: true,
+        totalIncorrectCount: true,
+        totalUnansweredCount: true,
+        questionUserLogs: {
+          select: {
+            questionUserLogId: true,
+            questionId: true,
+            version: true,
+            orderIndex: true,
+            skipped: true,
+            score: true,
+            textAnswer: true,
+            selectAnswerOrder: true,
+            questionVersion: {
+              select: {
+                question: {
+                  select: {
+                    id: true,
+                    title: true,
+                    questionType: true,
+                    answerType: true,
+                  },
+                },
+                questionAnswers: {
+                  select: {
+                    answerId: true,
+                    selectContent: true,
+                    isCorrect: true,
+                    maxLength: true,
+                    minLength: true,
+                  },
+                },
+                hint: true,
+                content: true,
+              },
+            },
+            answerSelectUserLogs: {
+              select: {
+                answerSelectUserLogId: true,
+
+                selectAnswerId: true,
+                isCorrect: true,
+                questionAnswer: {
+                  select: {
+                    selectContent: true,
+                    maxLength: true,
+                    minLength: true,
+                    isCorrect: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { orderIndex: "asc" },
+        },
+        exercise: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            isScoringBatch: true,
+            isCanSkip: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+
+        _count: {
+          select: {
+            questionUserLogs: true,
+          },
+        },
+      },
+      where: {
+        userId_answerLogSheetId: {
+          userId: this.userId,
+          answerLogSheetId: answerLogSheetId,
+        },
+      },
+    })
+  }
+
+  /**
    * 回答ログシートを取得する
    * @param answerLogSheetId
    * @param userId
    * @returns
    */
-  public async findAnswerLogSheetById(
-    answerLogSheetId: string,
-    userId: string,
-  ) {
+  public async findAnswerLogSheetById(answerLogSheetId: string) {
     return await this.dbConnection.answerLogSheet.findUnique({
       select: {
         answerLogSheetId: true,
@@ -164,7 +252,7 @@ export class UserLogRepository extends RepositoryBase {
       },
       where: {
         userId_answerLogSheetId: {
-          userId: userId,
+          userId: this.userId,
           answerLogSheetId: answerLogSheetId,
         },
       },
@@ -193,6 +281,8 @@ export class UserLogRepository extends RepositoryBase {
             questionVersion: {
               select: {
                 question: true,
+                questionId: true,
+                version: true,
                 questionAnswers: {
                   select: {
                     answerId: true,
@@ -235,18 +325,19 @@ export class UserLogRepository extends RepositoryBase {
    * 対象の問題をスキップする
    */
   public async saveSkipQuestionLog(
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     questionUserLogId: string,
-    userId: string,
   ) {
     return await this.dbConnection.questionUserLog.update({
       data: {
         skipped: true,
       },
       where: {
-        answerLogSheetId,
+        questionId,
+        version,
         questionUserLogId,
-        userId,
+        userId: this.userId,
       },
     })
   }
@@ -255,9 +346,9 @@ export class UserLogRepository extends RepositoryBase {
    * TYPEが`SELECT/MULTI_SELECT`の問題に回答する
    */
   public async saveSelectQuestionLog(
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     questionUserLogId: string,
-    userId: string,
     answer: string[],
   ) {
     return await this.dbConnection.questionUserLog.update({
@@ -268,15 +359,16 @@ export class UserLogRepository extends RepositoryBase {
             data: answer.map((a) => ({
               selectAnswerId: a,
               isCorrect: false,
+              questionId,
+              version,
             })),
             skipDuplicates: true,
           },
         },
       },
       where: {
-        answerLogSheetId,
         questionUserLogId,
-        userId,
+        userId: this.userId,
       },
     })
   }
@@ -296,9 +388,9 @@ export class UserLogRepository extends RepositoryBase {
    * TYPEが`TEXT`の問題に回答する
    */
   public async saveTextQuestionLog(
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     questionUserLogId: string,
-    userId: string,
     answer: string,
   ) {
     return await this.dbConnection.questionUserLog.update({
@@ -307,9 +399,10 @@ export class UserLogRepository extends RepositoryBase {
         score: 0, // 採点は後で行う
       },
       where: {
-        answerLogSheetId,
+        questionId,
+        version,
         questionUserLogId,
-        userId,
+        userId: this.userId,
       },
     })
   }

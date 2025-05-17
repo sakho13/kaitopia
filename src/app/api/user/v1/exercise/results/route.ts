@@ -1,9 +1,9 @@
+import { NextRequest } from "next/server"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserQuestionLogService } from "@/lib/classes/services/UserQuestionLogService"
+import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 import { UserService } from "@/lib/classes/services/UserService"
 import { prisma } from "@/lib/prisma"
-import { NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集結果の取得")
@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
     const userService = new UserService(prisma)
     await userService.getUserInfo(api.getFirebaseUid())
 
-    const userLogService = new UserQuestionLogService(
+    const userQuestionService = new UserQuestionService(
       userService.userController,
       prisma,
     )
     const { answerLogSheets, totalCount, nextPage } =
-      await userLogService.getAnswerLogSheets(count, page)
+      await userQuestionService.getAnswerLogSheets(count, page)
 
     return {
       answerLogSheets: answerLogSheets.map((r) => ({

@@ -163,7 +163,8 @@ model QuestionAnswer {
   minLength Int? @map("min_length") // 最小文字数
   maxLength Int? @map("max_length") // 最大文字数
 
-  questionVersion QuestionVersion @relation(fields: [questionId, version], references: [questionId, version])
+  questionVersion     QuestionVersion       @relation(fields: [questionId, version], references: [questionId, version])
+  answerSelectUserLog AnswerSelectUserLog[]
 
   @@id([questionId, version, answerId])
 }
@@ -280,10 +281,14 @@ model AnswerSelectUserLog {
   selectAnswerId    String   @map("select_answer_id")
   isCorrect         Boolean? @default(false) @map("is_correct") // 正解かどうか
 
+  questionId String @map("question_id")
+  version    Int    @map("version")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   questionUserLog QuestionUserLog @relation(fields: [questionUserLogId], references: [questionUserLogId], onDelete: Cascade)
+  questionAnswer  QuestionAnswer  @relation(fields: [questionId, version, selectAnswerId], references: [questionId, version, answerId], onDelete: Cascade)
 }
 
 // ************ MODELS ************

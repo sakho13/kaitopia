@@ -27,9 +27,10 @@ export function useAuth() {
         }
       })
       .catch(() => {
+        clearAuth()
         clearConfig()
       })
-  }, [refetchUserConfig, setConfig, clearConfig])
+  }, [refetchUserConfig, setConfig, clearAuth, clearConfig])
 
   useEffect(() => {
     const auth = getFirebaseClientAuth()

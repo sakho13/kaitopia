@@ -6,7 +6,7 @@ import { InfoArea } from "@/components/atoms/InfoArea"
 import { ManageTable } from "@/components/molecules/ManageTable"
 import { useGetManageExercise, usePatchManageExercise } from "@/hooks/useApiV1"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
-import { decodeBase64 } from "@/lib/functions/decodeBase64"
+import { decodeBase64ForUrl } from "@/lib/functions/decodeBase64"
 import { Plus } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -16,7 +16,7 @@ export default function Page() {
   const decodedExerciseId =
     !exerciseId || Array.isArray(exerciseId)
       ? ""
-      : decodeBase64(decodeURIComponent(exerciseId))
+      : decodeBase64ForUrl(exerciseId)
 
   const {
     dataToGetManageExercise,
