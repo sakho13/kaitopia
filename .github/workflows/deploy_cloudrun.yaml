@@ -3,22 +3,70 @@ name: Deploy to Cloud Run (Manual)
 on:
   workflow_dispatch:
     inputs:
+      releaseTag:
+        description: "リリースタグ"
+        required: true
+        type: string
       deployMaintenance:
         description: "メンテナンス画面を同時にデプロイするか"
         required: false
         type: boolean
+      maintenanceMessage:
+        description: "メンテナンス画面のメッセージ"
+        required: false
+        type: string
+      deployMode:
+        description: "デプロイモード"
+        required: false
+        default: development
+        type: choice
+        options:
+          - development
+          - maintenance
+          - production
 
-env:
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION: asia-northeast1
-  IMAGE_URI: gcr.io/${{ secrets.GCP_PROJECT_ID }}/kaitopia:${{ github.sha }}
+concurrency:
+  group: ${{ github.event.inputs.releaseTag }}
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  validate-release-tag:
+    name: 🔍 Validate releaseTag format
     runs-on: ubuntu-latest
+    steps:
+      - name: Check allowed tag pattern
+        run: |
+          TAG="${{ github.event.inputs.releaseTag }}"
+          if [[ ! "$TAG" =~ ^[abv][0-9]+-[0-9]+-[0-9]+$ ]]; then
+            echo "::error ::releaseTag must start with a, b or v and follow X.Y.Z (e.g. a0-0-1), but got '$TAG'"
+            exit 1
+          fi
 
-    environment:
-      name: production
+  push-image:
+    name: 🚀 Build & Push Images
+    needs: validate-release-tag
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_REGION: asia-northeast1
+      IMAGE_URI_MAIN: gcr.io/${{ secrets.GCP_PROJECT_ID }}/kaitopia:${{ github.sha }}
+      IMAGE_URI_MAINTENANCE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/kaitopia-maintenance:${{ github.sha }}
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - name: main
+            imageVar: IMAGE_URI_MAIN
+            tag: ${{ github.event.inputs.releaseTag }}
+            enabled: true
+          - name: maintenance
+            imageVar: IMAGE_URI_MAINTENANCE
+            tag: maintenance
+            enabled: ${{ github.event.inputs.deployMaintenance == 'true' }}
 
     steps:
       - name: Checkout code
@@ -32,36 +80,95 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ env.PROJECT_ID }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Configure Docker for GCP
         run: gcloud auth configure-docker --quiet
 
-      - name: Set up .env file
+      - name: Create ${{ matrix.name }} env file
+        if: ${{ matrix.enabled }}
         run: |
-          echo "NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}" >> .env
-          echo "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}" >> .env
-          echo "NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}" >> .env
-          echo "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}" >> .env
-          echo "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}" >> .env
-          echo "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}" >> .env
+          cat <<EOF > .env
+          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+          EOF
 
-      - name: 🔨 コンテナイメージをビルド
+          # maintenance のときだけメッセージ行を追加
+          if [ "${{ matrix.name }}" = "maintenance" ]; then
+            cat <<EOF >> .env
+          NEXT_PUBLIC_MAINTENANCE_MODE=true
+          NEXT_PUBLIC_MAINTENANCE_MODE_MESSAGE=${{ github.event.inputs.maintenanceMessage }}
+          EOF
+          fi
+
+      - name: Determine image URI
+        if: ${{ matrix.enabled }}
         run: |
-          docker build -t $IMAGE_URI -f Dockerfile .
+          # matrix.imageVar は "IMAGE_URI_MAIN" か "IMAGE_URI_MAINTENANCE"
+          IMG_VAR=$(echo "${{ matrix.imageVar }}")
+          IMAGE=${!IMG_VAR}
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      - name: 🚀 GCRへイメージをプッシュ
+      - name: 🔨 Build & Push ${{ matrix.name }} image
+        if: ${{ matrix.enabled }}
         run: |
-          docker push $IMAGE_URI
+          docker build -t $IMAGE -f Dockerfile .
+          docker push $IMAGE
 
-      - name: 🚀 Cloud Run へデプロイ(トラフィックなし)
+      - name: 🚢 Deploy ${{ matrix.name }} to Cloud Run (no traffic)
+        if: ${{ matrix.enabled }}
         run: |
           gcloud run deploy kaitopia \
-            --image $IMAGE_URI \
+            --image $IMAGE \
+            --tag=${{ matrix.tag }} \
             --region $GCP_REGION \
             --allow-unauthenticated \
             --no-traffic \
-            --service-account cloud-run-exec@$GCP_PROJECT_ID.iam.gserviceaccount.com \
-            --set-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }},NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }},NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }},NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }},NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }},NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }},NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }} \
+            --service-account=cloud-run-exec@${{ env.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
+            --set-env-vars \
+            "NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}, \
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}, \
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}, \
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}, \
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}, \
+            NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}, \
+            NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}" \
             --set-secrets="DATABASE_URL=prod-database-url:latest,NEXT_PRIVATE_FIREBASE_CLIENT_EMAIL=firebase-client-email:latest,NEXT_PRIVATE_FIREBASE_PRIVATE_KEY=firebase-private-key:latest"
+
+  switch-traffic:
+    name: 🔀 Switch traffic according to deployMode
+    needs: push-image
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.deployMode != 'development' }}
+
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Switch traffic
+        run: |
+          MODE="${{ github.event.inputs.deployMode }}"
+          if [ "$MODE" = "maintenance" ]; then
+            gcloud run services update-traffic kaitopia \
+              --to-tags maintenance=100 \
+              --region $GCP_REGION \
+              --platform managed
+          else
+            TAG="${{ github.event.inputs.releaseTag }}"
+            gcloud run services update-traffic kaitopia \
+              --to-tags ${TAG}=100 \
+              --region $GCP_REGION \
+              --platform managed
+          fi
