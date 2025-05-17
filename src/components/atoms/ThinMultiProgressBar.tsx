@@ -18,7 +18,8 @@ export function ThinMultiProgressBar({ progresses, totalProgress }: Props) {
     >
       {progresses.map((p, i) => {
         const barColor = p.color
-        const progress = (p.progress / totalProgress) * 100
+        const safeTotalProgress = totalProgress === 0 ? 1 : totalProgress
+        const progress = (p.progress / safeTotalProgress) * 100
 
         return (
           <div
