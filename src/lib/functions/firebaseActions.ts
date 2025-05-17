@@ -61,6 +61,7 @@ const EventMap = {
   googleLoginError: "google_login_error",
   logout: "logout",
   logoutError: "logout_error",
+  authenticationError: "authentication_error",
 
   exerciseStart: "exercise_start",
   exerciseStartError: "exercise_start_error",
