@@ -40,7 +40,7 @@ export function ButtonBase({
         size,
         bgColorMap[colorMode],
         disableHover ? "" : hoverColorMap[colorMode] + " hover:cursor-pointer",
-        `py-2 rounded-xl`,
+        `py-2 px-4 rounded-xl`,
         `transition`,
         `flex items-center justify-center gap-2`,
         className ?? "",

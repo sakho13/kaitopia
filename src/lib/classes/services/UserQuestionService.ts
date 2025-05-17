@@ -1,3 +1,4 @@
+import { $Enums } from "@prisma/client"
 import {
   QuestionAnswerContent,
   QuestionAnswerForUser,
@@ -84,57 +85,21 @@ export class UserQuestionService extends ServiceBase {
             if (!currentQuestionVersion || !currentQuestionUserLog)
               throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-            const answerType = q.answerType
-            const properties: QuestionAnswerForUser<QuestionAnswerTypeType> = [
-              "SELECT",
-              "MULTI_SELECT",
-            ].includes(answerType)
-              ? {
-                  selection: currentQuestionUserLog.selectAnswerOrder.reduce(
-                    (p, c) => {
-                      const a = currentQuestionVersion.questionAnswers.find(
-                        (a) => a.answerId === c,
-                      )
-                      if (a)
-                        return [
-                          ...p,
-                          {
-                            answerId: a.answerId!,
-                            selectContent: a.selectContent!,
-                          },
-                        ]
-                      return p
-                    },
-                    [] as { answerId: string; selectContent: string }[],
-                  ),
-                }
-              : {
-                  property: {
-                    answerId: "",
-                    maxLength: 0,
-                    minLength: 0,
-                  },
-                }
-            if (answerType === "TEXT") {
-              const answer = q.currentVersion?.questionAnswers[0]
-              if (answer && "property" in properties) {
-                properties.property.answerId = answer.answerId!
-                properties.property.maxLength = answer.maxLength ?? 0
-                properties.property.minLength = answer.minLength ?? 0
-              }
-            }
+            const answer = this._convertQuestionAnswerProperty(
+              {
+                answerType: q.answerType,
+                selectAnswerOrder: currentQuestionUserLog.selectAnswerOrder,
+                questionAnswers: q.currentVersion!.questionAnswers,
+              },
+              {
+                isScoringBatch: exercise.isScoringBatch,
+                random: exercise.random,
+              },
+            )
+
             const qLog = sheet.questionUserLogs.find(
               (l) => l.questionId === q.id && l.version === q.currentVersionId,
             )
-
-            if (!exercise.isScoringBatch) {
-              // 都度採点の場合は選択肢をランダムに並び替える
-              if ("selection" in properties && exercise.random) {
-                properties.selection = properties.selection.sort(
-                  () => Math.random() - 0.5,
-                )
-              }
-            }
 
             return {
               questionUserLogId: qLog ? qLog.questionUserLogId : q.id,
@@ -149,7 +114,7 @@ export class UserQuestionService extends ServiceBase {
               isCanSkip: exercise.isCanSkip,
 
               answerType: q.answerType,
-              answer: properties,
+              answer,
             }
           }),
           answerLogSheetId: sheet.answerLogSheetId,
@@ -263,7 +228,8 @@ export class UserQuestionService extends ServiceBase {
 
         return await this._saveUserAnswerLog(
           userLogRepository,
-          latest.answerLogSheetId,
+          userQuestionLog.questionVersion.questionId,
+          userQuestionLog.questionVersion.version,
           userQuestionLog.questionUserLogId,
           answer,
         )
@@ -311,7 +277,6 @@ export class UserQuestionService extends ServiceBase {
       const userLogRepository = new UserLogRepository(this._userId, t)
       const sheet = await userLogRepository.findAnswerLogSheetById(
         answerLogSheetId,
-        this._userId,
       )
 
       if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
@@ -341,6 +306,96 @@ export class UserQuestionService extends ServiceBase {
   }
 
   /**
+   * 問題の回答履歴を一覧で取得する(進行中も含む)
+   * @param limit
+   * @param page
+   * @returns
+   */
+  public async getAnswerLogSheets(limit: number = 10, page?: number) {
+    const offset = page ? (page - 1) * limit : undefined
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+
+    const answerLogSheets = await userLogRepository.findAllAnswerLogSheets(
+      limit,
+      offset,
+    )
+    const totalCount = await userLogRepository.countAllAnswerLogSheets()
+    const nextPage = answerLogSheets.length < limit ? null : page ? page + 1 : 2
+
+    return { answerLogSheets, totalCount, nextPage }
+  }
+
+  /**
+   * 問題の回答履歴を取得する
+   */
+  public async getAnswerLogSheet(answerLogSheetId: string) {
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+
+    const sheet = await userLogRepository.findAnswerLogSheetForResultById(
+      answerLogSheetId,
+    )
+    if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    if (sheet.isInProgress) {
+      throw new ApiV1Error([{ key: "ExerciseUnAnsweredError", params: null }])
+    }
+
+    return {
+      isInProgress: sheet.isInProgress,
+      totalQuestionCount: sheet._count.questionUserLogs,
+      totalCorrectCount: sheet.totalCorrectCount,
+      totalIncorrectCount: sheet.totalIncorrectCount,
+      totalUnansweredCount: sheet.totalUnansweredCount,
+
+      questionAnswerProperties: sheet.questionUserLogs.map((q) => {
+        return {
+          questionUserLogId: q.questionUserLogId,
+          questionId: q.questionVersion.question.id,
+          title: q.questionVersion.question.title,
+          questionType: q.questionVersion.question.questionType,
+          content: q.questionVersion.content,
+          hint: q.questionVersion.hint,
+          score: q.score,
+          answerType: q.questionVersion.question.answerType,
+
+          userAnswers: q.questionVersion.questionAnswers.map(
+            ({ answerId, isCorrect }) => {
+              const selectedAnswer = q.answerSelectUserLogs.find(
+                (a) => a.selectAnswerId === answerId,
+              )
+              return {
+                answerId: answerId,
+                isCorrect: isCorrect === true,
+                isSelected: !!selectedAnswer,
+              }
+            },
+          ),
+
+          answers: this._convertQuestionAnswerProperty({
+            answerType: q.questionVersion.question.answerType,
+            selectAnswerOrder: q.selectAnswerOrder,
+            questionAnswers: q.questionVersion.questionAnswers.map((s) => ({
+              answerId: s.answerId,
+              selectContent: s.selectContent,
+              minLength: s.minLength,
+              maxLength: s.maxLength,
+            })),
+          }),
+        }
+      }),
+      exercise: sheet.exercise,
+      createdAt: sheet.createdAt,
+      updatedAt: sheet.updatedAt,
+    }
+  }
+
+  /**
    * 回答を保存する(採点はしない)
    * @param userLogRepository
    * @param answerLogSheetId
@@ -350,24 +405,25 @@ export class UserQuestionService extends ServiceBase {
    */
   private async _saveUserAnswerLog(
     userLogRepository: UserLogRepository,
-    answerLogSheetId: string,
+    questionId: string,
+    version: number,
     userQuestionLogId: string,
     answer: QuestionAnswerContent,
   ) {
     if (answer.type === "SKIP") {
       return await userLogRepository.saveSkipQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
-        this._userId,
       )
     }
 
     if (answer.type === "SELECT" && "answerId" in answer) {
       await userLogRepository.deleteSelectQuestionLog(userQuestionLogId)
       return await userLogRepository.saveSelectQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
-        this._userId,
         [answer.answerId],
       )
     }
@@ -375,18 +431,18 @@ export class UserQuestionService extends ServiceBase {
     if (answer.type === "MULTI_SELECT" && "answerIds" in answer) {
       await userLogRepository.deleteSelectQuestionLog(userQuestionLogId)
       return await userLogRepository.saveSelectQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
-        this._userId,
         answer.answerIds,
       )
     }
 
     if (answer.type === "TEXT" && "content" in answer) {
       return await userLogRepository.saveTextQuestionLog(
-        answerLogSheetId,
+        questionId,
+        version,
         userQuestionLogId,
-        this._userId,
         answer.content,
       )
     }
@@ -693,6 +749,69 @@ export class UserQuestionService extends ServiceBase {
           { key: "InvalidFormatError", params: { key: "回答形式" } },
         ])
       }
+    }
+  }
+
+  private _convertQuestionAnswerProperty<
+    CQ extends {
+      answerType: $Enums.AnswerType
+      selectAnswerOrder: string[]
+      questionAnswers: T1[]
+    },
+    T1 extends {
+      answerId: string
+      selectContent: string | null
+      minLength: number | null
+      maxLength: number | null
+    },
+  >(
+    currentQuestion: CQ,
+    ext?: Partial<{ isScoringBatch: boolean; random: boolean }>,
+  ): QuestionAnswerForUser<QuestionAnswerTypeType> {
+    const answerType = currentQuestion.answerType
+    if (answerType === "TEXT") {
+      const a = currentQuestion.questionAnswers[0]
+      return {
+        property: {
+          answerId: a.answerId!,
+          maxLength: a.maxLength ?? 0,
+          minLength: a.minLength ?? 0,
+        },
+      }
+    }
+
+    if (["SELECT", "MULTI_SELECT"].includes(answerType)) {
+      const selection = currentQuestion.selectAnswerOrder.reduce((p, c) => {
+        const a = currentQuestion.questionAnswers.find((a) => a.answerId === c)
+        if (a) {
+          return [
+            ...p,
+            {
+              answerId: a.answerId!,
+              selectContent: a.selectContent!,
+            },
+          ]
+        }
+        return p
+      }, [] as { answerId: string; selectContent: string }[])
+
+      if (ext?.isScoringBatch === false) {
+        // 都度採点の場合は選択肢をランダムに並び替える
+        if (ext.random === true) {
+          selection.sort(() => Math.random() - 0.5)
+        }
+      }
+      return {
+        selection,
+      }
+    }
+
+    return {
+      property: {
+        answerId: "",
+        maxLength: 0,
+        minLength: 0,
+      },
     }
   }
 

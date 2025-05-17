@@ -1,14 +1,14 @@
 // import { getAnalytics } from "firebase/analytics"
 import { initializeApp, getApps } from "firebase/app"
 import { connectAuthEmulator, getAuth } from "firebase/auth"
+import { getAnalytics } from "firebase/analytics"
 
 let authInstance: ReturnType<typeof getAuth> | null = null
+let analyticsInstance: ReturnType<typeof getAnalytics> | null = null
 
-export function getFirebaseClientAuth() {
-  if (typeof window === "undefined") return null
+const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true"
 
-  if (authInstance) return authInstance
-
+function getFirebaseApp() {
   const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
@@ -17,13 +17,20 @@ export function getFirebaseClientAuth() {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
   }
-  console.log("firebaseConfig", firebaseConfig)
+  const apps = getApps()
+  const app = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig)
+  return app
+}
 
-  const app =
-    getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig)
+export function getFirebaseClientAuth() {
+  if (typeof window === "undefined" && !useEmulator) return null
+
+  if (authInstance) return authInstance
+
+  const app = getFirebaseApp()
   const auth = getAuth(app)
 
-  if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true") {
+  if (useEmulator) {
     connectAuthEmulator(auth, "http://localhost:9099", {
       disableWarnings: true,
     })
@@ -33,5 +40,14 @@ export function getFirebaseClientAuth() {
   return authInstance
 }
 
-// export const firebaseAuthClient = auth
-// export const analytics = getAnalytics(app)
+export function getFirebaseClientAnalytics() {
+  if (typeof window === "undefined" && !useEmulator) return null
+  if (process.env.NODE_ENV !== "production") return null
+
+  if (analyticsInstance) return analyticsInstance
+
+  const app = getFirebaseApp()
+  const analytics = getAnalytics(app)
+  analyticsInstance = analytics
+  return analyticsInstance
+}

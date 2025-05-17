@@ -30,6 +30,28 @@ export type QuestionForUser = {
 export type QuestionAnswerForUser<T extends QuestionAnswerTypeType> =
   QuestionAnswerProperty[T]
 
+export type QuestionForResult = {
+  questionUserLogId: string
+  questionId: string
+
+  title: string
+  questionType: QuestionTypeType
+
+  content: string
+  hint: string
+
+  score: number
+
+  answerType: QuestionAnswerTypeType
+
+  userAnswers: {
+    answerId: string
+    isCorrect: boolean
+    isSelected: boolean
+  }[]
+  answers: QuestionAnswerForUser<QuestionAnswerTypeType>
+}
+
 // *********************
 //       Question
 // *********************
@@ -125,7 +147,9 @@ export type QuestionAnswerBase<T extends QuestionAnswerTypeType> = {
 }
 
 export type QuestionUserAnswer = {
-  SKIP: object
+  SKIP: {
+    skipped: true
+  }
   SELECT: {
     answerId: string
   }

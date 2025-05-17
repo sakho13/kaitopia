@@ -17,6 +17,7 @@ import {
   QuestionBaseIdentifier,
   QuestionBasePublishedState,
   QuestionBaseStatus,
+  QuestionForResult,
   QuestionForUser,
   QuestionVersionBase,
   QuestionVersionBaseIdentifier,
@@ -298,6 +299,18 @@ export type ApiV1OutTypeMap = {
     nextPage: number | null
     totalCount: number
   }
+  /**
+   * GET /api/user/v1/exercise/result/log-sheet?answerLogSheetId=xxxx
+   */
+  GetUserResultLogSheet: {
+    answerLogSheetId: string
+    detail: AnswerLogSheetBase & {
+      questionUserLogs: QuestionForResult[]
+    }
+    exercise: (ExerciseBaseIdentifier & ExerciseBase) | null
+    createdAt: string
+    updatedAt: string
+  }
 
   /**
    * GET /api/manage/v1/own-schools
@@ -370,8 +383,9 @@ export type ApiV1OutTypeMap = {
    */
   GetManageUsers: {
     users: (UserBaseIdentity &
-      UserBaseInfo &
-      ReplacedDateToString<UserBaseInfoOption> &
+      UserBaseInfo & {
+        isGuest: boolean
+      } & ReplacedDateToString<UserBaseInfoOption> &
       ReplacedDateToString<UserBaseDate>)[]
     nextPage: number | null
     totalCount: number

@@ -149,7 +149,7 @@ export default function Layout({ children }: Props) {
         </nav>
       </aside>
 
-      <main className='flex-1 p-8'>
+      <main className='flex-1 p-8 max-h-screen overflow-y-auto'>
         <div className='flex justify-between items-center mb-6'>
           <h2 className='text-2xl font-semibold'>{pageTitle}</h2>
 

@@ -203,7 +203,7 @@ export function ExerciseManager({ exerciseId }: Props) {
               <ButtonBase
                 colorMode='ghost'
                 className='px-4'
-                onClick={() => onAnswer("SKIP", {})}
+                onClick={() => onAnswer("SKIP", { skipped: true })}
               >
                 スキップ
               </ButtonBase>

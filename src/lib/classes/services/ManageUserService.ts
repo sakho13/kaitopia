@@ -19,6 +19,7 @@ export class ManageUserService extends ServiceBase {
 
   public async getUsersForManageAdmin(limit: number = 10, page: number = 1) {
     // 管理者は全てのユーザーを取得できる
+    // その他のユーザは一旦無視
     if (!this.userController.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
