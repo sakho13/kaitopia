@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ToastContainer, Slide } from "react-toastify"
+import { FirebaseAnalytics } from "@/components/molecules/FirebaseAnalytics"
 import "./globals.css"
+import { Suspense } from "react"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +30,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-mono`}
       >
+        <Suspense fallback={null}>
+          <FirebaseAnalytics />
+        </Suspense>
+
         {children}
 
         <ToastContainer
