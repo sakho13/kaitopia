@@ -15,6 +15,10 @@ export function ThinMultiProgressBar({ progresses, totalProgress }: Props) {
     <div
       className={joincn(`h-1 rounded-full w-full flex`)}
       style={{ backgroundColor: "#f8f8f8" }}
+      aria-label='進捗バー'
+      aria-valuenow={progresses.reduce((acc, p) => acc + p.progress, 0)}
+      aria-valuemin={0}
+      aria-valuemax={totalProgress}
     >
       {progresses.map((p, i) => {
         const barColor = p.color
