@@ -1,7 +1,11 @@
 // import { getAnalytics } from "firebase/analytics"
 import { initializeApp, getApps } from "firebase/app"
 import { connectAuthEmulator, getAuth } from "firebase/auth"
-import { getAnalytics } from "firebase/analytics"
+import {
+  getAnalytics,
+  setUserProperties,
+  setDefaultEventParameters,
+} from "firebase/analytics"
 
 let authInstance: ReturnType<typeof getAuth> | null = null
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null
@@ -48,6 +52,13 @@ export function getFirebaseClientAnalytics() {
 
   const app = getFirebaseApp()
   const analytics = getAnalytics(app)
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "unknown"
+  setUserProperties(analytics, {
+    app_version: appVersion,
+  })
+  setDefaultEventParameters({
+    app_version: appVersion,
+  })
   analyticsInstance = analytics
   return analyticsInstance
 }
