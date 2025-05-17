@@ -15,7 +15,7 @@ import {
   useGetManageExercises,
 } from "@/hooks/useApiV1"
 import { useManageStore } from "@/hooks/stores/useManageStore"
-import { encodeBase64, encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
+import { encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { ManageNewExerciseForm } from "@/components/molecules/ManageNewExerciseForm"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { joincn } from "@/lib/functions/joincn"
@@ -100,7 +100,7 @@ export default function Page() {
           <tbody>
             {dataTooGetManageExercises.map((exercise, i) => (
               <tr
-                key={encodeBase64(exercise.exerciseId)}
+                key={encodeBase64ForUrl(exercise.exerciseId)}
                 className='border-t hover:bg-gray-50'
               >
                 <td className='px-1 py-2 text-center select-none'>{i + 1}</td>
