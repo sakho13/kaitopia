@@ -51,4 +51,19 @@ export class UserQuestionRepository extends RepositoryBase {
       },
     })
   }
+
+  /**
+   * 問題に紐づく回答を取得する
+   */
+  public async findQuestionAnswersByQuestionId(
+    questionId: string,
+    version: number,
+  ) {
+    return await this.dbConnection.questionAnswer.findMany({
+      where: {
+        questionId,
+        version,
+      },
+    })
+  }
 }

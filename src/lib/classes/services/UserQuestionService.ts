@@ -329,6 +329,73 @@ export class UserQuestionService extends ServiceBase {
   }
 
   /**
+   * 問題の回答履歴を取得する
+   */
+  public async getAnswerLogSheet(answerLogSheetId: string) {
+    const userLogRepository = new UserLogRepository(
+      this._userId,
+      this.dbConnection,
+    )
+
+    const sheet = await userLogRepository.findAnswerLogSheetForResultById(
+      answerLogSheetId,
+    )
+    if (!sheet) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+
+    if (sheet.isInProgress) {
+      throw new ApiV1Error([{ key: "ExerciseUnAnsweredError", params: null }])
+    }
+
+    return {
+      isInProgress: sheet.isInProgress,
+      totalQuestionCount: sheet._count.questionUserLogs,
+      totalCorrectCount: sheet.totalCorrectCount,
+      totalIncorrectCount: sheet.totalIncorrectCount,
+      totalUnansweredCount: sheet.totalUnansweredCount,
+
+      questionAnswerProperties: sheet.questionUserLogs.map((q) => {
+        return {
+          questionUserLogId: q.questionUserLogId,
+          questionId: q.questionVersion.question.id,
+          title: q.questionVersion.question.title,
+          questionType: q.questionVersion.question.questionType,
+          content: q.questionVersion.content,
+          hint: q.questionVersion.hint,
+          score: q.score,
+          answerType: q.questionVersion.question.answerType,
+
+          userAnswers: q.questionVersion.questionAnswers.map(
+            ({ answerId, isCorrect }) => {
+              const selectedAnswer = q.answerSelectUserLogs.find(
+                (a) => a.selectAnswerId === answerId,
+              )
+              return {
+                answerId: answerId,
+                isCorrect: isCorrect === true,
+                isSelected: !!selectedAnswer,
+              }
+            },
+          ),
+
+          answers: this._convertQuestionAnswerProperty({
+            answerType: q.questionVersion.question.answerType,
+            selectAnswerOrder: q.selectAnswerOrder,
+            questionAnswers: q.questionVersion.questionAnswers.map((s) => ({
+              answerId: s.answerId,
+              selectContent: s.selectContent,
+              minLength: s.minLength,
+              maxLength: s.maxLength,
+            })),
+          }),
+        }
+      }),
+      exercise: sheet.exercise,
+      createdAt: sheet.createdAt,
+      updatedAt: sheet.updatedAt,
+    }
+  }
+
+  /**
    * 回答を保存する(採点はしない)
    * @param userLogRepository
    * @param answerLogSheetId

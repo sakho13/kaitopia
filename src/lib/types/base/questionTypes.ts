@@ -44,7 +44,11 @@ export type QuestionForResult = {
 
   answerType: QuestionAnswerTypeType
 
-  selectedAnswers: { answerId: string; isCorrect: boolean }[]
+  userAnswers: {
+    answerId: string
+    isCorrect: boolean
+    isSelected: boolean
+  }[]
   answers: QuestionAnswerForUser<QuestionAnswerTypeType>
 }
 

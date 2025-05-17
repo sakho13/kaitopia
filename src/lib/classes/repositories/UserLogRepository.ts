@@ -117,6 +117,97 @@ export class UserLogRepository extends RepositoryBase {
   }
 
   /**
+   * 結果確認用の回答ログシートを取得する
+   */
+  public async findAnswerLogSheetForResultById(answerLogSheetId: string) {
+    return await this.dbConnection.answerLogSheet.findUnique({
+      select: {
+        answerLogSheetId: true,
+        exerciseId: true,
+        isInProgress: true,
+        totalCorrectCount: true,
+        totalIncorrectCount: true,
+        totalUnansweredCount: true,
+        questionUserLogs: {
+          select: {
+            questionUserLogId: true,
+            questionId: true,
+            version: true,
+            orderIndex: true,
+            skipped: true,
+            score: true,
+            textAnswer: true,
+            selectAnswerOrder: true,
+            questionVersion: {
+              select: {
+                question: {
+                  select: {
+                    id: true,
+                    title: true,
+                    questionType: true,
+                    answerType: true,
+                  },
+                },
+                questionAnswers: {
+                  select: {
+                    answerId: true,
+                    selectContent: true,
+                    isCorrect: true,
+                    maxLength: true,
+                    minLength: true,
+                  },
+                },
+                hint: true,
+                content: true,
+              },
+            },
+            answerSelectUserLogs: {
+              select: {
+                answerSelectUserLogId: true,
+
+                selectAnswerId: true,
+                isCorrect: true,
+                questionAnswer: {
+                  select: {
+                    selectContent: true,
+                    maxLength: true,
+                    minLength: true,
+                    isCorrect: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { orderIndex: "asc" },
+        },
+        exercise: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            isScoringBatch: true,
+            isCanSkip: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+
+        _count: {
+          select: {
+            questionUserLogs: true,
+          },
+        },
+      },
+      where: {
+        userId_answerLogSheetId: {
+          userId: this.userId,
+          answerLogSheetId: answerLogSheetId,
+        },
+      },
+    })
+  }
+
+  /**
    * 回答ログシートを取得する
    * @param answerLogSheetId
    * @param userId
