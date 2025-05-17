@@ -1,13 +1,15 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useGetUserResultsLogs } from "@/hooks/useApiV1"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
-import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { encodeBase64, encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
 import { InfoArea } from "../atoms/InfoArea"
 import { ThinMultiProgressBar } from "../atoms/ThinMultiProgressBar"
 
 export function UserLatestResultLogs() {
+  const router = useRouter()
   const { dataToGetUserResultLogs, totalCountToGetUserResultLogs } =
     useGetUserResultsLogs()
 
@@ -32,7 +34,21 @@ export function UserLatestResultLogs() {
             key={encodeBase64(l.answerLogSheetId)}
             className={joincn("select-none", i === 0 ? "" : "mt-4")}
           >
-            <div className='flex gap-4'>
+            <div
+              className={joincn(
+                "flex gap-4 px-4",
+                l.isInProgress ? "" : "hover:cursor-pointer hover:opacity-80",
+              )}
+              onClick={() => {
+                if (l.isInProgress) return
+
+                router.push(
+                  `/v1/user/result/logs?answerLogSheetId=${encodeBase64ForUrl(
+                    l.answerLogSheetId,
+                  )}`,
+                )
+              }}
+            >
               <div>
                 <span className='text-gray-500'>
                   {DateUtility.formatDateTime(createdAtt)}
@@ -50,7 +66,7 @@ export function UserLatestResultLogs() {
               </div>
             </div>
 
-            <div className='px-2'>
+            <div>
               <ThinMultiProgressBar
                 totalProgress={l.totalQuestionCount}
                 progresses={[
