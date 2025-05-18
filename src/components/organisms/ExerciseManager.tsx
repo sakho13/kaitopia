@@ -7,6 +7,7 @@ import {
   usePostUserExerciseQuestion,
 } from "@/hooks/useApiV1"
 import { QuestionForUser } from "@/lib/types/base/questionTypes"
+import { useBoolean } from "@/hooks/common/useBoolean"
 import { useQuestionAnswer } from "@/hooks/useQuestionAnswer"
 import { ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { joincn } from "@/lib/functions/joincn"
@@ -313,7 +314,7 @@ function useExerciseManager(exerciseId: string) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [state, setState] = useState<"answer" | "result">("answer")
   const [answerLoading, setAnswerLoading] = useState(false)
-  const [showHint, setShowHint] = useState(false)
+  const { value: showHint, onChange: setShowHint } = useBoolean(false)
 
   const [patchResult, setPatchResult] =
     useState<ApiV1OutTypeMap["PatchUserExerciseQuestion"]>()
