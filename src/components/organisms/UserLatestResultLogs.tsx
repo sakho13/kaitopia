@@ -61,8 +61,10 @@ export function UserLatestResultLogs() {
                 </span>
               </div>
               <div>
-                {l.totalCorrectCount} / {l.totalQuestionCount}問
-                {isInProgress && " 🏃"}
+                {l.totalCorrectCount} / {l.totalQuestionCount}問 &nbsp;
+              </div>
+              <div className='w-fit hover:animate-spin'>
+                {isInProgress && "🏃"}
               </div>
             </div>
 
