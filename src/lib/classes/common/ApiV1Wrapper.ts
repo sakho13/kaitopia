@@ -21,8 +21,9 @@ export class ApiV1Wrapper {
       const data = await apiLogic()
       return NextResponse.json({ success: true, data }, { status: 200 })
     } catch (error: unknown) {
-      if (process.env.NODE_ENV !== "production")
+      if (process.env.NODE_ENV !== "production") {
         console.error(`[${this.apiName}] Error:`, error)
+      }
 
       if (error instanceof ApiV1Error) {
         return NextResponse.json(

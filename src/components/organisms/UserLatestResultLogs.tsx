@@ -60,8 +60,8 @@ export function UserLatestResultLogs() {
                   {l.exercise ? `問題集「${l.exercise.title}」` : ""}
                 </span>
               </div>
-              <div>
-                {l.totalCorrectCount} / {l.totalQuestionCount}問 &nbsp;
+              <div className='ml-2'>
+                {l.totalCorrectCount} / {l.totalQuestionCount}問
               </div>
               <div className='w-fit hover:animate-spin'>
                 {isInProgress && "🏃"}
