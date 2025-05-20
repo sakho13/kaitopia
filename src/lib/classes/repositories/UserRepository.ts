@@ -114,7 +114,22 @@ export class UserRepository extends RepositoryBase {
       data: {
         name: data.name,
         birthDayDate: data.birthDayDate || null,
-        role: data.role,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+      },
+    })
+  }
+
+  public async updateUserRoleByFirebaseUid(
+    firebaseUid: string,
+    role: UserBaseInfo["role"],
+  ) {
+    return await this.dbConnection.user.update({
+      where: {
+        firebaseUid: firebaseUid,
+      },
+      data: {
+        role: role,
       },
     })
   }
