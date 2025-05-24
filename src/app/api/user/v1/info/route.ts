@@ -4,7 +4,7 @@ import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { UserService } from "@/lib/classes/services/UserService"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
-import { isStrictISO8601 } from "@/lib/functions/isStrictIso8601"
+import { isStrictISO8601 } from "@/lib/functions/isStrictISO8601"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ取得")
