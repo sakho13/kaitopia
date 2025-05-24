@@ -6,6 +6,11 @@ export type User = UserBaseInfo &
   UserBaseDate &
   UserRelationSchools
 
+/**
+ * 編集可能なユーザ情報項目
+ */
+export type EditableUserInfo = Omit<UserBaseInfo, "role"> & UserBaseInfoOption
+
 export type UserBaseInfo = {
   name: string
   email: string | null
