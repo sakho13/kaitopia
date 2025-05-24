@@ -28,6 +28,7 @@ import {
   SchoolBaseIdentity,
 } from "./base/schoolTypes"
 import {
+  EditableUserInfo,
   UserBaseDate,
   UserBaseIdentity,
   UserBaseInfo,
@@ -122,6 +123,12 @@ export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
 
 export type ApiV1InTypeMap = {
   /**
+   * PATCH /api/user/v1/user/info
+   */
+  PatchUserInfo: {
+    user: ReplacedDateToString<EditableUserInfo>
+  }
+  /**
    * GET /api/manage/v1/exercise?exerciseId=xxxx
    */
   GetManageExercise: {
@@ -191,6 +198,7 @@ export type ApiV1OutTypeMap = {
       ReplacedDateToString<UserBaseInfoOption> &
       ReplacedDateToString<Omit<UserBaseDate, "deletedAt">>
   }
+  PatchUserInfo: ApiV1OutTypeMap["GetUserInfo"]
   PostUserLogin: {
     state: "register" | "login"
     user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>

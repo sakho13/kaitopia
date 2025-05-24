@@ -1,6 +1,9 @@
-import { UserBaseInfo } from "@/lib/types/base/userTypes"
+import { EditableUserInfo, UserBaseInfo } from "@/lib/types/base/userTypes"
 import { ServiceBase } from "../common/ServiceBase"
 import { UserController } from "../controller/UserController"
+import { UserRepository } from "../repositories/UserRepository"
+import { ReplacedDateToString } from "@/lib/types/common/ReplacedDateToString"
+import { ApiV1Error } from "../common/ApiV1Error"
 
 export class UserService extends ServiceBase {
   private _userController: UserController
@@ -26,6 +29,29 @@ export class UserService extends ServiceBase {
     )
   }
 
+  public async editUserInfo(
+    data: Partial<ReplacedDateToString<EditableUserInfo>>,
+  ) {
+    const resultUpdate = await this.dbConnection.$transaction(async (t) => {
+      const userRepository = new UserRepository(t)
+
+      const name = data.name
+      // ISO 8601形式の文字列をDateに変換(時間は00:00:00)
+      const birthDayDate = data.birthDayDate
+        ? new Date(data.birthDayDate)
+        : undefined
+      // const email = data.email
+      // const phoneNumber = data.phoneNumber
+
+      return await userRepository.updateUserByUid(this._userId, {
+        name,
+        birthDayDate,
+      })
+    })
+
+    return resultUpdate
+  }
+
   public async getOwnSchools() {
     return await this._userController.getOwnSchools()
   }
@@ -34,8 +60,10 @@ export class UserService extends ServiceBase {
     return await this.userController.getUserAccessibleSchools()
   }
 
-  public get userId() {
-    return this._userController.userId
+  private get _userId() {
+    if (this.userController.userId === null)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    return this.userController.userId
   }
 
   public get canAccessManagePage() {

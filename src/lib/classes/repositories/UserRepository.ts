@@ -103,13 +103,13 @@ export class UserRepository extends RepositoryBase {
     })
   }
 
-  public async updateUserByFirebaseUid(
-    firebaseUid: string,
+  public async updateUserByUid(
+    uid: string,
     data: Partial<UserBaseInfo & UserBaseInfoOption>,
   ) {
     return await this.dbConnection.user.update({
       where: {
-        firebaseUid: firebaseUid,
+        id: uid,
       },
       data: {
         name: data.name,
