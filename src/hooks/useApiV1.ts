@@ -342,6 +342,30 @@ export function useGetUserInfo() {
 }
 
 /**
+ * PATCH: `/api/user/v1/info`
+ */
+export function usePatchUserInfo() {
+  const { idToken } = useAuth()
+
+  const requestPatchUserInfo = async (
+    input: ApiV1InTypeMap["PatchUserInfo"],
+  ) => {
+    return await requestHttp(
+      "PatchUserInfo",
+      "PatchUserInfo",
+      "/api/user/v1/info",
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchUserInfo,
+  }
+}
+
+/**
  * POST: `/api/user/v1/login`
  */
 export function usePostUserLogin() {

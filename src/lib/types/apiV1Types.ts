@@ -123,7 +123,7 @@ export type ApiV1ErrorInput<K extends keyof ApiV1ErrorMap> = {
 
 export type ApiV1InTypeMap = {
   /**
-   * PATCH /api/user/v1/user/info
+   * PATCH /api/user/v1/info
    */
   PatchUserInfo: {
     user: ReplacedDateToString<EditableUserInfo>
