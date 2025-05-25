@@ -5,6 +5,7 @@ import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { UserService } from "@/lib/classes/services/UserService"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 import { isStrictISO8601 } from "@/lib/functions/isStrictISO8601"
+import { STATICS } from "@/lib/statics"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ取得")
@@ -115,8 +116,8 @@ function validatePatch(
   if ("name" in body.user) {
     if (
       typeof body.user.name !== "string" ||
-      body.user.name.length < 1 ||
-      body.user.name.length > 20
+      body.user.name.length < STATICS.VALIDATE.NAME.MIN_LENGTH ||
+      body.user.name.length > STATICS.VALIDATE.NAME.MAX_LENGTH
     ) {
       return {
         error: new ApiV1Error([
