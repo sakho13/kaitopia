@@ -116,7 +116,7 @@ function validatePatch(
     if (
       typeof body.user.name !== "string" ||
       body.user.name.length < 1 ||
-      body.user.name.length > 100
+      body.user.name.length > 20
     ) {
       return {
         error: new ApiV1Error([

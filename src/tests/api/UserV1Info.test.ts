@@ -322,7 +322,7 @@ describe("API /api/user/v1/info", () => {
           },
           {
             user: {
-              name: "a".repeat(101), // 101文字
+              name: "a".repeat(21), // 21文字
             },
           },
         )
