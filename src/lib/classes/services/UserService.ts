@@ -43,7 +43,7 @@ export class UserService extends ServiceBase {
       // const email = data.email
       // const phoneNumber = data.phoneNumber
 
-      return await userRepository.updateUserByUid(this._userId, {
+      return await userRepository.updateUserById(this._userId, {
         name,
         birthDayDate,
       })

@@ -103,13 +103,13 @@ export class UserRepository extends RepositoryBase {
     })
   }
 
-  public async updateUserByUid(
-    uid: string,
+  public async updateUserById(
+    userId: string,
     data: Partial<UserBaseInfo & UserBaseInfoOption>,
   ) {
     return await this.dbConnection.user.update({
       where: {
-        id: uid,
+        id: userId,
       },
       data: {
         name: data.name,
