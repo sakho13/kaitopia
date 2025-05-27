@@ -1,4 +1,4 @@
-import { isStrictISO8601 } from "@/lib/functions/isStrictIso8601"
+import { isStrictISO8601 } from "@/lib/functions/isStrictISO8601"
 
 describe("lib/functions/isStrictISO8601", () => {
   test("UTC日時文字列", () => {
