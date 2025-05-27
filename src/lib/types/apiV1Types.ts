@@ -126,7 +126,7 @@ export type ApiV1InTypeMap = {
    * PATCH /api/user/v1/info
    */
   PatchUserInfo: {
-    user: ReplacedDateToString<EditableUserInfo>
+    user: Partial<ReplacedDateToString<EditableUserInfo>>
   }
   /**
    * GET /api/manage/v1/exercise?exerciseId=xxxx
