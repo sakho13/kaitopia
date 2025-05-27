@@ -9,19 +9,12 @@ import {
   POST as PostUserV1ExerciseQuestion,
 } from "@/app/api/user/v1/exercise/question/route"
 import { TestUtility } from "../TestUtility"
-import { DateUtility } from "@/lib/classes/common/DateUtility"
-import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
 
 describe("API /api/user/v1/result/log-sheet", () => {
   let newUserToken = ""
 
   beforeAll(async () => {
-    const token = await TestUtility.getTokenByEmailAndSignUp(
-      `test-user-${DateUtility.generateDateStringNow()}+${generateRandomLenNumber(
-        3,
-      )}@kaitopia.com`,
-      "password",
-    )
+    const token = await TestUtility.getGuestToken()
     newUserToken = token
     const resultSignUp = await TestUtility.signUpByToken(token)
     expect(resultSignUp.ok).toBe(true)
