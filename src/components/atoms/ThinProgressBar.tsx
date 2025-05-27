@@ -1,4 +1,5 @@
 import { joincn } from "@/lib/functions/joincn"
+import { ReactNode } from "react"
 
 type BorderColor = {
   progress: number
@@ -8,9 +9,10 @@ type BorderColor = {
 type Props = {
   progress: number
   colorBorders?: BorderColor[]
+  cursor?: ReactNode
 }
 
-export function ThinProgressBar({ progress, colorBorders }: Props) {
+export function ThinProgressBar({ progress, colorBorders, cursor }: Props) {
   const barColor = colorBorders
     ? colorBorders
         .sort((a, b) => a.progress - b.progress)
@@ -24,7 +26,7 @@ export function ThinProgressBar({ progress, colorBorders }: Props) {
 
   return (
     <div
-      className={joincn(`h-1 rounded-full w-full`)}
+      className={joincn(`h-1 rounded-full w-full relative`)}
       style={{ backgroundColor: "#f8f8f8" }}
     >
       <div
@@ -35,6 +37,17 @@ export function ThinProgressBar({ progress, colorBorders }: Props) {
           transition: "width 0.5s ease-in-out",
         }}
       />
+
+      {cursor && (
+        <div
+          className='absolute top-[-19px] translate-x-[-50%]'
+          style={{
+            left: `${progress}%`,
+          }}
+        >
+          {cursor}
+        </div>
+      )}
     </div>
   )
 }

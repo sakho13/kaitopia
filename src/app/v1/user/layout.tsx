@@ -14,7 +14,7 @@ export default function Layout({
         <UserPopover />
       </header>
 
-      <main className='p-6 max-w-6xl mx-auto'>{children}</main>
+      <main className='px-3 md:p-6 max-w-6xl mx-auto'>{children}</main>
     </div>
   )
 }

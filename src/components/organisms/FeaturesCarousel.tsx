@@ -10,12 +10,14 @@ import {
   CarouselPrevious,
 } from "../ui/carousel"
 import { useRef } from "react"
+import { useRouter } from "next/navigation"
 
 type FeatureItem = {
   title: string
   description: string
 
   status: "coming-soon" | "in-development" | "available" | null
+  descriptionLink?: string
 }
 
 const FeatureList: FeatureItem[] = [
@@ -23,6 +25,7 @@ const FeatureList: FeatureItem[] = [
     title: "📚 問題集",
     description: "多様な問題形式に対応した問題集を作成し、学習者に提供します。",
     status: "available",
+    descriptionLink: "/public/ex/exercise",
   },
   {
     title: "👊 ゲストアカウント",
@@ -55,6 +58,7 @@ const FeatureList: FeatureItem[] = [
 
 export function FeaturesCarousel() {
   const plugins = useRef(CarouselAutoPlay({ delay: 3000 }))
+  const router = useRouter()
 
   return (
     <Carousel
@@ -101,11 +105,26 @@ export function FeaturesCarousel() {
                 "p-6 rounded-2xl shadow hover:shadow-lg",
                 "transition cursor-default select-none",
                 "h-full",
+                feature.descriptionLink ? "hover:cursor-pointer" : "",
               )}
+              onClick={() =>
+                feature.descriptionLink
+                  ? router.push(feature.descriptionLink)
+                  : undefined
+              }
             >
               <h3 className='text-xl font-semibold mb-2'>{feature.title}</h3>
               <p>{feature.description}</p>
             </div>
+
+            {feature.descriptionLink && (
+              <a
+                href={feature.descriptionLink}
+                className='absolute bottom-2 right-2 text-blue-500 hover:underline text-sm'
+              >
+                詳細を見る
+              </a>
+            )}
           </CarouselItem>
         ))}
       </CarouselContent>
