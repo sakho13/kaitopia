@@ -159,7 +159,7 @@ export function ExerciseManager({ exerciseId }: Props) {
   }
 
   return (
-    <div className='max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
+    <div className='max-w-full w-full md:max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
       <ThinProgressBar
         progress={((currentIndex + 1) / questions.length) * 100}
         colorBorders={[
@@ -167,6 +167,11 @@ export function ExerciseManager({ exerciseId }: Props) {
           { progress: 50, color: "#98d0ff" },
           { progress: 80, color: "#95daaf" },
         ]}
+        cursor={
+          <div className='transform scale-x-[-1]'>
+            <span className='select-none text-lg'>🏃</span>
+          </div>
+        }
       />
 
       <h1 className='text-xl font-bold select-none'>
