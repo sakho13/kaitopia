@@ -335,7 +335,7 @@ export function useGetUserInfo() {
   )
 
   return {
-    dataTooGetUserInfo: data,
+    dataToGetUserInfo: data,
     isLoadingToGetUserInfo: isLoading,
     refetchUserInfo: mutate,
   } as const
