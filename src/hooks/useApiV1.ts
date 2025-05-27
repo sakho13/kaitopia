@@ -335,10 +335,34 @@ export function useGetUserInfo() {
   )
 
   return {
-    dataTooGetUserInfo: data,
+    dataToGetUserInfo: data,
     isLoadingToGetUserInfo: isLoading,
     refetchUserInfo: mutate,
   } as const
+}
+
+/**
+ * PATCH: `/api/user/v1/info`
+ */
+export function usePatchUserInfo() {
+  const { idToken } = useAuth()
+
+  const requestPatchUserInfo = async (
+    input: ApiV1InTypeMap["PatchUserInfo"],
+  ) => {
+    return await requestHttp(
+      "PatchUserInfo",
+      "PatchUserInfo",
+      "/api/user/v1/info",
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchUserInfo,
+  }
 }
 
 /**

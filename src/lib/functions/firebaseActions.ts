@@ -51,6 +51,8 @@ export const handleLogoutByFirebase = async () => {
 // analytics
 
 const EventMap = {
+  pageView: "page_view",
+
   emailLogin: "email_login",
   emailLoginError: "email_login_error",
   emailRegister: "email_register",

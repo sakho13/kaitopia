@@ -4,7 +4,7 @@ export default function MaintenancePage() {
       <h1 className='font-bold text-2xl'>メンテナンス中です</h1>
 
       <p>
-        {process.env.NEXT_PUBLIC_MAINTENANCE_MODE_MESSAGE ??
+        {process.env.NEXT_PUBLIC_MAINTENANCE_MODE_MESSAGE ||
           "メンテナンス中です。復帰時期は公式アナウンスを確認してください。"}
       </p>
     </div>

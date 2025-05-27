@@ -7,6 +7,7 @@ import {
   usePostUserExerciseQuestion,
 } from "@/hooks/useApiV1"
 import { QuestionForUser } from "@/lib/types/base/questionTypes"
+import { useBoolean } from "@/hooks/common/useBoolean"
 import { useQuestionAnswer } from "@/hooks/useQuestionAnswer"
 import { ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { joincn } from "@/lib/functions/joincn"
@@ -30,9 +31,11 @@ export function ExerciseManager({ exerciseId }: Props) {
     questions,
     currentQuestion,
     answerState,
+    showHint,
 
     onAnswer,
     onClickNext,
+    onClickHint,
   } = useExerciseManager(exerciseId)
 
   if (
@@ -156,7 +159,7 @@ export function ExerciseManager({ exerciseId }: Props) {
   }
 
   return (
-    <div className='max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
+    <div className='max-w-full w-full md:max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
       <ThinProgressBar
         progress={((currentIndex + 1) / questions.length) * 100}
         colorBorders={[
@@ -164,6 +167,11 @@ export function ExerciseManager({ exerciseId }: Props) {
           { progress: 50, color: "#98d0ff" },
           { progress: 80, color: "#95daaf" },
         ]}
+        cursor={
+          <div className='transform scale-x-[-1]'>
+            <span className='select-none text-lg'>🏃</span>
+          </div>
+        }
       />
 
       <h1 className='text-xl font-bold select-none'>
@@ -174,7 +182,7 @@ export function ExerciseManager({ exerciseId }: Props) {
         </span>
       </h1>
 
-      <div>
+      <div id='question-content'>
         <p className='text-lg font-medium select-none'>
           {currentQuestion.content}
         </p>
@@ -191,6 +199,15 @@ export function ExerciseManager({ exerciseId }: Props) {
         />
       </div>
 
+      <div id='question-options' className=''>
+        {showHint && (
+          <p className='select-none text-gray-600 mx-4'>
+            <span className='font-semibold'>ヒント:&nbsp;</span>
+            <span>{currentQuestion.hint}</span>
+          </p>
+        )}
+      </div>
+
       <div
         className={joincn(
           "text-sm text-gray-500 flex justify-between px-4 py-2",
@@ -199,17 +216,26 @@ export function ExerciseManager({ exerciseId }: Props) {
       >
         {patchResult === undefined ? (
           <>
-            {currentQuestion.isCanSkip ? (
-              <ButtonBase
-                colorMode='ghost'
-                className='px-4'
-                onClick={() => onAnswer("SKIP", { skipped: true })}
-              >
-                スキップ
-              </ButtonBase>
-            ) : (
-              <div></div>
-            )}
+            <div>
+              {currentQuestion.isCanSkip ? (
+                <ButtonBase
+                  colorMode='ghost'
+                  className='px-4'
+                  onClick={() => onAnswer("SKIP", { skipped: true })}
+                >
+                  スキップ
+                </ButtonBase>
+              ) : null}
+
+              {currentQuestion.hint && !showHint ? (
+                <ButtonBase
+                  onClick={onClickHint}
+                  title='まだガンバってみません？'
+                >
+                  ヒント
+                </ButtonBase>
+              ) : null}
+            </div>
 
             <ButtonBase
               colorMode='primary'
@@ -293,6 +319,7 @@ function useExerciseManager(exerciseId: string) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [state, setState] = useState<"answer" | "result">("answer")
   const [answerLoading, setAnswerLoading] = useState(false)
+  const { value: showHint, onChange: setShowHint } = useBoolean(false)
 
   const [patchResult, setPatchResult] =
     useState<ApiV1OutTypeMap["PatchUserExerciseQuestion"]>()
@@ -351,6 +378,7 @@ function useExerciseManager(exerciseId: string) {
 
   const onClickNext = () => {
     if (patchResult) {
+      setShowHint(false)
       resetAnswer()
       _moveNextQuestion()
       return
@@ -379,6 +407,10 @@ function useExerciseManager(exerciseId: string) {
           setAnswerLoading(false)
         })
     }
+  }
+
+  const onClickHint = () => {
+    setShowHint(true)
   }
 
   const _sendAnswer = async () => {
@@ -421,8 +453,10 @@ function useExerciseManager(exerciseId: string) {
       selectedAnswerIds,
       textAnswer,
     },
+    showHint,
 
     onAnswer,
     onClickNext,
+    onClickHint,
   }
 }

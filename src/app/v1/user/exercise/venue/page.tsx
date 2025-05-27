@@ -23,7 +23,7 @@ export default function ExerciseAnswerPage() {
   if (exerciseId === null) return <Skeleton className='w-full h-[400px]' />
 
   return (
-    <div className='min-h-screen bg-kaitopia-background text-kaitopia-text p-8 font-sans'>
+    <div className='min-h-screen bg-kaitopia-background text-kaitopia-text py-8 md:p-8 font-sans'>
       <ExerciseManager exerciseId={exerciseId} />
     </div>
   )
