@@ -1,4 +1,5 @@
 export const STATICS = {
+  APP_DOMAIN: "https://kaitopia.net",
   APP_TITLE: process.env.NEXT_PUBLIC_APP_TITLE || "title",
   APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || "version",
   APP_OWNER: process.env.NEXT_PUBLIC_APP_OWNER || "owner",
