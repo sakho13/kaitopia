@@ -9,7 +9,7 @@ export function GuestUserPop() {
     return (
       <div
         id='guest-user-pop'
-        className='absolute bottom-0 left-0 right-0 bg-yellow-100 text-yellow-800 p-4 text-center'
+        className='bg-yellow-100 text-yellow-800 p-4 text-center'
       >
         <p className='select-none'>
           <span>ゲストでログイン中</span>&nbsp;
