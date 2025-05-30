@@ -12,4 +12,9 @@ export const STATICS = {
       MIN_LENGTH: 1,
     },
   },
+
+  GUEST_LIMIT: {
+    /** ゲストユーザが利用できる問題集の開始上限 */
+    EXERCISE_COUNT: 5,
+  },
 }
