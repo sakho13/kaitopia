@@ -2,13 +2,14 @@
  * @jest-environment node
  */
 
-import { GET, PATCH } from "@/app/api/user/v1/exercise/question/route"
+import { GET, PATCH, POST } from "@/app/api/user/v1/exercise/question/route"
 import { GET as GetUserV1ExerciseResults } from "@/app/api/user/v1/exercise/results/route"
 import { TestUtility } from "../TestUtility"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
+import { STATICS } from "@/lib/statics"
 
-describe("API /api/user/v1/exercise", () => {
+describe("API /api/user/v1/exercise/question", () => {
   let newUserToken = ""
 
   beforeAll(async () => {
@@ -323,6 +324,119 @@ describe("API /api/user/v1/exercise", () => {
           nextPage: null,
           totalCount: 1,
         }),
+      })
+    })
+
+    test(`ゲストユーザで上限回数まで問題集に回答開始でき、次でエラーになる`, async () => {
+      const token = await TestUtility.getGuestToken()
+      const loginResult = await TestUtility.signUpByToken(token)
+      expect(loginResult.ok).toBe(true)
+
+      const answeredSheetIds: string[] = []
+      for (let i = 0; i < STATICS.GUEST_LIMIT.EXERCISE_COUNT; i++) {
+        const result = await TestUtility.runApi(
+          GET,
+          "GET",
+          "/api/user/v1/exercise/question?exerciseId=intro_programming_1&mode=answer",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+        )
+        expect(result.ok).toBe(true)
+        expect(result.status).toBe(200)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: true,
+          data: expect.objectContaining({
+            fn: "answer",
+            answerLogSheetId: expect.any(String),
+            exercise: expect.objectContaining({
+              title: expect.any(String),
+            }),
+            questions: expect.arrayContaining([
+              expect.objectContaining({
+                questionUserLogId: expect.any(String),
+                title: expect.any(String),
+              }),
+            ]),
+          }),
+        })
+
+        const answerLogSheetId = json.data.answerLogSheetId
+
+        // 回答を送信
+        for (const questionUserLog of json.data.questions) {
+          const questionUserLogId = questionUserLog.questionUserLogId
+          const answerType = questionUserLog.answerType
+          expect(questionUserLogId).toBeDefined()
+          expect(answerType).toBeDefined()
+          const patchResult = await TestUtility.runApi(
+            PATCH,
+            "PATCH",
+            "/api/user/v1/exercise/question",
+            {
+              Authorization: `Bearer ${token}`,
+            },
+            {
+              answerLogSheetId,
+              questionUserLogId,
+              exerciseId: "intro_programming_1",
+              answer:
+                answerType === "SELECT"
+                  ? {
+                      type: "SELECT",
+                      answerId: "3",
+                    }
+                  : {
+                      type: "MULTI_SELECT",
+                      answerIds: ["1", "2"],
+                    },
+            },
+          )
+          expect(patchResult.ok).toBe(true)
+          expect(patchResult.status).toBe(200)
+        }
+
+        // 回答を確定
+        const postResult = await TestUtility.runApi(
+          POST,
+          "POST",
+          "/api/user/v1/exercise/question",
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            answerLogSheetId,
+            exerciseId: "intro_programming_1",
+          },
+        )
+        expect(postResult.ok).toBe(true)
+        expect(postResult.status).toBe(200)
+
+        answeredSheetIds.push(answerLogSheetId)
+      }
+      expect(answeredSheetIds.length).toBe(STATICS.GUEST_LIMIT.EXERCISE_COUNT)
+
+      // ゲストユーザで上限回数を超えて問題を取得しようとするとエラーになる
+      const overResult = await TestUtility.runApi(
+        GET,
+        "GET",
+        "/api/user/v1/exercise/question?exerciseId=intro_programming_1&mode=answer",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(overResult.ok).toBe(false)
+      expect(overResult.status).toBe(400)
+      const overJson = await overResult.json()
+      expect(overJson).toEqual({
+        success: false,
+        errors: [
+          {
+            code: "ExerciseGuestLimitError",
+            message: `問題の回答上限に達しました（上限: ${STATICS.GUEST_LIMIT.EXERCISE_COUNT}）`,
+          },
+        ],
       })
     })
   })
