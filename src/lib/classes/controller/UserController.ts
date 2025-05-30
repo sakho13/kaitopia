@@ -12,6 +12,7 @@ import { DateUtility } from "../common/DateUtility"
 export class UserController extends ControllerBase {
   private _userId: string | null = null
   private _userRole: UserRoleType | null = null
+  private _isGuest: boolean = false
 
   public async getUserInfo(firebaseUid: string) {
     const user = await this._fetchUserInfoByFirebaseUid(firebaseUid)
@@ -19,6 +20,7 @@ export class UserController extends ControllerBase {
 
     this._userId = user.id
     this._userRole = user.role
+    this._isGuest = user.isGuest
     return user
   }
 
@@ -157,5 +159,9 @@ export class UserController extends ControllerBase {
 
   public get isAdmin() {
     return this._userRole === "ADMIN"
+  }
+
+  public get isGuest() {
+    return this._isGuest
   }
 }
