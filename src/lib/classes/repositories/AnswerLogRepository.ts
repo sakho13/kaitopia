@@ -46,17 +46,4 @@ export class AnswerLogRepository extends RepositoryBase {
       },
     })
   }
-
-  public async createAnswerLogSheetByExerciseId(
-    userId: string,
-    exerciseId: string,
-  ) {
-    return await this.dbConnection.answerLogSheet.create({
-      data: {
-        userId,
-        exerciseId,
-        isInProgress: true,
-      },
-    })
-  }
 }

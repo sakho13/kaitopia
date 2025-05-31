@@ -117,6 +117,18 @@ export class UserLogRepository extends RepositoryBase {
   }
 
   /**
+   * 完了した回答ログシートの総数をカウントする
+   */
+  public async countCompletedAnswerLogSheets() {
+    return await this.dbConnection.answerLogSheet.count({
+      where: {
+        userId: this.userId,
+        isInProgress: false,
+      },
+    })
+  }
+
+  /**
    * 結果確認用の回答ログシートを取得する
    */
   public async findAnswerLogSheetForResultById(answerLogSheetId: string) {

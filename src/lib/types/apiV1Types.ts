@@ -98,6 +98,11 @@ export const ApiV1ErrorMapObj = {
     message: "すでに回答済みの問題集です",
     status: 400,
   },
+  ExerciseGuestLimitError: {
+    message: "問題の回答上限に達しました（上限: {limit}）",
+    params: ["limit"],
+    status: 400,
+  },
 } as const
 
 export type ApiV1ErrorMap = {

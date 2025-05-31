@@ -146,6 +146,10 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.deployMode != 'development' }}
 
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_REGION: asia-northeast1
+
     steps:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v1

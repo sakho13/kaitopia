@@ -17,6 +17,8 @@ const config: Config = {
   },
   testMatch: ["**/tests/**/*.test.[jt]s?(x)"],
   testTimeout: 30000,
+  globalSetup: "<rootDir>/src/tests/jest.globalSetup.ts",
+  globalTeardown: "<rootDir>/src/tests/jest.globalTeardown.ts",
 }
 
 export default createJestConfig(config)

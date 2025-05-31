@@ -12,6 +12,7 @@ import { UserController } from "../controller/UserController"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { UserLogRepository } from "../repositories/UserLogRepository"
 import { UserQuestionRepository } from "../repositories/UserQuestionRepository"
+import { STATICS } from "@/lib/statics"
 
 export class UserQuestionService extends ServiceBase {
   private userController: UserController
@@ -72,6 +73,23 @@ export class UserQuestionService extends ServiceBase {
       }
 
       if (mode === "answer" || mode === "restart") {
+        // ゲストユーザの上限チェック
+        if (this.userController.isGuest) {
+          const userLogRepository = new UserLogRepository(
+            this._userId,
+            this.dbConnection,
+          )
+          const count = await userLogRepository.countCompletedAnswerLogSheets()
+          if (count >= STATICS.GUEST_LIMIT.EXERCISE_COUNT) {
+            throw new ApiV1Error([
+              {
+                key: "ExerciseGuestLimitError",
+                params: { limit: `${STATICS.GUEST_LIMIT.EXERCISE_COUNT}` },
+              },
+            ])
+          }
+        }
+
         const { questions, sheet, exercise } =
           await this._insertAnswerLogSheetAndPropertyByExercise(
             this._exerciseId,
@@ -605,6 +623,7 @@ export class UserQuestionService extends ServiceBase {
 
   /**
    * 問題集用の回答ログシートを作成する
+   * @throws ゲストユーザの上限チェック `ExerciseGuestLimitError`
    * @param exerciseId
    * @param createNew trueの場合は、既出の問題集があっても新しいものを作成する
    * @returns
@@ -619,6 +638,7 @@ export class UserQuestionService extends ServiceBase {
       this._userId,
       this.dbConnection,
     )
+
     const latest = await userLogRepository.findLatestAnswerLogSheetByExerciseId(
       exerciseId,
     )

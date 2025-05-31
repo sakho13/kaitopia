@@ -8,7 +8,7 @@ import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
 
 export default function Page() {
-  const { config } = useUserConfigStore.getState()
+  const { config } = useUserConfigStore()
   const {
     dataToGetManageUsers,
     totalCountToGetManageUsers,
