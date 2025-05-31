@@ -25,7 +25,7 @@ export default function Layout({ children }: Props) {
   const router = useRouter()
   const path = usePathname()
   const { schoolId, setSchoolId, schools, setSchools, clearSchoolId } =
-    useManageStore.getState()
+    useManageStore()
   const { dataToGetOwnSchools } = useGetManageOwnSchools()
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("")
 

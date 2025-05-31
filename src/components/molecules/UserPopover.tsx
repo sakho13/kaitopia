@@ -57,7 +57,7 @@ export default function UserPopover() {
 
 function useUserPopover() {
   const { signOut: handleSignOut } = useAuth()
-  const { config: userConfig } = useUserConfigStore.getState()
+  const { config: userConfig } = useUserConfigStore()
 
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
