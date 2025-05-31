@@ -32,11 +32,42 @@ export function ExerciseManager({ exerciseId }: Props) {
     currentQuestion,
     answerState,
     showHint,
+    exerciseError,
 
     onAnswer,
     onClickNext,
     onClickHint,
   } = useExerciseManager(exerciseId)
+
+  if (exerciseError) {
+    return (
+      <div className='max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
+        <p className='text-red-600 text-lg font-bold'>
+          {exerciseError.message || "エラーが発生しました。"}
+        </p>
+        <p className='text-gray-500'>
+          <span className='select-none'>エラーコード:</span>&nbsp;
+          {exerciseError.code}
+        </p>
+        <p className='text-gray-400 select-none'>
+          {exerciseError.code === "ExerciseGuestLimitError" && (
+            <span>
+              機能が制限されています。気になったらログアウトして、本登録してください😉
+            </span>
+          )}
+        </p>
+
+        <ButtonBase
+          onClick={() => redirect("/v1/user")}
+          sizeMode='full'
+          colorMode='primary'
+          className='font-semibold py-4'
+        >
+          トップに戻る
+        </ButtonBase>
+      </div>
+    )
+  }
 
   if (
     isLoadingToGetUserExerciseQuestions ||
@@ -360,6 +391,11 @@ function useExerciseManager(exerciseId: string) {
       ? dataToGetUserExerciseQuestions.data.answerLogSheetId ?? ""
       : ""
   }, [dataToGetUserExerciseQuestions])
+  const exerciseError = useMemo(() => {
+    return dataToGetUserExerciseQuestions?.success
+      ? null
+      : dataToGetUserExerciseQuestions?.errors[0]
+  }, [dataToGetUserExerciseQuestions])
 
   // *********** memo ***********
 
@@ -454,6 +490,7 @@ function useExerciseManager(exerciseId: string) {
       textAnswer,
     },
     showHint,
+    exerciseError,
 
     onAnswer,
     onClickNext,
