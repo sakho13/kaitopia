@@ -73,6 +73,23 @@ export class UserQuestionService extends ServiceBase {
       }
 
       if (mode === "answer" || mode === "restart") {
+        // ゲストユーザの上限チェック
+        if (this.userController.isGuest) {
+          const userLogRepository = new UserLogRepository(
+            this._userId,
+            this.dbConnection,
+          )
+          const count = await userLogRepository.countCompletedAnswerLogSheets()
+          if (count >= STATICS.GUEST_LIMIT.EXERCISE_COUNT) {
+            throw new ApiV1Error([
+              {
+                key: "ExerciseGuestLimitError",
+                params: { limit: `${STATICS.GUEST_LIMIT.EXERCISE_COUNT}` },
+              },
+            ])
+          }
+        }
+
         const { questions, sheet, exercise } =
           await this._insertAnswerLogSheetAndPropertyByExercise(
             this._exerciseId,
@@ -621,19 +638,6 @@ export class UserQuestionService extends ServiceBase {
       this._userId,
       this.dbConnection,
     )
-
-    // ゲストユーザの上限チェック
-    if (this.userController.isGuest) {
-      const count = await userLogRepository.countAllAnswerLogSheets(false)
-      if (count >= STATICS.GUEST_LIMIT.EXERCISE_COUNT) {
-        throw new ApiV1Error([
-          {
-            key: "ExerciseGuestLimitError",
-            params: { limit: `${STATICS.GUEST_LIMIT.EXERCISE_COUNT}` },
-          },
-        ])
-      }
-    }
 
     const latest = await userLogRepository.findLatestAnswerLogSheetByExerciseId(
       exerciseId,
