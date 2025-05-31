@@ -3,7 +3,7 @@
 import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
 
 export function GuestUserPop() {
-  const { config } = useUserConfigStore.getState()
+  const { config } = useUserConfigStore()
 
   if (config.isGuest) {
     return (
