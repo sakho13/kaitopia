@@ -438,6 +438,30 @@ describe("API /api/user/v1/exercise/question", () => {
           },
         ],
       })
+
+      const logSheetsResult = await TestUtility.runApi(
+        GetUserV1ExerciseResults,
+        "GET",
+        "/api/user/v1/exercise/results?count=10&page=1",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(logSheetsResult.ok).toBe(true)
+      expect(logSheetsResult.status).toBe(200)
+      const logSheetsJson = await logSheetsResult.json()
+      expect(logSheetsJson.data.answerLogSheets).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            answerLogSheetId: expect.any(String),
+            exerciseId: "intro_programming_1",
+            isInProgress: false,
+          }),
+        ]),
+      )
+      expect(logSheetsJson.data.answerLogSheets.length).toBe(
+        STATICS.GUEST_LIMIT.EXERCISE_COUNT,
+      )
     })
   })
 
