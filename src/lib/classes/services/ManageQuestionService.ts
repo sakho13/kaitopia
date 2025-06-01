@@ -1,7 +1,12 @@
+import {
+  QuestionAnswerTypeType,
+  QuestionTypeType,
+} from "@/lib/types/base/questionTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ServiceBase } from "../common/ServiceBase"
 import { UserController } from "../controller/UserController"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
+import { ManageQuestionRepository } from "../repositories/ManageQuestionRepository"
 
 /**
  * 管理画面にて行う問題操作を行うサービスクラス
@@ -69,12 +74,124 @@ export class ManageQuestionService extends ServiceBase {
     return null
   }
 
-  // public async addNewQuestionVersion(questionId: string) {}
+  /**
+   * 問題集に紐づく問題を作成する
+   * ※編集中バージョンも作成する
+   */
+  public async createQuestionWithExercise(
+    schoolId: string,
+    data: {
+      title: string
+      questionType: QuestionTypeType
+      answerType: QuestionAnswerTypeType
+    },
+  ) {
+    const exerciseId = this._exerciseId
+    if (exerciseId === null) {
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題集ID" } },
+      ])
+    }
 
-  // public async changeCurrentVersion(
-  //   questionId: string,
-  //   newVersionData: number,
-  // ) {}
+    const accessRole = await this.userController.accessSchoolMethod(schoolId)
+    if (!accessRole.includes("create")) {
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+    }
+
+    const createdQuestion = await this.dbConnection.$transaction(async (t) => {
+      const questionRepository = new ManageQuestionRepository(t)
+      const created = await questionRepository.createQuestion(
+        schoolId,
+        data.title,
+        data.questionType,
+        data.answerType,
+      )
+
+      const questionId = created.id
+      await questionRepository.relateQuestionToExercise(created.id, exerciseId)
+      await questionRepository.createNewVersion(questionId, 1, {
+        content: "",
+      })
+      return created
+    })
+
+    return createdQuestion
+  }
+
+  public async editQuestion() {
+    //
+  }
+
+  public async deleteQuestion(schoolId: string, questionId: string) {
+    const accessRole = await this.userController.accessSchoolMethod(schoolId)
+    if (!accessRole.includes("delete")) {
+      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+    }
+
+    const deleted = await this.dbConnection.$transaction(async (t) => {
+      const questionRepository = new ManageQuestionRepository(t)
+      return await questionRepository.deleteQuestion(questionId)
+    })
+
+    return deleted
+  }
+
+  /**
+   * 新しい編集中バージョンを作成する
+   */
+  public async addNewQuestionVersion(questionId: string) {
+    await this.dbConnection.$transaction(async (t) => {
+      const questionRepository = new ManageQuestionRepository(t)
+      const question = await questionRepository.getQuestionDetails(questionId)
+      if (!question) {
+        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      }
+
+      const access = await this.userController.accessSchoolMethod(
+        question.schoolId,
+      )
+      if (!access.includes("edit")) {
+        throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+      }
+
+      //
+    })
+
+    //
+  }
+
+  /**
+   * 公開バージョンを変更する
+   */
+  public async changeCurrentVersion(
+    questionId: string,
+    newVersionData: number,
+  ) {
+    const result = await this.dbConnection.$transaction(async (t) => {
+      const questionRepository = new ManageQuestionRepository(t)
+      const questionVersion = await questionRepository.getQuestionVersion(
+        questionId,
+        newVersionData,
+      )
+      if (!questionVersion) {
+        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      }
+
+      const access = await this.userController.accessSchoolMethod(
+        questionVersion.question.schoolId,
+      )
+      if (!access.includes("edit")) {
+        throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
+      }
+
+      return await questionRepository.changeCurrentVersion(
+        questionId,
+        newVersionData,
+      )
+    })
+
+    return result
+  }
 
   public set exerciseId(exerciseId: string) {
     this._exerciseId = exerciseId

@@ -11,6 +11,7 @@ import {
 } from "./base/exerciseTypes"
 import {
   QuestionAnswerContent,
+  QuestionAnswerTypeType,
   QuestionBase,
   QuestionBaseDate,
   QuestionBaseEditState,
@@ -19,6 +20,7 @@ import {
   QuestionBaseStatus,
   QuestionForResult,
   QuestionForUser,
+  QuestionTypeType,
   QuestionVersionBase,
   QuestionVersionBaseIdentifier,
 } from "./base/questionTypes"
@@ -155,15 +157,27 @@ export type ApiV1InTypeMap = {
     description?: string
     isPublished?: boolean
   }
-  PostManageQuestion: {
-    schoolId: string
-    question: QuestionBase
-    content: QuestionVersionBase
-  }
   /**
    * DELETE /api/manage/v1/exercise
    */
   DeleteManageExercise: null
+  /**
+   * POST /api/manage/v1/exercise/question
+   */
+  PostManageExerciseQuestion: {
+    exerciseId: string
+    /** 1~64文字 */
+    title: string
+    questionType: QuestionTypeType
+    answerType: QuestionAnswerTypeType
+  }
+  /**
+   * PATCH /api/manage/v1/question
+   */
+  PatchManageQuestion: {
+    questionId: string
+    title?: string
+  }
 
   /**
    * GET /api/user/v1/exercise?exerciseId=xxxx
@@ -391,6 +405,13 @@ export type ApiV1OutTypeMap = {
   } & QuestionBase &
     QuestionBaseStatus &
     ReplacedDateToString<QuestionBaseDate>
+  /**
+   * POST /api/manage/v1/exercise/question
+   */
+  PostManageExerciseQuestion: {
+    questionId: string
+  }
+
   /**
    * GET /api/manage/v1/users?count=10&page=1
    */
