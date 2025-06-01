@@ -19,6 +19,7 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: "<rootDir>/src/tests/jest.globalSetup.ts",
   globalTeardown: "<rootDir>/src/tests/jest.globalTeardown.ts",
+  maxWorkers: 1,
 }
 
 export default createJestConfig(config)
