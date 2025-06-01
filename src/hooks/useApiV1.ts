@@ -246,6 +246,31 @@ export function useDeleteManageExercise() {
 }
 
 /**
+ * POST: `/api/manage/v1/exercise/question`
+ */
+export function usePostManageExerciseQuestion() {
+  const { idToken } = useAuth()
+
+  const requestPostExerciseQuestion = async (
+    exerciseId: string,
+    input: ApiV1InTypeMap["PostManageExerciseQuestion"],
+  ) => {
+    return await requestHttp(
+      "PostManageExerciseQuestion",
+      "PostManageExerciseQuestion",
+      `/api/manage/v1/exercise/question`,
+      idToken ?? "",
+      input,
+      "POST",
+    )
+  }
+
+  return {
+    requestPostExerciseQuestion,
+  }
+}
+
+/**
  * GET: `/api/manage/v1/users?page=1&count=10`
  */
 export function useGetManageUsers() {
