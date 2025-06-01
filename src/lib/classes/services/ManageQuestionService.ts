@@ -112,6 +112,10 @@ export class ManageQuestionService extends ServiceBase {
       await questionRepository.createNewVersion(questionId, 1, {
         content: "",
       })
+      await questionRepository.changeDraftVersion(
+        questionId,
+        1, // 最初のバージョンをドラフトに設定
+      )
       return created
     })
 
