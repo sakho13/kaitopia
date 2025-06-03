@@ -19,8 +19,13 @@ export function useSelectInput<T>({ selectOptions, initialValue }: Props<T>) {
     initialValue ?? null,
   )
 
-  const onChange = (newValue: T) => {
+  const onChange = (newValue: unknown) => {
+    if (!_isValidValue(newValue)) return
     setSelectedValue(newValue)
+  }
+
+  const _isValidValue = (value: unknown): value is T => {
+    return selectOptions.includes(value as T)
   }
 
   return {
