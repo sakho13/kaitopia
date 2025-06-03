@@ -102,7 +102,9 @@ export async function POST(request: NextRequest) {
 function validatePost(rawBody: unknown) {
   return validateBodyWrapper("PostManageExerciseQuestion", rawBody, (b) => {
     if (typeof b !== "object" || b === null) {
-      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      throw new ApiV1Error([
+        { key: "InvalidFormatError", params: { key: "リクエストボディ" } },
+      ])
     }
 
     // 必須項目のチェック
