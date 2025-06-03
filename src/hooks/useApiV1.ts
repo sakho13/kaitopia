@@ -252,7 +252,6 @@ export function usePostManageExerciseQuestion() {
   const { idToken } = useAuth()
 
   const requestPostExerciseQuestion = async (
-    exerciseId: string,
     input: ApiV1InTypeMap["PostManageExerciseQuestion"],
   ) => {
     return await requestHttp(
