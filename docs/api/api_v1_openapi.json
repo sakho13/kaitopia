@@ -872,6 +872,118 @@
       }
     },
 
+    "/manage/v1/exercise/question": {
+      "get": {
+        "summary": "問題集の問題を取得する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationHeader"
+          },
+          {
+            "in": "query",
+            "name": "exerciseId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題集ID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問題の取得に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ManageExerciseQuestionDetail"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "post": {
+        "summary": "問題集に紐づく問題を登録する",
+        "tags": ["ManageAPI"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "exerciseId": {
+                    "type": "string",
+                    "description": "登録先問題集ID"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "1~64文字"
+                  },
+                  "questionType": {
+                    "$ref": "#/components/schemas/QuestionTypeType"
+                  },
+                  "answerType": {
+                    "$ref": "#/components/schemas/AnswerTypeType"
+                  }
+                },
+                "required": [
+                  "exerciseId",
+                  "title",
+                  "questionType",
+                  "answerType"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題の登録に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "questionId": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "/common/v1/recommend-exercise": {
       "get": {
         "summary": "開発者おすすめの問題集を取得する",
@@ -1066,6 +1178,42 @@
         }
       },
 
+      "QuestionVersionType": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "integer" },
+          "content": { "type": "string" },
+          "hint": { "type": "string" }
+        }
+      },
+
+      "ManageExerciseQuestionDetail": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "問題タイトル" },
+          "questionType": { "$ref": "#/components/schemas/QuestionTypeType" },
+          "answerType": { "$ref": "#/components/schemas/AnswerTypeType" },
+          "isPublished": { "type": "boolean" },
+          "createdAt": {
+            "type": "string",
+            "description": "作成日時\\nJST時間をISO8601形式で返す"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新日時\\nJST時間をISO8601形式で返す"
+          },
+          "deletedAt": {
+            "type": "string",
+            "nullable": true,
+            "description": "削除日時\\nJST時間をISO8601形式で返す"
+          },
+          "versions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/QuestionVersionType" }
+          }
+        }
+      },
+
       "UserRoleType": {
         "type": "string",
         "example": "USER",
@@ -1073,7 +1221,7 @@
       },
       "QuestionTypeType": {
         "type": "string",
-        "enum": ["TEXT", "IMAGE"]
+        "enum": ["TEXT", "IMAGE", "VIDEO", "AUDIO"]
       },
       "AnswerTypeType": {
         "type": "string",
