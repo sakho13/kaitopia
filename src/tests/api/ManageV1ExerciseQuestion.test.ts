@@ -69,6 +69,22 @@ describe("API /api/manage/v1/exercise/question", () => {
           title: "新しい問題",
           questionType: "TEXT",
           answerType: "SELECT",
+          questionProperty: {
+            content: "問題の内容",
+            hint: "ヒントの内容",
+          },
+          questionAnswerProperty: {
+            selection: [
+              {
+                selectContent: "選択肢1(正解)",
+                isCorrect: true,
+              },
+              {
+                selectContent: "選択肢2(不正解)",
+                isCorrect: false,
+              },
+            ],
+          },
         },
       )
       expect(questionResult.ok).toBe(true)
@@ -79,6 +95,38 @@ describe("API /api/manage/v1/exercise/question", () => {
         data: {
           questionId: expect.any(String),
         },
+      })
+
+      const questionGetResult = await TestUtility.runApi(
+        GET,
+        "GET",
+        `/api/manage/v1/exercise?exerciseId=${exerciseId}&questionId=${questionJson.data.questionId}`,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+      expect(questionGetResult.ok).toBe(true)
+      expect(questionGetResult.status).toBe(200)
+      const questionGetJson = await questionGetResult.json()
+      expect(questionGetJson).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          title: "新しい問題",
+          questionType: "TEXT",
+          answerType: "SELECT",
+          isPublished: false,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
+
+          versions: expect.arrayContaining([
+            {
+              version: 1,
+              content: "問題の内容",
+              hint: "ヒントの内容",
+            },
+          ]),
+        }),
       })
     })
   })
