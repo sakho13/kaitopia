@@ -23,6 +23,7 @@ import {
   QuestionTypeType,
   QuestionVersionBase,
   QuestionVersionBaseIdentifier,
+  RegisterQuestionType,
 } from "./base/questionTypes"
 import {
   SchoolBase,
@@ -161,16 +162,14 @@ export type ApiV1InTypeMap = {
    * DELETE /api/manage/v1/exercise
    */
   DeleteManageExercise: null
+
   /**
    * POST /api/manage/v1/exercise/question
    */
   PostManageExerciseQuestion: {
     exerciseId: string
-    /** 1~64文字 */
-    title: string
-    questionType: QuestionTypeType
-    answerType: QuestionAnswerTypeType
-  }
+  } & RegisterQuestionType<QuestionAnswerTypeType, QuestionTypeType>
+
   /**
    * PATCH /api/manage/v1/question
    */

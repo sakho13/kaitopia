@@ -1,4 +1,5 @@
 import {
+  QuestionAnswerPropertyEdit,
   QuestionAnswerTypeType,
   QuestionTypeType,
 } from "@/lib/types/base/questionTypes"
@@ -7,6 +8,7 @@ import { ServiceBase } from "../common/ServiceBase"
 import { UserController } from "../controller/UserController"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { ManageQuestionRepository } from "../repositories/ManageQuestionRepository"
+import { IgnoreKeysObject } from "@/lib/types/common/IgnoreKeysObject"
 
 /**
  * 管理画面にて行う問題操作を行うサービスクラス
@@ -78,12 +80,20 @@ export class ManageQuestionService extends ServiceBase {
    * 問題集に紐づく問題を作成する
    * ※編集中バージョンも作成する
    */
-  public async createQuestionWithExercise(
+  public async createQuestionWithExercise<A extends QuestionAnswerTypeType>(
     schoolId: string,
     data: {
       title: string
       questionType: QuestionTypeType
-      answerType: QuestionAnswerTypeType
+      answerType: A
+      questionProperty: {
+        content: string
+        hint: string
+      }
+      questionAnswerProperty: IgnoreKeysObject<
+        QuestionAnswerPropertyEdit[A],
+        "answerId"
+      >
     },
   ) {
     const exerciseId = this._exerciseId
@@ -109,9 +119,31 @@ export class ManageQuestionService extends ServiceBase {
 
       const questionId = created.id
       await questionRepository.relateQuestionToExercise(created.id, exerciseId)
+
+      // 問題のプロパティを作成
       await questionRepository.createNewVersion(questionId, 1, {
-        content: "",
+        content: data.questionProperty.content,
+        hint: data.questionProperty.hint,
       })
+      if ("selection" in data.questionAnswerProperty) {
+        await questionRepository.createQuestionAnswer(
+          questionId,
+          1,
+          data.questionAnswerProperty.selection.map((s) => ({
+            selectContent: s.selectContent,
+            isCorrect: s.isCorrect,
+          })),
+        )
+      }
+      if ("property" in data.questionAnswerProperty) {
+        const { maxLength, minLength } = data.questionAnswerProperty.property
+        await questionRepository.createQuestionAnswer(questionId, 1, [
+          {
+            minLength,
+            maxLength,
+          },
+        ])
+      }
       await questionRepository.changeDraftVersion(
         questionId,
         1, // 最初のバージョンをドラフトに設定

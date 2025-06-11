@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
         title: validateResult.result.title,
         questionType: validateResult.result.questionType,
         answerType: validateResult.result.answerType,
+        questionProperty: validateResult.result.questionProperty,
+        questionAnswerProperty: validateResult.result.questionAnswerProperty,
       },
     )
 
@@ -149,6 +151,126 @@ function validatePost(rawBody: unknown) {
       throw new ApiV1Error([
         { key: "InvalidFormatError", params: { key: "問題タイトル" } },
       ])
+    }
+
+    // オプション項目のチェック
+    if (
+      !("questionProperty" in b) ||
+      typeof b.questionProperty !== "object" ||
+      b.questionProperty === null
+    ) {
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題プロパティ" } },
+      ])
+    }
+    if (
+      !("questionAnswerProperty" in b) ||
+      typeof b.questionAnswerProperty !== "object" ||
+      b.questionAnswerProperty === null
+    ) {
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "回答プロパティ" } },
+      ])
+    }
+    const { questionProperty, questionAnswerProperty } = b
+
+    if (!("content" in questionProperty)) {
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "問題内容" } },
+      ])
+    }
+    if (!("hint" in questionProperty)) {
+      throw new ApiV1Error([
+        { key: "RequiredValueError", params: { key: "ヒント" } },
+      ])
+    }
+
+    if (
+      typeof questionProperty.content !== "string" ||
+      questionProperty.content.length < 1 ||
+      questionProperty.content.length > 1024
+    ) {
+      throw new ApiV1Error([
+        { key: "InvalidFormatError", params: { key: "問題内容" } },
+      ])
+    }
+    if (
+      typeof questionProperty.hint !== "string" ||
+      questionProperty.hint.length > 1024
+    ) {
+      throw new ApiV1Error([
+        { key: "InvalidFormatError", params: { key: "ヒント" } },
+      ])
+    }
+
+    if (b.answerType === "SELECT") {
+      if (!("selection" in questionAnswerProperty)) {
+        throw new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "選択肢" } },
+        ])
+      }
+    }
+
+    if (b.answerType === "MULTI_SELECT") {
+      if (!("selection" in questionAnswerProperty)) {
+        throw new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "選択肢" } },
+        ])
+      }
+    }
+
+    if (b.answerType === "TEXT") {
+      if (
+        !("property" in questionAnswerProperty) ||
+        typeof questionAnswerProperty.property !== "object" ||
+        questionAnswerProperty.property === null
+      ) {
+        throw new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "回答プロパティ" } },
+        ])
+      }
+
+      if (
+        !("minLength" in questionAnswerProperty.property) ||
+        typeof questionAnswerProperty.property.minLength !== "number"
+      ) {
+        throw new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "最小文字数" } },
+        ])
+      }
+      if (
+        !("maxLength" in questionAnswerProperty.property) ||
+        typeof questionAnswerProperty.property.maxLength !== "number"
+      ) {
+        throw new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "最大文字数" } },
+        ])
+      }
+
+      if (
+        questionAnswerProperty.property.minLength < 1 ||
+        questionAnswerProperty.property.minLength > 1000
+      ) {
+        throw new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "最小文字数" } },
+        ])
+      }
+      if (
+        questionAnswerProperty.property.maxLength < 1 ||
+        questionAnswerProperty.property.maxLength > 10000
+      ) {
+        throw new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "最大文字数" } },
+        ])
+      }
+      if (
+        questionAnswerProperty.property.minLength >
+        questionAnswerProperty.property.maxLength
+      ) {
+        throw new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "文字数範囲" } },
+        ])
+      }
     }
 
     return

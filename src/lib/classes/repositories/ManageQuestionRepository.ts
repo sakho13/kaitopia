@@ -105,6 +105,28 @@ export class ManageQuestionRepository extends RepositoryBase {
     })
   }
 
+  public async createQuestionAnswer(
+    questionId: string,
+    version: number,
+    data: Partial<{
+      selectContent: string
+      isCorrect: boolean
+      minLength: number
+      maxLength: number
+    }>[],
+  ) {
+    return await this.dbConnection.questionAnswer.createMany({
+      data: data.map((item) => ({
+        questionId: questionId,
+        version: version,
+        selectContent: item.selectContent,
+        isCorrect: item.isCorrect,
+        minLength: item.minLength,
+        maxLength: item.maxLength,
+      })),
+    })
+  }
+
   public async changeDraftVersion(questionId: string, version: number) {
     return await this.dbConnection.question.update({
       data: {
