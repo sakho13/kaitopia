@@ -4,15 +4,15 @@ import { Plus } from "lucide-react"
 import { ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { ButtonBase } from "../atoms/ButtonBase"
 import { ManageTable } from "../molecules/ManageTable"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog"
 import { ManageExerciseQuestionForm } from "../molecules/manage/ManageExerciseQuestionForm"
 import { useBoolean } from "@/hooks/common/useBoolean"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet"
 
 type Props = {
   exerciseId: string
@@ -32,8 +32,8 @@ export function ManageExerciseQuestionList({
       <div className='flex justify-between items-center'>
         <h2 className='text-lg font-semibold select-none'>問題を編集</h2>
 
-        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
+        <Sheet open={isDialogOpen} onOpenChange={setDialogOpen}>
+          <SheetTrigger asChild>
             <ButtonBase
               colorMode='primary'
               sizeMode='fit'
@@ -41,21 +41,24 @@ export function ManageExerciseQuestionList({
             >
               <Plus size={14} strokeWidth={3} /> 問題を追加
             </ButtonBase>
-          </DialogTrigger>
+          </SheetTrigger>
 
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>新しい問題集</DialogTitle>
-            </DialogHeader>
-            <ManageExerciseQuestionForm
-              exerciseId={exerciseId}
-              onSaved={() => {
-                if (onUpdate) onUpdate()
-                setDialogOpen(false)
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+          <SheetContent className='w-[800px]'>
+            <SheetHeader>
+              <SheetTitle>新しい問題集</SheetTitle>
+            </SheetHeader>
+
+            <div className='h-[80vh] overflow-y-scroll px-4'>
+              <ManageExerciseQuestionForm
+                exerciseId={exerciseId}
+                onSaved={() => {
+                  if (onUpdate) onUpdate()
+                  setDialogOpen(false)
+                }}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className='px-2 mt-2'>
