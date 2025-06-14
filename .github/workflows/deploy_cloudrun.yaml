@@ -144,6 +144,8 @@ jobs:
     name: 🔀 Switch traffic according to deployMode
     needs: push-image
     runs-on: ubuntu-latest
+    environment: production
+
     if: ${{ github.event.inputs.deployMode != 'development' }}
 
     env:
