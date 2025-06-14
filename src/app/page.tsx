@@ -65,6 +65,12 @@ export default function Home() {
         >
           サインアップする
         </Link>
+
+        <div className='mt-6'>
+          <Link href={"/public/about"} className='underline'>
+            このアプリについて
+          </Link>
+        </div>
       </section>
 
       {/* Footer */}

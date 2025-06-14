@@ -2,6 +2,8 @@
 //      ユーザ用
 // *********************
 
+import { IgnoreKeysObject } from "../common/IgnoreKeysObject"
+
 /**
  * ユーザが回答するときの問題の型
  */
@@ -138,6 +140,30 @@ export type QuestionAnswerProperty = {
   }
 }
 
+export type QuestionAnswerPropertyEdit = {
+  SELECT: {
+    selection: {
+      answerId: string
+      selectContent: string
+      isCorrect: boolean
+    }[]
+  }
+  MULTI_SELECT: {
+    selection: {
+      answerId: string
+      selectContent: string
+      isCorrect: boolean
+    }[]
+  }
+  TEXT: {
+    property: {
+      answerId: string
+      minLength: number
+      maxLength: number
+    }
+  }
+}
+
 /**
  * 問題の回答を表す型
  */
@@ -169,6 +195,9 @@ export type QuestionAnswerContent = QuestionUserAnswerType<
   keyof QuestionUserAnswer
 >
 
+export const QUESTION_TYPES = ["TEXT", "IMAGE", "VIDEO", "AUDIO"] as const
+export const QUESTION_ANSWER_TYPES = ["SELECT", "MULTI_SELECT", "TEXT"] as const
+
 export const QuestionType = {
   TEXT: "TEXT",
   IMAGE: "IMAGE",
@@ -185,3 +214,25 @@ export const QuestionAnswerType = {
 } as const
 
 export type QuestionAnswerTypeType = keyof typeof QuestionAnswerType
+
+/**
+ * 登録用の問題の基本型
+ */
+export type RegisterQuestionType<
+  A extends QuestionAnswerTypeType,
+  Q extends QuestionTypeType,
+> = {
+  /** 1~64文字 */
+  title: string
+  questionType: Q
+  answerType: A
+
+  questionProperty: {
+    content: string
+    hint: string
+  }
+  questionAnswerProperty: IgnoreKeysObject<
+    QuestionAnswerPropertyEdit[A],
+    "answerId"
+  >
+}

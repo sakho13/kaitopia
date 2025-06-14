@@ -11,6 +11,19 @@ export const STATICS = {
       MAX_LENGTH: 20,
       MIN_LENGTH: 1,
     },
+
+    QUESTION_TITLE: {
+      MAX_LENGTH: 64,
+      MIN_LENGTH: 1,
+    },
+
+    QUESTION_CONTENT: {
+      MAX_LENGTH: 1024,
+      MIN_LENGTH: 1,
+    },
+    QUESTION_HINT: {
+      MAX_LENGTH: 1024,
+    },
   },
 
   GUEST_LIMIT: {
