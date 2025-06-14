@@ -1,6 +1,6 @@
 {
   "name": "kaitopia",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "engines": {
     "node": "20.x"
@@ -17,7 +17,7 @@
     "prisma:seed": "npx prisma db seed",
     "prisma:init": "npm run prisma:generate && npm run prisma:deploy && npm run prisma:seed",
     "prisma:studio": "npx prisma studio",
-    "test": "jest --runInBand",
+    "test": "jest",
     "test:cov": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e-report": "playwright show-report"
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@prisma/client": "6.5.0",
+    "@radix-ui/react-collapsible": "1.1.11",
     "@radix-ui/react-dialog": "1.1.7",
     "@radix-ui/react-slot": "1.2.0",
     "@tailwindcss/postcss": "4.1.6",

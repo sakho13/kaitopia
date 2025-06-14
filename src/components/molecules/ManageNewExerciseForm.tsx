@@ -11,7 +11,7 @@ type Props = {
 }
 
 export function ManageNewExerciseForm({ onClickButton }: Props) {
-  const { schoolId } = useManageStore.getState()
+  const { schoolId } = useManageStore()
 
   const [exerciseName, setExerciseName] = useState<string>("")
   const [exerciseError, setExerciseError] = useState<string>("")

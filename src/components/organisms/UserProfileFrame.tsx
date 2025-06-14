@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
 import { useGetUserInfo, usePatchUserInfo } from "@/hooks/useApiV1"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
@@ -113,7 +113,7 @@ function useUserProfileFrame() {
   const { requestPatchUserInfo } = usePatchUserInfo()
   const { dataToGetUserInfo, isLoadingToGetUserInfo, refetchUserInfo } =
     useGetUserInfo()
-  const { config } = useUserConfigStore.getState()
+  const { config } = useUserConfigStore()
   const { showSuccessShort, showError } = useToast()
 
   const {
@@ -185,6 +185,13 @@ function useUserProfileFrame() {
     resetName(rawData.data.user.name)
     setIsEditing(false)
   }
+
+  useEffect(() => {
+    if (!dataToGetUserInfo || !dataToGetUserInfo.success) return
+
+    resetName(dataToGetUserInfo.data.user.name)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataToGetUserInfo])
 
   return {
     isLoadingToGetUserInfo,

@@ -11,6 +11,7 @@ import {
 } from "./base/exerciseTypes"
 import {
   QuestionAnswerContent,
+  QuestionAnswerTypeType,
   QuestionBase,
   QuestionBaseDate,
   QuestionBaseEditState,
@@ -19,8 +20,10 @@ import {
   QuestionBaseStatus,
   QuestionForResult,
   QuestionForUser,
+  QuestionTypeType,
   QuestionVersionBase,
   QuestionVersionBaseIdentifier,
+  RegisterQuestionType,
 } from "./base/questionTypes"
 import {
   SchoolBase,
@@ -98,6 +101,11 @@ export const ApiV1ErrorMapObj = {
     message: "すでに回答済みの問題集です",
     status: 400,
   },
+  ExerciseGuestLimitError: {
+    message: "問題の回答上限に達しました（上限: {limit}）",
+    params: ["limit"],
+    status: 400,
+  },
 } as const
 
 export type ApiV1ErrorMap = {
@@ -150,15 +158,25 @@ export type ApiV1InTypeMap = {
     description?: string
     isPublished?: boolean
   }
-  PostManageQuestion: {
-    schoolId: string
-    question: QuestionBase
-    content: QuestionVersionBase
-  }
   /**
    * DELETE /api/manage/v1/exercise
    */
   DeleteManageExercise: null
+
+  /**
+   * POST /api/manage/v1/exercise/question
+   */
+  PostManageExerciseQuestion: {
+    exerciseId: string
+  } & RegisterQuestionType<QuestionAnswerTypeType, QuestionTypeType>
+
+  /**
+   * PATCH /api/manage/v1/question
+   */
+  PatchManageQuestion: {
+    questionId: string
+    title?: string
+  }
 
   /**
    * GET /api/user/v1/exercise?exerciseId=xxxx
@@ -386,6 +404,13 @@ export type ApiV1OutTypeMap = {
   } & QuestionBase &
     QuestionBaseStatus &
     ReplacedDateToString<QuestionBaseDate>
+  /**
+   * POST /api/manage/v1/exercise/question
+   */
+  PostManageExerciseQuestion: {
+    questionId: string
+  }
+
   /**
    * GET /api/manage/v1/users?count=10&page=1
    */

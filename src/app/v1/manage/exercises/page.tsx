@@ -23,7 +23,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react"
 
 export default function Page() {
   const router = useRouter()
-  const { schoolId } = useManageStore.getState()
+  const { schoolId } = useManageStore()
 
   const [openNewExerciseDialog, setOpenNewExerciseDialog] = useState(false)
   const [openDeleteExerciseDialog, setOpenDeleteExerciseDialog] = useState<
