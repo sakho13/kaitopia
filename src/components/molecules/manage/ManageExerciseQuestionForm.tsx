@@ -33,15 +33,21 @@ type Props = (
 
 export function ManageExerciseQuestionForm(props: Props) {
   if ("questionId" in props) {
-    return <ManageExerciseQuestionFormEdit questionId={props.questionId} />
+    return (
+      <div className='w-full h-full'>
+        <ManageExerciseQuestionFormEdit questionId={props.questionId} />
+      </div>
+    )
   }
 
   if ("exerciseId" in props) {
     return (
-      <ManageExerciseQuestionFormNew
-        exerciseId={props.exerciseId}
-        onSaved={props.onSaved}
-      />
+      <div className='w-full h-full'>
+        <ManageExerciseQuestionFormNew
+          exerciseId={props.exerciseId}
+          onSaved={props.onSaved}
+        />
+      </div>
     )
   }
 
@@ -208,7 +214,7 @@ function ManageExerciseQuestionFormNew({
   }
 
   return (
-    <div className='w-full h-full'>
+    <>
       <div className='grid gap-y-2'>
         <div id='question-title'>
           <label htmlFor='title'>問題タイトル</label>
@@ -404,7 +410,7 @@ function ManageExerciseQuestionFormNew({
           作成
         </ButtonBase>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -413,9 +419,17 @@ function ManageExerciseQuestionFormEdit({
 }: {
   questionId: string
 }) {
+  const _saveQuestion = () => {}
+
   return (
-    <div>
+    <>
       <p>未対応 {questionId}</p>
-    </div>
+
+      <div className='mt-6 flex justify-end'>
+        <ButtonBase colorMode='primary' sizeMode='full' onClick={_saveQuestion}>
+          作成
+        </ButtonBase>
+      </div>
+    </>
   )
 }
