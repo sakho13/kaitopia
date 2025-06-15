@@ -1,0 +1,100 @@
+name: Every PR Check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ./package.json
+          cache: "npm"
+          cache-dependency-path: "./package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./
+        run: npm ci
+
+      - name: Run builds
+        working-directory: ./
+        run: npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+
+  test:
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+
+    needs: build
+
+    services:
+      kaitopia_db:
+        image: postgres:17
+        env:
+          POSTGRES_USER: kaitopia_user
+          POSTGRES_PASSWORD: devkaitopia
+          POSTGRES_DB: kaitopia
+          TZ: Asia/Tokyo
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ./package.json
+          cache: "npm"
+          cache-dependency-path: "./package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./
+        run: npm i
+
+      - name: install firebase-tools
+        run: |
+          npm install -g firebase-tools
+
+      - name: Set up database
+        run: |
+          npm run prisma:init
+
+      - name: Start Firebase Emulator (バックグラウンド)
+        working-directory: ./docker/firebase
+        run: |
+          npx firebase emulators:start \
+            --only auth,firestore \
+            --import ./init-data \
+            --project kaitopia-dev \
+            --export-on-exit &
+          npx wait-on tcp:9099 tcp:8080 tcp:4000
+
+      - name: Run tests
+        working-directory: ./
+        run: npm test
