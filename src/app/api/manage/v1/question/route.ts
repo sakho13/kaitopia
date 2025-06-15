@@ -21,13 +21,10 @@ export async function GET(request: NextRequest) {
 
     const questionService = new ManageQuestionService(userController, prisma)
     const question = await questionService.getQuestionDetail(questionId)
-    if (!question) {
-      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-    }
 
     return {
       question: {
-        schoolId: "",
+        schoolId: question.schoolId,
         questionId,
         title: question.title,
         questionType: question.questionType,

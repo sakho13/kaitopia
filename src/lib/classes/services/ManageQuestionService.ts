@@ -6,7 +6,6 @@ import {
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ServiceBase } from "../common/ServiceBase"
 import { UserController } from "../controller/UserController"
-import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { ManageQuestionRepository } from "../repositories/ManageQuestionRepository"
 import { IgnoreKeysObject } from "@/lib/types/common/IgnoreKeysObject"
 
@@ -27,54 +26,43 @@ export class ManageQuestionService extends ServiceBase {
   }
 
   public async getQuestionDetail(questionId: string) {
-    if (this._exerciseId) {
-      const exerciseRepository = new ExerciseRepository(this.dbConnection)
-      const exercise = await exerciseRepository.findExerciseById(
-        this._exerciseId,
-      )
-      if (!exercise)
-        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+    const question = await this.dbConnection.question.findUnique({
+      select: {
+        schoolId: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
 
-      const question = await this.dbConnection.question.findUnique({
-        select: {
-          title: true,
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
+        questionType: true,
+        answerType: true,
+        isPublished: true,
+        currentVersionId: true,
+        currentVersion: true,
+        draftVersionId: true,
+        draftVersion: true,
 
-          questionType: true,
-          answerType: true,
-          isPublished: true,
-          currentVersionId: true,
-          currentVersion: true,
-          draftVersionId: true,
-          draftVersion: true,
-
-          versions: {
-            select: {
-              version: true,
-              content: true,
-              hint: true,
-              createdAt: true,
-              updatedAt: true,
-              questionAnswers: true,
-            },
+        versions: {
+          select: {
+            version: true,
+            content: true,
+            hint: true,
+            createdAt: true,
+            updatedAt: true,
+            questionAnswers: true,
           },
         },
-        where: {
-          id: questionId,
-          exerciseQuestions: {
-            every: {
-              exerciseId: this._exerciseId,
-            },
-          },
-        },
-      })
+      },
+      where: {
+        id: questionId,
+      },
+    })
 
-      return question
+    if (!question) {
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
     }
 
-    return null
+    return question
   }
 
   /**
