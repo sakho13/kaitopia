@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       releaseTag:
-        description: "リリースタグ"
+        description: "リリースタグ(例: 1.2.3)"
         required: true
         type: string
       deployMaintenance:
@@ -16,7 +16,7 @@ on:
         required: false
         type: string
       deployMode:
-        description: "デプロイモード"
+        description: "デプロイモード\n- development: 開発環境(トラフィック切り替えなし)\n- maintenance: メンテナンスモード(メンテナンスイメージへトラフィックを切り替える)\n- production: 本番環境(直接リリースタグのイメージへトラフィックを切り替える)"
         required: false
         default: development
         type: choice
@@ -37,8 +37,8 @@ jobs:
       - name: Check allowed tag pattern
         run: |
           TAG="${{ github.event.inputs.releaseTag }}"
-          if [[ ! "$TAG" =~ ^[abv][0-9]+-[0-9]+-[0-9]+$ ]]; then
-            echo "::error ::releaseTag must start with a, b or v and follow X.Y.Z (e.g. a0-0-1), but got '$TAG'"
+          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error ::releaseTag must follow X.Y.Z (例: 1.2.3), but got '$TAG'"
             exit 1
           fi
 
@@ -61,16 +61,26 @@ jobs:
         include:
           - name: main
             imageVar: IMAGE_URI_MAIN
-            tag: ${{ github.event.inputs.releaseTag }}
             enabled: true
           - name: maintenance
             imageVar: IMAGE_URI_MAINTENANCE
-            tag: maintenance
             enabled: ${{ github.event.inputs.deployMaintenance == 'true' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Compute TAG
+        if: ${{ matrix.enabled }}
+        run: |
+          if [ "${{ matrix.name }}" = "main" ]; then
+            # 例えば "1.2.3" → "1-2-3"
+            TAG="${{ github.event.inputs.releaseTag }}"
+            TAG="v${TAG//./-}"
+          else
+            TAG="maintenance"
+          fi
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v1
@@ -125,7 +135,7 @@ jobs:
         run: |
           gcloud run deploy kaitopia \
             --image $IMAGE \
-            --tag=${{ matrix.tag }} \
+            --tag=$TAG \
             --region $GCP_REGION \
             --allow-unauthenticated \
             --no-traffic \
@@ -172,9 +182,34 @@ jobs:
               --region $GCP_REGION \
               --platform managed
           else
-            TAG="${{ github.event.inputs.releaseTag }}"
+            RELEASE="${{ github.event.inputs.releaseTag }}"
+            TAG="v${RELEASE//./-}"
             gcloud run services update-traffic kaitopia \
               --to-tags ${TAG}=100 \
               --region $GCP_REGION \
               --platform managed
           fi
+
+  push-release-tag:
+    name: 📦 Push release tag
+    needs: switch-traffic
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.deployMode == 'production' }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure git for pushing tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+
+      - name: Create and push release tag
+        run: |
+          git tag -a ${{ github.event.inputs.releaseTag }} -m "リリース ver${{ github.event.inputs.releaseTag }}"
+          git push origin ${{ github.event.inputs.releaseTag }}
