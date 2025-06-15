@@ -57,6 +57,7 @@ export class ManageQuestionService extends ServiceBase {
               hint: true,
               createdAt: true,
               updatedAt: true,
+              questionAnswers: true,
             },
           },
         },
@@ -154,9 +155,7 @@ export class ManageQuestionService extends ServiceBase {
     return createdQuestion
   }
 
-  public async editQuestion() {
-    //
-  }
+  // public async editQuestion(questionId: string, version: number) {}
 
   public async deleteQuestion(schoolId: string, questionId: string) {
     const accessRole = await this.userController.accessSchoolMethod(schoolId)

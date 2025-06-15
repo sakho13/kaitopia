@@ -10,7 +10,9 @@ import {
   ExerciseBaseProperty,
 } from "./base/exerciseTypes"
 import {
+  Question,
   QuestionAnswerContent,
+  QuestionAnswerPropertyEdit,
   QuestionAnswerTypeType,
   QuestionBase,
   QuestionBaseDate,
@@ -21,6 +23,7 @@ import {
   QuestionForResult,
   QuestionForUser,
   QuestionTypeType,
+  QuestionVersion,
   QuestionVersionBase,
   QuestionVersionBaseIdentifier,
   RegisterQuestionType,
@@ -346,6 +349,15 @@ export type ApiV1OutTypeMap = {
       SchoolBase &
       ReplacedDateToString<SchoolBaseDate>)[]
   }
+
+  GetManageQuestion: {
+    question: Question
+    currentVersion: number | null
+    draftVersion: number | null
+    versions: (QuestionVersion &
+      QuestionAnswerPropertyEdit[keyof QuestionAnswerPropertyEdit])[]
+  }
+
   /**
    * GET /api/manage/v1/exercise
    */
