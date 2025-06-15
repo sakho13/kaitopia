@@ -1,4 +1,4 @@
-name: Pre-Build
+name: Every PR Check
 
 on:
   pull_request:
