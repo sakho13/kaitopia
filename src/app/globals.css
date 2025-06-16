@@ -185,3 +185,31 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* fanfare effect */
+.fanfare-petal {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #ffb6c1;
+  border-radius: 50% 50% 60% 60%;
+  opacity: 0.8;
+  animation: fanfare-fly var(--duration, 3s) linear forwards;
+}
+.fanfare-left {
+  left: 0;
+}
+.fanfare-right {
+  right: 0;
+}
+@keyframes fanfare-fly {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 0px), var(--y, -200px)) rotate(720deg);
+    opacity: 0;
+  }
+}
