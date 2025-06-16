@@ -8,7 +8,7 @@ export function Fanfare() {
 
   useEffect(() => {
     let mounted = true
-    import("party-js").then((party) => {
+    import("party-js").then(({ default: party }) => {
       if (!mounted) return
       if (leftRef.current) {
         party.confetti(leftRef.current, {
