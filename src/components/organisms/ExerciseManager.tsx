@@ -15,6 +15,7 @@ import { ButtonBase } from "../atoms/ButtonBase"
 import { ExerciseManageAnswerPart } from "../molecules/ExerciseManageAnswerPart"
 import { Skeleton } from "../ui/skeleton"
 import { ThinProgressBar } from "../atoms/ThinProgressBar"
+import { Fanfare } from "../atoms/Fanfare"
 
 type Props = {
   exerciseId: string
@@ -96,6 +97,7 @@ export function ExerciseManager({ exerciseId }: Props) {
 
     return (
       <div className='max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow space-y-6 transition-all'>
+        {correctPercent >= 60 && <Fanfare />}
         <h1 className='text-lg font-bold text-text'>
           回答結果&nbsp;「{exercise.title}」
         </h1>
