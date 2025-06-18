@@ -36,6 +36,10 @@ export class UserEntity extends EntityMutable<UserEntityType> {
     }
   }
 
+  get userId(): string {
+    return this.value.id
+  }
+
   get userRole(): UserRoleType {
     return this.value.role
   }

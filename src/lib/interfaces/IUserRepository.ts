@@ -6,6 +6,4 @@ export interface IUserRepository {
   create(user: UserEntity): Promise<UserEntity>
 
   save(user: UserEntity): Promise<UserEntity>
-
-  delete(user: UserEntity): Promise<UserEntity>
 }
