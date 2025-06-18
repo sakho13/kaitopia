@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { UserService } from "@/lib/classes/services/UserService"
+import { UserService2 } from "@/lib/classes/services/UserService2"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 import { isStrictISO8601 } from "@/lib/functions/isStrictISO8601"
 import { STATICS } from "@/lib/statics"
@@ -13,23 +16,29 @@ export async function GET(request: NextRequest) {
   return await api.execute("GetUserInfo", async () => {
     await api.authorize(request)
 
-    const userService = new UserService(prisma)
+    const userRepository = new PrismaUserRepository(prisma)
+    const schoolRepository = new PrismaSchoolRepository(prisma)
+    const userService = new UserService2(
+      prisma,
+      userRepository,
+      schoolRepository,
+    )
     const user = await userService.getUserInfo(api.getFirebaseUid())
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
     return {
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        birthDayDate: user.birthDayDate
-          ? user.birthDayDate.toISOString()
+        id: user.userId,
+        name: user.value.name,
+        email: user.value.email,
+        phoneNumber: user.value.phoneNumber,
+        birthDayDate: user.value.birthDayDate
+          ? user.value.birthDayDate.toISOString()
           : null,
-        role: user.role,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
+        role: user.value.role,
+        createdAt: user.value.createdAt.toISOString(),
+        updatedAt: user.value.updatedAt.toISOString(),
       },
     }
   })
