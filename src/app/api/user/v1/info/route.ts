@@ -2,13 +2,11 @@ import { NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService } from "@/lib/classes/services/UserService"
 import { UserService2 } from "@/lib/classes/services/UserService2"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
-import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 import { isStrictISO8601 } from "@/lib/functions/isStrictISO8601"
-import { STATICS } from "@/lib/statics"
+import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ取得")
@@ -51,134 +49,87 @@ export async function PATCH(request: NextRequest) {
     await api.authorize(request)
 
     const body = await request.json()
+
     const validationResult = validatePatch(body)
     if (validationResult.error) throw validationResult.error
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-    const result = await userService.editUserInfo({
+    const userRepository = new PrismaUserRepository(prisma)
+    const schoolRepository = new PrismaSchoolRepository(prisma)
+    const userService = new UserService2(
+      prisma,
+      userRepository,
+      schoolRepository,
+    )
+
+    const user = await userService.getUserInfo(api.getFirebaseUid())
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    const result = await userService.editUserInfo(user, {
       name: validationResult.result.user.name,
       birthDayDate: validationResult.result.user.birthDayDate,
     })
 
     return {
       user: {
-        id: result.id,
-        name: result.name,
-        email: result.email,
-        phoneNumber: result.phoneNumber,
-        birthDayDate: result.birthDayDate?.toISOString() ?? null,
-        role: result.role,
-        createdAt: result.createdAt.toISOString(),
-        updatedAt: result.updatedAt.toISOString(),
+        id: result.userId,
+        name: result.value.name,
+        email: result.value.email,
+        phoneNumber: result.value.phoneNumber,
+        birthDayDate: result.value.birthDayDate?.toISOString() ?? null,
+        role: result.value.role,
+        createdAt: result.value.createdAt.toISOString(),
+        updatedAt: result.value.updatedAt.toISOString(),
       },
     }
   })
 }
 
-function validatePatch(
-  body: unknown,
-): ApiV1ValidationResult<
-  ApiV1InTypeMap["PatchUserInfo"],
-  "RequiredValueError" | "NotFoundError" | "InvalidFormatError"
-> {
-  if (typeof body !== "object" || body === null) {
-    return {
-      error: new ApiV1Error([{ key: "NotFoundError", params: null }]),
-      result: null,
-    }
-  }
+function validatePatch(body: unknown) {
+  return validateBodyWrapper(
+    "PatchUserInfo",
+    body,
+    (rawBody, { isObject, isInKeyObject, isDateTimeString }) => {
+      if (!isObject(rawBody)) {
+        throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+      }
 
-  if (
-    !("user" in body) ||
-    typeof body.user !== "object" ||
-    body.user === null
-  ) {
-    return {
-      error: new ApiV1Error([
-        { key: "RequiredValueError", params: { key: "編集項目" } },
-      ]),
-      result: null,
-    }
-  }
+      if (!isInKeyObject(rawBody, "user") || !isObject(rawBody.user)) {
+        throw new ApiV1Error([
+          { key: "RequiredValueError", params: { key: "編集項目" } },
+        ])
+      }
 
-  const editableKeys = ["name", "birthDayDate", "email", "phoneNumber"]
+      const editableKeys = ["name", "birthDayDate", "email", "phoneNumber"]
 
-  // bodyオブジェクトに編集項目が最低1つはあるか
-  const hasEditableKeys = Object.keys(body.user).some((key) =>
-    editableKeys.includes(key),
+      // bodyオブジェクトに編集項目が最低1つはあるか
+      const hasEditableKeys = Object.keys(rawBody.user).some((key) =>
+        editableKeys.includes(key),
+      )
+      if (!hasEditableKeys) {
+        throw new ApiV1Error([
+          {
+            key: "RequiredValueError",
+            params: { key: "編集項目" },
+            columnName: "user",
+          },
+        ])
+      }
+
+      if ("birthDayDate" in rawBody.user) {
+        if (
+          !isDateTimeString(rawBody.user.birthDayDate) ||
+          !isStrictISO8601(rawBody.user.birthDayDate)
+        ) {
+          throw new ApiV1Error([
+            {
+              key: "InvalidFormatError",
+              params: { key: "生年月日" },
+              columnName: "birthDayDate",
+            },
+          ])
+        }
+      }
+    },
   )
-  if (!hasEditableKeys) {
-    return {
-      error: new ApiV1Error([
-        {
-          key: "RequiredValueError",
-          params: { key: "編集項目" },
-          columnName: "user",
-        },
-      ]),
-      result: null,
-    }
-  }
-
-  // 項目がある場合に、それぞれ型チェックを行う
-  if ("name" in body.user) {
-    if (
-      typeof body.user.name !== "string" ||
-      body.user.name.length < STATICS.VALIDATE.NAME.MIN_LENGTH ||
-      body.user.name.length > STATICS.VALIDATE.NAME.MAX_LENGTH
-    ) {
-      return {
-        error: new ApiV1Error([
-          {
-            key: "InvalidFormatError",
-            params: { key: "名前" },
-            columnName: "name",
-          },
-        ]),
-        result: null,
-      }
-    }
-  }
-
-  if ("birthDayDate" in body.user) {
-    if (typeof body.user.birthDayDate !== "string") {
-      return {
-        error: new ApiV1Error([
-          {
-            key: "InvalidFormatError",
-            params: { key: "生年月日" },
-            columnName: "birthDayDate",
-          },
-        ]),
-        result: null,
-      }
-    }
-
-    if (!isStrictISO8601(body.user.birthDayDate)) {
-      return {
-        error: new ApiV1Error([
-          {
-            key: "InvalidFormatError",
-            params: { key: "生年月日" },
-            columnName: "birthDayDate",
-          },
-        ]),
-        result: null,
-      }
-    }
-  }
-
-  // emailとphoneNumberは未対応
-  if ("email" in body.user || "phoneNumber" in body.user) {
-    return {
-      error: new ApiV1Error([{ key: "NotFoundError", params: null }]),
-      result: null,
-    }
-  }
-
-  return {
-    error: null,
-    result: body as ApiV1InTypeMap["PatchUserInfo"],
-  }
 }

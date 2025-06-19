@@ -4,6 +4,7 @@ import {
   ApiV1InTypeMap,
   ApiV1ValidationResult,
 } from "../types/apiV1Types"
+import { isStrictISO8601 } from "./isStrictISO8601"
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v)
@@ -16,9 +17,15 @@ function isInKeyObject<K extends string>(
   return typeof v === "object" && v !== null && key in v
 }
 
+function isDateTimeString(v: unknown): v is string {
+  return typeof v === "string" && !isNaN(Date.parse(v))
+}
+
 type CustomValidators = {
   isObject: typeof isObject
   isInKeyObject: typeof isInKeyObject
+  isDateTimeString: typeof isDateTimeString
+  isStrictISO8601: typeof isStrictISO8601
 }
 
 /**
@@ -37,6 +44,8 @@ export function validateBodyWrapper<T extends keyof ApiV1InTypeMap>(
     validator(body, {
       isObject,
       isInKeyObject,
+      isDateTimeString,
+      isStrictISO8601,
     })
   } catch (error: unknown) {
     if (error instanceof ApiV1Error) {

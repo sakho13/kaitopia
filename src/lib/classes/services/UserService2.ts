@@ -1,6 +1,7 @@
 import { ISchoolRepository } from "@/lib/interfaces/ISchoolRepository"
 import { IUserRepository } from "@/lib/interfaces/IUserRepository"
 import {
+  EditableUserInfo,
   UserAccessSchoolMethod,
   UserBaseInfo,
 } from "@/lib/types/base/userTypes"
@@ -8,6 +9,7 @@ import { PrismaClient } from "@prisma/client"
 import { PrismaUserRepository } from "../repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "../repositories/PrismaSchoolRepository"
 import { UserEntity } from "../entities/UserEntity"
+import { ReplacedDateToString } from "@/lib/types/common/ReplacedDateToString"
 
 export class UserService2 {
   constructor(
@@ -45,6 +47,23 @@ export class UserService2 {
       await schoolRepository.createSelfSchool(user)
       return user
     })
+  }
+
+  public async editUserInfo(
+    beforeUser: UserEntity,
+    data: Partial<ReplacedDateToString<EditableUserInfo>>,
+  ) {
+    const user = new UserEntity({
+      ...beforeUser.value,
+      name: data.name ?? beforeUser.value.name,
+      birthDayDate: data.birthDayDate
+        ? new Date(data.birthDayDate)
+        : beforeUser.value.birthDayDate,
+    })
+
+    user.validate()
+
+    return await this._userRepository.save(user)
   }
 
   /**
