@@ -5,7 +5,6 @@ import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { UserService2 } from "@/lib/classes/services/UserService2"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
-import { isStrictISO8601 } from "@/lib/functions/isStrictISO8601"
 import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 
 export async function GET(request: NextRequest) {
@@ -89,7 +88,10 @@ function validatePatch(body: unknown) {
   return validateBodyWrapper(
     "PatchUserInfo",
     body,
-    (rawBody, { isObject, isInKeyObject, isDateTimeString }) => {
+    (
+      rawBody,
+      { isObject, isInKeyObject, isDateTimeString, isStrictISO8601 },
+    ) => {
       if (!isObject(rawBody)) {
         throw new ApiV1Error([{ key: "NotFoundError", params: null }])
       }
