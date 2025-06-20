@@ -67,11 +67,11 @@ export default function Home() {
         </Link>
 
         <div className='mt-6'>
-          <Link href={'/public/about'} className='underline mr-4'>
+          <Link href={"/public/about"} className='underline mr-4'>
             このアプリについて
           </Link>
-          <Link href={'/public/faq'} className='underline'>
-            よくある質問
+          <Link href={"/public/faq"} className='underline'>
+            FAQ
           </Link>
         </div>
       </section>
