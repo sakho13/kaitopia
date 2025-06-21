@@ -7,7 +7,7 @@ RUN apt-get update && \
     apt-get clean
 
 # Firebase CLI のインストール
-RUN npm install -g firebase-tools
+RUN npm install -g firebase-tools@14.7.0
 
 COPY . .
 

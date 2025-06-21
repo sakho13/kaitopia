@@ -93,6 +93,24 @@ export function useGetManageOwnSchools() {
   } as const
 }
 
+export function useGetManageQuestion(questionId: string) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/manage/v1/question", idToken, questionId],
+    async ([url, token, qid]) =>
+      token
+        ? fetcher("GetManageQuestion", "GET", `${url}?questionId=${qid}`, token)
+        : null,
+  )
+
+  return {
+    dataToGetManageQuestion: data,
+    isLoadingToGetManageQuestion: isLoading,
+    refetchManageQuestion: mutate,
+  } as const
+}
+
 /**
  * GET: `/api/manage/v1/exercises`
  */
