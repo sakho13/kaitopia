@@ -33,8 +33,7 @@ export async function PATCH(request: NextRequest) {
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
     }
 
-    const access = await userService.accessSchoolMethod(
-      user,
+    const access = await userService.userController.accessSchoolMethod(
       question.value.schoolId,
     )
     if (!access.includes("edit")) {
