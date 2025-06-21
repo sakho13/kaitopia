@@ -2,7 +2,8 @@
  * @jest-environment node
  */
 
-import { GET } from "@/app/api/manage/v1/question/route"
+import { GET, PATCH } from "@/app/api/manage/v1/question/route"
+import { PATCH as PATCH_VERSION } from "@/app/api/manage/v1/question-version/route"
 import { TestUtility } from "@/tests/TestUtility"
 
 const AdminUserEmail = "kaitopia-admin+001@kaitopia.com"
@@ -98,6 +99,90 @@ describe("API /api/manage/v1/question", () => {
             message: "アクセス権限がありません",
           },
         ]),
+      })
+    })
+
+    describe("PATCH", () => {
+      test("ADMINユーザ 問題のタイトルを更新できる", async () => {
+        const result = await TestUtility.runApi(
+          PATCH,
+          "PATCH",
+          "/api/manage/v1/question?questionId=intro_programming_1_1",
+          { Authorization: `Bearer ${token}` },
+          { title: "更新タイトル" },
+        )
+        expect(result.ok).toBe(true)
+        expect(result.status).toBe(200)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: true,
+          questionId: "intro_programming_1_1",
+        })
+      })
+
+      test("USERユーザ 問題のタイトルを更新できない", async () => {
+        const userToken = await TestUtility.getTokenByEmailAndLogin(
+          UserUserEmail,
+          UserUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          PATCH,
+          "PATCH",
+          "/api/manage/v1/question?questionId=intro_programming_1_1",
+          { Authorization: `Bearer ${userToken}` },
+          { title: "更新タイトル" },
+        )
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(403)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            { code: "RoleTypeError", message: "アクセス権限がありません" },
+          ]),
+        })
+      })
+    })
+
+    describe("PATCH version", () => {
+      test("ADMINユーザ アクティブバージョンを更新できる", async () => {
+        const result = await TestUtility.runApi(
+          PATCH_VERSION,
+          "PATCH",
+          "/api/manage/v1/question-version",
+          { Authorization: `Bearer ${token}` },
+          { questionId: "intro_programming_1_1", version: 1 },
+        )
+        expect(result.ok).toBe(true)
+        expect(result.status).toBe(200)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: true,
+          questionId: "intro_programming_1_1",
+        })
+      })
+
+      test("USERユーザ アクティブバージョンを更新できない", async () => {
+        const userToken = await TestUtility.getTokenByEmailAndLogin(
+          UserUserEmail,
+          UserUserPassword,
+        )
+        const result = await TestUtility.runApi(
+          PATCH_VERSION,
+          "PATCH",
+          "/api/manage/v1/question-version",
+          { Authorization: `Bearer ${userToken}` },
+          { questionId: "intro_programming_1_1", version: 1 },
+        )
+        expect(result.ok).toBe(false)
+        expect(result.status).toBe(403)
+        const json = await result.json()
+        expect(json).toEqual({
+          success: false,
+          errors: expect.arrayContaining([
+            { code: "RoleTypeError", message: "アクセス権限がありません" },
+          ]),
+        })
       })
     })
   })
