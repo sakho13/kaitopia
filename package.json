@@ -3,7 +3,11 @@
   "version": "0.0.4",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "22.16.0"
+  },
+  "volta": {
+    "node": "22.16.0",
+    "npm": "11.4.2"
   },
   "scripts": {
     "dev": "next dev --turbopack",
