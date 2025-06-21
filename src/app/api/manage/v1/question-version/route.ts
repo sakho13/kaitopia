@@ -23,7 +23,8 @@ export async function PATCH(request: NextRequest) {
     const service = new ManageQuestionService2(questionRepository)
 
     const question = await service.getQuestion(result.questionId)
-    if (!question) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+    if (!question)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
     const versionEntity = await service.getQuestionVersion(
       result.questionId,
@@ -41,7 +42,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     await service.changeCurrentVersion(question, result.version)
-    return { success: true, questionId: result.questionId }
+    return { questionId: result.questionId }
   })
 }
 

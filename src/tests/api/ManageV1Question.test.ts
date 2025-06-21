@@ -109,14 +109,16 @@ describe("API /api/manage/v1/question", () => {
           "PATCH",
           "/api/manage/v1/question?questionId=intro_programming_1_1",
           { Authorization: `Bearer ${token}` },
-          { title: "更新タイトル" },
+          { title: "プログラミング入門 「プログラム」とは？" },
         )
         expect(result.ok).toBe(true)
         expect(result.status).toBe(200)
         const json = await result.json()
         expect(json).toEqual({
           success: true,
-          questionId: "intro_programming_1_1",
+          data: {
+            questionId: "intro_programming_1_1",
+          },
         })
       })
 
@@ -158,7 +160,9 @@ describe("API /api/manage/v1/question", () => {
         const json = await result.json()
         expect(json).toEqual({
           success: true,
-          questionId: "intro_programming_1_1",
+          data: {
+            questionId: "intro_programming_1_1",
+          },
         })
       })
 

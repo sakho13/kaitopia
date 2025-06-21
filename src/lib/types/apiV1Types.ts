@@ -432,12 +432,10 @@ export type ApiV1OutTypeMap = {
   }
 
   PatchManageQuestion: {
-    success: boolean
     questionId: string
   }
 
   PatchManageQuestionVersion: {
-    success: boolean
     questionId: string
   }
 

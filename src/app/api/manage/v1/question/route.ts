@@ -89,7 +89,8 @@ export async function PATCH(request: NextRequest) {
     const service = new ManageQuestionService2(questionRepository)
 
     const question = await service.getQuestion(questionId)
-    if (!question) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+    if (!question)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
     const access = await userService.userController.accessSchoolMethod(
       question.value.schoolId,
@@ -99,7 +100,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     await service.editQuestion(question, { title: result.title! })
-    return { success: true, questionId }
+    return { questionId }
   })
 }
 
