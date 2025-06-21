@@ -1,4 +1,4 @@
-FROM node:20.11.0-slim AS base
+FROM node:22.16.0-slim AS base
 
 
 FROM base AS deps
@@ -31,7 +31,7 @@ RUN npm run prisma:generate
 RUN npm run build
 
 
-FROM node:20.11.0 AS runner
+FROM node:22.16.0 AS runner
 
 ENV NODE_ENV=production
 WORKDIR /app
