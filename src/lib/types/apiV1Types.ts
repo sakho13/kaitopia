@@ -182,6 +182,14 @@ export type ApiV1InTypeMap = {
   }
 
   /**
+   * PATCH /api/manage/v1/question-version
+   */
+  PatchManageQuestionVersion: {
+    questionId: string
+    version: number
+  }
+
+  /**
    * GET /api/user/v1/exercise?exerciseId=xxxx
    */
   GetUserExerciseInfo: {
@@ -420,6 +428,14 @@ export type ApiV1OutTypeMap = {
    * POST /api/manage/v1/exercise/question
    */
   PostManageExerciseQuestion: {
+    questionId: string
+  }
+
+  PatchManageQuestion: {
+    questionId: string
+  }
+
+  PatchManageQuestionVersion: {
     questionId: string
   }
 

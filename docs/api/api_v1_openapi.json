@@ -984,6 +984,106 @@
       }
     },
 
+    "/manage/v1/question": {
+      "patch": {
+        "summary": "問題を更新する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          { "$ref": "#/components/parameters/AuthorizationHeader" },
+          {
+            "in": "query",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "問題ID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "minItems": 1,
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "問題のタイトル",
+                    "minLength": 1,
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問題の更新に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "questionId": { "type": "string", "description": "更新した問題ID" }
+                  },
+                  "required": ["success", "questionId"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/v1/question-version": {
+      "patch": {
+        "summary": "問題のアクティブバージョンを更新する",
+        "tags": ["ManageAPI"],
+        "parameters": [
+          { "$ref": "#/components/parameters/AuthorizationHeader" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "questionId": {
+                    "type": "string",
+                    "description": "問題ID"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "description": "設定するバージョン"
+                  }
+                },
+                "required": ["questionId", "version"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "バージョンの更新に成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "questionId": { "type": "string", "description": "更新した問題ID" }
+                  },
+                  "required": ["success", "questionId"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/common/v1/recommend-exercise": {
       "get": {
         "summary": "開発者おすすめの問題集を取得する",
