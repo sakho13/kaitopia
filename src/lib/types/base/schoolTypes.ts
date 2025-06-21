@@ -26,3 +26,15 @@ export type SchoolBaseDate = {
 export type SchoolRelationUser = {
   owners: User[]
 }
+
+export type SchoolRelateUserMember = {
+  members: {
+    limitAt: Date | null
+  }[]
+}
+
+export type SchoolRelateUserOwner = {
+  owners: {
+    priority: number
+  }[]
+}

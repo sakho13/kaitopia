@@ -23,6 +23,10 @@ export type UserBaseInfoOption = {
   birthDayDate: Date | null
 }
 
+export type UserBaseManageOption = {
+  isGuest: boolean
+}
+
 export type UserBaseIdentity = {
   id: string
 
