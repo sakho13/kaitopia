@@ -96,6 +96,16 @@ export default function SignupPage() {
         <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
           サインアップ
         </ButtonBase>
+
+        <p className='mt-2 text-xs text-center text-gray-500'>
+          <a
+            href='/public/terms'
+            className='text-primary font-medium hover:underline'
+          >
+            利用規約
+          </a>
+          に同意の上、登録してください。
+        </p>
       </form>
 
       <div className='mt-6 text-center text-sm text-gray-500'>または</div>
