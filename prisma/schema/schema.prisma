@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native"]
@@ -15,29 +9,6 @@ datasource db {
 }
 
 // ************ MODELS ************
-
-model User {
-  id String @id @default(cuid(2))
-
-  firebaseUid String  @unique @map("firebase_uid")
-  isGuest     Boolean @default(false) @map("is_guest")
-
-  role Role @default(USER) @map("role")
-
-  name         String    @map("name")
-  email        String?   @map("email")
-  phoneNumber  String?   @map("phone_number")
-  birthDayDate DateTime? @map("birth_day_date")
-
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  ownerSchools SchoolOwner[]
-  // memberSchools SchoolMember[]
-  SchoolMember SchoolMember[]
-  // userAuthProviders UserAuthProvider[]
-}
 
 // model UserAuthProvider {
 //   userId   String          @map("user_id")
@@ -70,8 +41,8 @@ model School {
   question Question[]
   exercise Exercise[]
 
-  owners        SchoolOwner[]
-  members       SchoolMember[]
+  owners         SchoolOwner[]
+  members        SchoolMember[]
   questionGroups QuestionGroup[]
 }
 
@@ -120,11 +91,11 @@ model Question {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  school            School                  @relation(fields: [schoolId], references: [id])
-  versions          QuestionVersion[]
-  currentVersion    QuestionVersion?        @relation("CurrentVersion", fields: [id, currentVersionId], references: [questionId, version])
-  draftVersion      QuestionVersion?        @relation("DraftVersion", fields: [id, draftVersionId], references: [questionId, version])
-  exerciseQuestions ExerciseQuestion[]
+  school                 School                  @relation(fields: [schoolId], references: [id])
+  versions               QuestionVersion[]
+  currentVersion         QuestionVersion?        @relation("CurrentVersion", fields: [id, currentVersionId], references: [questionId, version])
+  draftVersion           QuestionVersion?        @relation("DraftVersion", fields: [id, draftVersionId], references: [questionId, version])
+  exerciseQuestions      ExerciseQuestion[]
   questionGroupQuestions QuestionGroupQuestion[]
 
   @@unique([id, currentVersionId], name: "question_current_version")
@@ -219,7 +190,7 @@ model QuestionGroup {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  school                School                @relation(fields: [schoolId], references: [id])
+  school                 School                  @relation(fields: [schoolId], references: [id])
   questionGroupQuestions QuestionGroupQuestion[]
 
   @@id([schoolId, questionGroupId])
@@ -324,14 +295,6 @@ model AnswerSelectUserLog {
 // ************ MODELS ************
 
 // ************ ENUMS ************
-
-enum Role {
-  USER // default
-  MODERATOR // upgrade from USER
-  TEACHER // upgrade from MODERATOR
-
-  ADMIN // developer
-}
 
 // enum UserSSOProvider {
 //   EMAIL
