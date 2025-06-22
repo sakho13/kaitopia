@@ -70,8 +70,9 @@ model School {
   question Question[]
   exercise Exercise[]
 
-  owners  SchoolOwner[]
-  members SchoolMember[]
+  owners        SchoolOwner[]
+  members       SchoolMember[]
+  questionGroups QuestionGroup[]
 }
 
 model SchoolOwner {
@@ -119,11 +120,13 @@ model Question {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  school            School             @relation(fields: [schoolId], references: [id])
+  school            School                  @relation(fields: [schoolId], references: [id])
   versions          QuestionVersion[]
-  currentVersion    QuestionVersion?   @relation("CurrentVersion", fields: [id, currentVersionId], references: [questionId, version])
-  draftVersion      QuestionVersion?   @relation("DraftVersion", fields: [id, draftVersionId], references: [questionId, version])
+  currentVersion    QuestionVersion?        @relation("CurrentVersion", fields: [id, currentVersionId], references: [questionId, version])
+  draftVersion      QuestionVersion?        @relation("DraftVersion", fields: [id, draftVersionId], references: [questionId, version])
   exerciseQuestions ExerciseQuestion[]
+  questionGroupId   String?        @map("question_group_id")
+  questionGroup     QuestionGroup? @relation(fields: [schoolId, questionGroupId], references: [schoolId, questionGroupId])
 
   @@unique([id, currentVersionId], name: "question_current_version")
   @@unique([id, draftVersionId], name: "question_draft_version")
@@ -206,6 +209,21 @@ model ExerciseQuestion {
   question Question @relation(fields: [questionId], references: [id])
 
   @@id([exerciseId, questionId])
+}
+
+model QuestionGroup {
+  schoolId        String @map("school_id")
+  questionGroupId String @default(cuid(2)) @map("question_group_id")
+  name            String @map("name")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  school   School    @relation(fields: [schoolId], references: [id])
+  question Question[]
+
+  @@id([schoolId, questionGroupId])
 }
 
 // AnswerLogSheet あらゆるQuestionの回答記録のマスター

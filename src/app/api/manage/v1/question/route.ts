@@ -6,6 +6,7 @@ import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 import { PrismaQuestionRepository } from "@/lib/classes/repositories/PrismaQuestionRepository"
 import { ManageQuestionService2 } from "@/lib/classes/services/ManageQuestionService2"
 import { ManageQuestionService } from "@/lib/classes/services/ManageQuestionService"
+import { ManageQuestionGroupService } from "@/lib/classes/services/ManageQuestionGroupService"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題の取得")
@@ -100,6 +101,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     await service.editQuestion(question, { title: result.title! })
+
+    if ("questionGroupId" in result) {
+      const groupService = new ManageQuestionGroupService(
+        userService.userController,
+        prisma,
+      )
+      await groupService.setQuestionGroup(
+        questionId,
+        question.value.schoolId,
+        result.questionGroupId || null,
+      )
+    }
     return { questionId }
   })
 }
@@ -115,6 +128,16 @@ function validatePatch(body: unknown) {
     if (!("title" in b)) {
       throw new ApiV1Error([
         { key: "RequiredValueError", params: { key: "問題タイトル" } },
+      ])
+    }
+
+    if (
+      "questionGroupId" in b &&
+      b.questionGroupId !== null &&
+      typeof b.questionGroupId !== "string"
+    ) {
+      throw new ApiV1Error([
+        { key: "InvalidFormatError", params: { key: "問題グループID" } },
       ])
     }
 
