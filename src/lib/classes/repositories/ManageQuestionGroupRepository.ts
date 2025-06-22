@@ -20,13 +20,23 @@ export class ManageQuestionGroupRepository extends RepositoryBase {
     )
   }
 
-  public async updateQuestionGroup(
+  public async replaceQuestionGroups(
     questionId: string,
-    groupId: string | null,
+    schoolId: string,
+    groupIds: string[],
   ): Promise<void> {
-    await this.dbConnection.question.update({
-      where: { id: questionId },
-      data: { questionGroupId: groupId },
+    await this.dbConnection.questionGroupQuestion.deleteMany({
+      where: { questionId },
     })
+
+    if (groupIds.length > 0) {
+      await this.dbConnection.questionGroupQuestion.createMany({
+        data: groupIds.map((id) => ({
+          questionId,
+          schoolId,
+          questionGroupId: id,
+        })),
+      })
+    }
   }
 }

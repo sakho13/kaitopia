@@ -188,7 +188,7 @@ export type ApiV1InTypeMap = {
   PatchManageQuestion: {
     questionId: string
     title?: string
-    questionGroupId?: string | null
+    questionGroupIds?: string[]
   }
 
   /**

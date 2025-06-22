@@ -102,15 +102,15 @@ export async function PATCH(request: NextRequest) {
 
     await service.editQuestion(question, { title: result.title! })
 
-    if ("questionGroupId" in result) {
+    if ("questionGroupIds" in result) {
       const groupService = new ManageQuestionGroupService(
         userService.userController,
         prisma,
       )
-      await groupService.setQuestionGroup(
+      await groupService.setQuestionGroups(
         questionId,
         question.value.schoolId,
-        result.questionGroupId || null,
+        result.questionGroupIds ?? [],
       )
     }
     return { questionId }
@@ -131,14 +131,19 @@ function validatePatch(body: unknown) {
       ])
     }
 
-    if (
-      "questionGroupId" in b &&
-      b.questionGroupId !== null &&
-      typeof b.questionGroupId !== "string"
-    ) {
-      throw new ApiV1Error([
-        { key: "InvalidFormatError", params: { key: "問題グループID" } },
-      ])
+    if ("questionGroupIds" in b) {
+      if (!Array.isArray(b.questionGroupIds)) {
+        throw new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "問題グループID" } },
+        ])
+      }
+      for (const id of b.questionGroupIds) {
+        if (typeof id !== "string") {
+          throw new ApiV1Error([
+            { key: "InvalidFormatError", params: { key: "問題グループID" } },
+          ])
+        }
+      }
     }
 
     if (

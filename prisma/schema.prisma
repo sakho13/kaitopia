@@ -125,8 +125,7 @@ model Question {
   currentVersion    QuestionVersion?        @relation("CurrentVersion", fields: [id, currentVersionId], references: [questionId, version])
   draftVersion      QuestionVersion?        @relation("DraftVersion", fields: [id, draftVersionId], references: [questionId, version])
   exerciseQuestions ExerciseQuestion[]
-  questionGroupId   String?        @map("question_group_id")
-  questionGroup     QuestionGroup? @relation(fields: [schoolId, questionGroupId], references: [schoolId, questionGroupId])
+  questionGroupQuestions QuestionGroupQuestion[]
 
   @@unique([id, currentVersionId], name: "question_current_version")
   @@unique([id, draftVersionId], name: "question_draft_version")
@@ -220,10 +219,23 @@ model QuestionGroup {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  school   School    @relation(fields: [schoolId], references: [id])
-  question Question[]
+  school                School                @relation(fields: [schoolId], references: [id])
+  questionGroupQuestions QuestionGroupQuestion[]
 
   @@id([schoolId, questionGroupId])
+}
+
+model QuestionGroupQuestion {
+  schoolId        String @map("school_id")
+  questionGroupId String @map("question_group_id")
+  questionId      String @map("question_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  questionGroup QuestionGroup @relation(fields: [schoolId, questionGroupId], references: [schoolId, questionGroupId])
+  question      Question      @relation(fields: [questionId], references: [id])
+
+  @@id([schoolId, questionGroupId, questionId])
 }
 
 // AnswerLogSheet あらゆるQuestionの回答記録のマスター

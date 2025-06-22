@@ -21,16 +21,16 @@ export class ManageQuestionGroupService extends ServiceBase {
     return await repo.findGroups(schoolId)
   }
 
-  public async setQuestionGroup(
+  public async setQuestionGroups(
     questionId: string,
     schoolId: string,
-    groupId: string | null,
+    groupIds: string[],
   ): Promise<void> {
     const access = await this.userController.accessSchoolMethod(schoolId)
     if (!access.includes("edit"))
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const repo = new ManageQuestionGroupRepository(this.dbConnection)
-    await repo.updateQuestionGroup(questionId, groupId)
+    await repo.replaceQuestionGroups(questionId, schoolId, groupIds)
   }
 }
