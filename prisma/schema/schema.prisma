@@ -23,58 +23,6 @@ datasource db {
 //   @@id([userId, provider])
 // }
 
-model School {
-  id String @id @default(cuid(2))
-
-  name         String  @map("name")
-  description  String  @map("description")
-  // isSelfSchool ユーザが必ず所属するSchoolを識別する
-  isSelfSchool Boolean @default(false) @map("is_self_school")
-  // isPublic 公開しているがどうが(条件有無は無関係)
-  isPublic     Boolean @default(false) @map("is_public")
-  // isGlobal グローバルな学校(全ユーザが参加できる)
-  isGlobal     Boolean @default(false) @map("is_global")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  question Question[]
-  exercise Exercise[]
-
-  owners         SchoolOwner[]
-  members        SchoolMember[]
-  questionGroups QuestionGroup[]
-}
-
-model SchoolOwner {
-  schoolId String @map("school_id")
-  userId   String @map("user_id")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  // priority 学校のオーナーの優先度(0が一番高い)
-  priority  Int      @default(0) @map("priority")
-
-  school School @relation(fields: [schoolId], references: [id])
-  owner  User   @relation(fields: [userId], references: [id])
-
-  @@id([schoolId, userId])
-}
-
-model SchoolMember {
-  schoolId String @map("school_id")
-  userId   String @map("user_id")
-
-  // 利用期限 nullの場合は期限なし
-  limitAt DateTime?
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  school School @relation(fields: [schoolId], references: [id])
-  member User   @relation(fields: [userId], references: [id])
-
-  @@id([schoolId, userId])
-}
-
 model Question {
   id       String @id @default(cuid(2))
   schoolId String @map("school_id")
