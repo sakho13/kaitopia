@@ -1,7 +1,7 @@
 import { RepositoryBase } from "../common/RepositoryBase"
 import { QuestionGroupEntity } from "../entities/QuestionGroupEntity"
 
-export class ManageQuestionGroupRepository extends RepositoryBase {
+export class PrismaManageQuestionGroupRepository extends RepositoryBase {
   public async findGroups(schoolId: string): Promise<QuestionGroupEntity[]> {
     const groups = await this.dbConnection.questionGroup.findMany({
       where: { schoolId, deletedAt: null },

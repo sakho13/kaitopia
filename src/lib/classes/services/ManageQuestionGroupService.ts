@@ -1,5 +1,5 @@
 import { ServiceBase } from "../common/ServiceBase"
-import { ManageQuestionGroupRepository } from "../repositories/ManageQuestionGroupRepository"
+import { PrismaManageQuestionGroupRepository } from "../repositories/PrismaManageQuestionGroupRepository"
 import { QuestionGroupEntity } from "../entities/QuestionGroupEntity"
 import { UserAuthenticationUtility } from "../utilities/UserAuthenticationUtility"
 import { UserEntity } from "../entities/UserEntity"
@@ -11,7 +11,7 @@ export class ManageQuestionGroupService extends ServiceBase {
   ): Promise<QuestionGroupEntity[]> {
     UserAuthenticationUtility.checkPermissionWithThrow(user, schoolId, "read")
 
-    const repo = new ManageQuestionGroupRepository(this.dbConnection)
+    const repo = new PrismaManageQuestionGroupRepository(this.dbConnection)
     return await repo.findGroups(schoolId)
   }
 
@@ -23,7 +23,7 @@ export class ManageQuestionGroupService extends ServiceBase {
   ): Promise<void> {
     UserAuthenticationUtility.checkPermissionWithThrow(user, schoolId, "edit")
 
-    const repo = new ManageQuestionGroupRepository(this.dbConnection)
+    const repo = new PrismaManageQuestionGroupRepository(this.dbConnection)
     await repo.replaceQuestionGroups(questionId, schoolId, groupIds)
   }
 }
