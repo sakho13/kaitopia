@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題の取得")
 
   return await api.execute("GetManageQuestion", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    await api.checkAccessManagePage(request)
 
     const questionId = request.nextUrl.searchParams.get("questionId")
     if (!questionId || questionId.length < 2)
@@ -23,11 +23,17 @@ export async function GET(request: NextRequest) {
         { key: "RequiredValueError", params: { key: "問題ID" } },
       ])
 
-    await userService.getUserInfo(api.getFirebaseUid())
-    const userController = userService.userController
+    const userService2 = new UserService2(
+      prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
+    )
+    const user = await userService2.getUserInfo(api.getFirebaseUid())
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    const questionService = new ManageQuestionService(userController, prisma)
-    const question = await questionService.getQuestionDetail(questionId)
+    const questionService = new ManageQuestionService(prisma)
+    const question = await questionService.getQuestionDetail(user, questionId)
 
     return {
       question: {
