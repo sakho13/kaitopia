@@ -29,6 +29,11 @@ import {
   RegisterQuestionType,
 } from "./base/questionTypes"
 import {
+  QuestionGroupBase,
+  QuestionGroupBaseDate,
+  QuestionGroupBaseIdentifier,
+} from "./base/questionGroupTypes"
+import {
   SchoolBase,
   SchoolBaseDate,
   SchoolBaseIdentity,
@@ -151,6 +156,10 @@ export type ApiV1InTypeMap = {
     schoolId?: string
   }
 
+  GetManageQuestionGroups: {
+    schoolId: string
+  }
+
   PostManageExercise: {
     schoolId: string
     property: ExerciseBase
@@ -179,6 +188,7 @@ export type ApiV1InTypeMap = {
   PatchManageQuestion: {
     questionId: string
     title?: string
+    questionGroupIds?: string[]
   }
 
   /**
@@ -392,6 +402,14 @@ export type ApiV1OutTypeMap = {
      */
     nextPage: number | null
     totalCount: number
+  }
+
+  GetManageQuestionGroups: {
+    questionGroups: (
+      QuestionGroupBaseIdentifier &
+      QuestionGroupBase &
+      ReplacedDateToString<QuestionGroupBaseDate>
+    )[]
   }
   /**
    * POST /api/manage/v1/exercise
