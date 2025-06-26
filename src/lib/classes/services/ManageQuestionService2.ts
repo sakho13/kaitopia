@@ -1,6 +1,8 @@
 import { IQuestionRepository } from "@/lib/interfaces/IQuestionRepository"
 import { QuestionEntity } from "../entities/QuestionEntity"
 import { QuestionVersionEntity } from "../entities/QuestionVersionEntity"
+import { UserEntity } from "../entities/UserEntity"
+import { UserAuthenticationUtility } from "../utilities/UserAuthenticationUtility"
 
 export class ManageQuestionService2 {
   constructor(private readonly _questionRepository: IQuestionRepository) {}
@@ -17,9 +19,15 @@ export class ManageQuestionService2 {
   }
 
   async editQuestion(
+    user: UserEntity,
     question: QuestionEntity,
     data: { title: string },
   ): Promise<QuestionEntity> {
+    UserAuthenticationUtility.checkPermissionWithThrow(
+      user,
+      question.value.schoolId,
+      "edit",
+    )
     const newQuestion = new QuestionEntity({
       ...question.value,
       title: data.title,

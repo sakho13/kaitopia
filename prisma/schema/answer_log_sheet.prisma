@@ -1,0 +1,82 @@
+// AnswerLogSheet あらゆるQuestionの回答記録のマスター
+// いわゆる回答用紙
+model AnswerLogSheet {
+  userId           String @map("user_id")
+  answerLogSheetId String @default(cuid(2))
+
+  isInProgress Boolean @default(false) @map("is_in_progress") // 回答途中かどうか
+
+  // 合計正解数
+  // QuestionTypeがSELECT/MULTI_SELECTのみ集計
+  totalCorrectCount    Int @default(0) @map("total_correct_count")
+  // 合計不正解数
+  // QuestionTypeがSELECT/MULTI_SELECTのみ集計
+  totalIncorrectCount  Int @default(0) @map("total_incorrect_count")
+  // 合計未回答数
+  totalUnansweredCount Int @default(0) @map("total_unanswered_count")
+
+  // 問題集から回答された時
+  exerciseId String? @map("exercise_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  exercise         Exercise?         @relation(fields: [exerciseId], references: [id])
+  questionUserLogs QuestionUserLog[]
+
+  @@id([userId, answerLogSheetId])
+}
+
+// 出題した問題の履歴
+model QuestionUserLog {
+  questionUserLogId String @id @default(cuid(2))
+
+  userId           String @map("user_id")
+  answerLogSheetId String @map("answer_log_sheet_id")
+
+  orderIndex Int    @default(1) @map("order_index") // 問題の出題順
+  questionId String @map("question_id")
+  version    Int    @map("version") // 問題のバージョン
+
+  // 採点に利用したかどうか
+  isAnswered Boolean @default(false) @map("is_answered")
+
+  // スキップされたかどうか
+  skipped Boolean @default(false) @map("skipped")
+
+  selectAnswerOrder String[] @default([]) @map("select_answer_order_id")
+
+  // QuestionTypeがSELECT/MULTI_SELECTの場合
+  isCorrect Boolean @default(false) @map("is_correct")
+  // QuestionTypeがTEXTの場合
+  // 0点から100点の間でスコアをつける
+  score     Int     @default(0) @map("score")
+
+  // TYPE: TEXT の場合
+  textAnswer String? @map("text_answer")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  questionVersion      QuestionVersion       @relation(fields: [questionId, version], references: [questionId, version])
+  answerLogSheet       AnswerLogSheet        @relation(fields: [userId, answerLogSheetId], references: [userId, answerLogSheetId], onDelete: Cascade)
+  // TYPE: SELECT/MULTI_SELECT の場合
+  answerSelectUserLogs AnswerSelectUserLog[]
+}
+
+model AnswerSelectUserLog {
+  answerSelectUserLogId String @id @default(cuid(2)) @map("answer_select_user_log_id")
+
+  questionUserLogId String   @map("question_user_log_id")
+  selectAnswerId    String   @map("select_answer_id")
+  isCorrect         Boolean? @default(false) @map("is_correct") // 正解かどうか
+
+  questionId String @map("question_id")
+  version    Int    @map("version")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  questionUserLog QuestionUserLog @relation(fields: [questionUserLogId], references: [questionUserLogId], onDelete: Cascade)
+  questionAnswer  QuestionAnswer  @relation(fields: [questionId, version, selectAnswerId], references: [questionId, version, answerId], onDelete: Cascade)
+}

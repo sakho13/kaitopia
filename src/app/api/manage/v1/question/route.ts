@@ -6,6 +6,10 @@ import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 import { PrismaQuestionRepository } from "@/lib/classes/repositories/PrismaQuestionRepository"
 import { ManageQuestionService2 } from "@/lib/classes/services/ManageQuestionService2"
 import { ManageQuestionService } from "@/lib/classes/services/ManageQuestionService"
+import { ManageQuestionGroupService } from "@/lib/classes/services/ManageQuestionGroupService"
+import { UserService2 } from "@/lib/classes/services/UserService2"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題の取得")
@@ -70,7 +74,7 @@ export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題の更新")
 
   return api.execute("PatchManageQuestion", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    await api.checkAccessManagePage(request)
 
     const questionId = request.nextUrl.searchParams.get("questionId")
     if (!questionId)
@@ -82,7 +86,12 @@ export async function PATCH(request: NextRequest) {
     const { error, result } = validatePatch(body)
     if (error) throw error
 
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const userService2 = new UserService2(
+      prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
+    )
+    const user = await userService2.getUserInfo(api.getFirebaseUid())
     if (!user) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
     const questionRepository = new PrismaQuestionRepository(prisma)
@@ -92,14 +101,17 @@ export async function PATCH(request: NextRequest) {
     if (!question)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-    const access = await userService.userController.accessSchoolMethod(
-      question.value.schoolId,
-    )
-    if (!access.includes("edit")) {
-      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
-    }
+    await service.editQuestion(user, question, { title: result.title! })
 
-    await service.editQuestion(question, { title: result.title! })
+    if ("questionGroupIds" in result) {
+      const groupService = new ManageQuestionGroupService(prisma)
+      await groupService.setQuestionGroups(
+        user,
+        questionId,
+        question.value.schoolId,
+        result.questionGroupIds ?? [],
+      )
+    }
     return { questionId }
   })
 }
@@ -116,6 +128,21 @@ function validatePatch(body: unknown) {
       throw new ApiV1Error([
         { key: "RequiredValueError", params: { key: "問題タイトル" } },
       ])
+    }
+
+    if ("questionGroupIds" in b) {
+      if (!Array.isArray(b.questionGroupIds)) {
+        throw new ApiV1Error([
+          { key: "InvalidFormatError", params: { key: "問題グループID" } },
+        ])
+      }
+      for (const id of b.questionGroupIds) {
+        if (typeof id !== "string") {
+          throw new ApiV1Error([
+            { key: "InvalidFormatError", params: { key: "問題グループID" } },
+          ])
+        }
+      }
     }
 
     if (

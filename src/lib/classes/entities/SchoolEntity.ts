@@ -3,15 +3,9 @@ import {
   SchoolBase,
   SchoolBaseDate,
   SchoolBaseIdentity,
-  SchoolRelateUserMember,
-  SchoolRelateUserOwner,
 } from "@/lib/types/base/schoolTypes"
-import { DateUtility } from "../common/DateUtility"
 
-type SchoolEntityType = SchoolBase &
-  SchoolBaseIdentity &
-  SchoolBaseDate &
-  (SchoolRelateUserMember | SchoolRelateUserOwner)
+type SchoolEntityType = SchoolBase & SchoolBaseIdentity & SchoolBaseDate
 
 export class SchoolEntity extends EntityMutable<SchoolEntityType> {
   constructor(value: SchoolEntityType) {
@@ -30,13 +24,5 @@ export class SchoolEntity extends EntityMutable<SchoolEntityType> {
 
   get isGlobalSchool(): boolean {
     return this.value.isGlobal && this.value.isPublic
-  }
-
-  get isInLimit(): boolean {
-    if (!("members" in this.value)) return false
-
-    return this.value.members.some(
-      (m) => m.limitAt === null || m.limitAt >= DateUtility.getNowDate(),
-    )
   }
 }
