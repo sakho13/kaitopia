@@ -14,7 +14,7 @@ export class PrismaSchoolRepository
     if (!school) {
       return null
     }
-    return new SchoolEntity({ ...school, members: [], owners: [] })
+    return new SchoolEntity(school)
   }
 
   async findOwnSchools(userId: string): Promise<SchoolEntity[]> {
