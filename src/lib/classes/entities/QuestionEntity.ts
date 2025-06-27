@@ -5,6 +5,7 @@ import {
   QuestionTypeType,
 } from "@/lib/types/base/questionTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
+import { QuestionVersionEntity } from "./QuestionVersionEntity"
 
 export type QuestionEntityType = {
   questionId: string
@@ -18,6 +19,7 @@ export type QuestionEntityType = {
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
+  versions: QuestionVersionEntity[]
 }
 
 export class QuestionEntity extends EntityMutable<QuestionEntityType> {

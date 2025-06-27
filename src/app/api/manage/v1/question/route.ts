@@ -5,7 +5,6 @@ import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 import { PrismaQuestionRepository } from "@/lib/classes/repositories/PrismaQuestionRepository"
 import { ManageQuestionService2 } from "@/lib/classes/services/ManageQuestionService2"
-import { ManageQuestionService } from "@/lib/classes/services/ManageQuestionService"
 import { ManageQuestionGroupService } from "@/lib/classes/services/ManageQuestionGroupService"
 import { UserService2 } from "@/lib/classes/services/UserService2"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
@@ -32,44 +31,35 @@ export async function GET(request: NextRequest) {
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    const questionService = new ManageQuestionService(prisma)
-    const question = await questionService.getQuestionDetail(user, questionId)
+    const questionService = new ManageQuestionService2(
+      prisma,
+      new PrismaQuestionRepository(prisma),
+    )
+    const question = await questionService.getQuestion(user, questionId)
+    if (!question)
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
     return {
       question: {
-        schoolId: question.schoolId,
+        schoolId: question.value.schoolId,
         questionId,
-        title: question.title,
-        questionType: question.questionType,
-        answerType: question.answerType,
+        title: question.value.title,
+        questionType: question.value.questionType,
+        answerType: question.value.answerType,
       },
-      currentVersion: question.currentVersionId,
-      draftVersion: question.draftVersionId,
-      versions: question.versions.map((v) => {
+      currentVersion: question.value.currentVersion,
+      draftVersion: question.value.draftVersion,
+      versions: question.value.versions.map((v) => {
         const base = {
           questionId,
-          version: v.version,
-          content: v.content,
-          hint: v.hint,
-        }
-        if (question.answerType === "TEXT") {
-          return {
-            ...base,
-            property: {
-              answerId: v.questionAnswers[0]?.answerId || "",
-              maxLength: v.questionAnswers[0]?.maxLength || 0,
-              minLength: v.questionAnswers[0]?.minLength || 0,
-            },
-          }
+          version: v.value.version,
+          content: v.value.content,
+          hint: v.value.hint,
         }
 
         return {
           ...base,
-          selection: v.questionAnswers.map((a) => ({
-            answerId: a.answerId,
-            isCorrect: a.isCorrect!,
-            selectContent: a.selectContent!,
-          })),
+          ...v.propertyOfAnswer,
         }
       }),
     }
@@ -101,9 +91,9 @@ export async function PATCH(request: NextRequest) {
     if (!user) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
     const questionRepository = new PrismaQuestionRepository(prisma)
-    const service = new ManageQuestionService2(questionRepository)
+    const service = new ManageQuestionService2(prisma, questionRepository)
 
-    const question = await service.getQuestion(questionId)
+    const question = await service.getQuestion(user, questionId)
     if (!question)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
