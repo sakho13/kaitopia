@@ -36,7 +36,9 @@ export default function Page() {
       }
 
       showError(
-        `ゲストユーザの削除に失敗しました。 (${result.errors.join(", ")})`,
+        `ゲストユーザの削除に失敗しました。 (${result.errors
+          .map((e) => JSON.stringify(e))
+          .join(", ")})`,
       )
     }
   }
