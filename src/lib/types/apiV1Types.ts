@@ -229,6 +229,8 @@ export type ApiV1InTypeMap = {
     exerciseId: string
     answer: QuestionAnswerContent
   }
+
+  DeleteManageUserGuest: null
 }
 
 export type ApiV1OutTypeMap = {
@@ -405,11 +407,9 @@ export type ApiV1OutTypeMap = {
   }
 
   GetManageQuestionGroups: {
-    questionGroups: (
-      QuestionGroupBaseIdentifier &
+    questionGroups: (QuestionGroupBaseIdentifier &
       QuestionGroupBase &
-      ReplacedDateToString<QuestionGroupBaseDate>
-    )[]
+      ReplacedDateToString<QuestionGroupBaseDate>)[]
   }
   /**
    * POST /api/manage/v1/exercise
@@ -468,6 +468,15 @@ export type ApiV1OutTypeMap = {
       ReplacedDateToString<UserBaseDate>)[]
     nextPage: number | null
     totalCount: number
+  }
+
+  /**
+   * DELETE /api/manage/v1/user/guest
+   * @description 規定期間経過したゲストユーザを削除する
+   */
+  DeleteManageUserGuest: {
+    deletedUserCount: number
+    deletedUserIds: string[]
   }
 }
 
