@@ -58,7 +58,7 @@ describe("API /api/user/v1/exercise/question", () => {
       expect(json.data.questions.length).toBeGreaterThan(0)
       expect(
         json.data.questions.every(
-          (q: { answer: unknown }) =>
+          (q: { answer: unknown; questionGroups: unknown }) =>
             typeof q.answer === "object" &&
             q.answer !== null &&
             Object.keys(q.answer).length === 0 &&
@@ -129,7 +129,7 @@ describe("API /api/user/v1/exercise/question", () => {
       })
       expect(
         json.data.questions.every(
-          (q: { answer: unknown }) =>
+          (q: { answer: unknown; questionGroups: unknown }) =>
             typeof q.answer === "object" &&
             q.answer !== null &&
             Object.keys(q.answer).length > 0 &&
