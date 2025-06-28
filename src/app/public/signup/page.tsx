@@ -1,6 +1,7 @@
 "use client"
 
 import { ButtonBase } from "@/components/atoms/ButtonBase"
+import { Skeleton } from "@/components/ui/skeleton"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
@@ -74,6 +75,7 @@ export default function SignupPage() {
             className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
             value={password}
             onChange={(e) => onChangePassword(e.target.value)}
+            disabled={loading}
           />
         </div>
 
@@ -91,17 +93,22 @@ export default function SignupPage() {
             className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
             value={confirm}
             onChange={(e) => onChangeConfirm(e.target.value)}
+            disabled={loading}
           />
         </div>
 
-        <ButtonBase 
-          type='submit' 
-          sizeMode='full' 
-          className='font-semibold'
-          disabled={loading}
-        >
-          {loading ? "サインアップ中..." : "サインアップ"}
-        </ButtonBase>
+        {loading ? (
+          <Skeleton className='w-full h-10 rounded-xl' />
+        ) : (
+          <ButtonBase
+            type='submit'
+            sizeMode='full'
+            className='font-semibold'
+            disabled={loading}
+          >
+            {loading ? "サインアップ中..." : "サインアップ"}
+          </ButtonBase>
+        )}
 
         <p className='mt-2 text-xs text-center text-gray-500'>
           <a
