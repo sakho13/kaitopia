@@ -16,6 +16,7 @@ import { ExerciseManageAnswerPart } from "../molecules/ExerciseManageAnswerPart"
 import { Skeleton } from "../ui/skeleton"
 import { ThinProgressBar } from "../atoms/ThinProgressBar"
 import { Fanfare } from "../atoms/Fanfare"
+import { PillLabel } from "../atoms/PillLabel"
 
 type Props = {
   exerciseId: string
@@ -207,13 +208,27 @@ export function ExerciseManager({ exerciseId }: Props) {
         }
       />
 
-      <h1 className='text-xl font-bold select-none'>
-        <span>{exercise.title}</span>
+      <div id='question-header'>
+        <h1 className='text-xl font-bold select-none'>
+          <span>{exercise.title}</span>
 
-        <span className='text-md text-gray-500 ml-2'>
-          {currentIndex + 1} 問目 / {questions.length}
-        </span>
-      </h1>
+          <span className='text-md text-gray-500 ml-2'>
+            {currentIndex + 1} 問目 / {questions.length}
+          </span>
+        </h1>
+
+        <div id='question-options'>
+          <div className='flex flex-wrap gap-2 mt-2 px-4'>
+            {currentQuestion.questionGroups.map((g) => (
+              <PillLabel
+                key={g.questionGroupId}
+                label={g.name}
+                colorMode='gray'
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div id='question-content'>
         <p className='text-lg font-medium select-none'>
