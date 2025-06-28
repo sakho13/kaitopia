@@ -64,4 +64,20 @@ export class DateUtility {
     const milliseconds = now.getMilliseconds().toString().padStart(3, "0")
     return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`
   }
+
+  /**
+   * 指定した日数だけ前の日付を取得する
+   * @param days 日数
+   * @param base 基準となる日付（省略可能、デフォルトは現在の日付）
+   * @returns 指定した日数だけ前の日付
+   *
+   * @example
+   * // 5日前の日付を取得
+   * const fiveDaysAgo = DateUtility.getBeforeDaysDate(5)
+   * console.log(fiveDaysAgo) // 現在の日付から5日前の日付が表示される
+   */
+  public static getBeforeDaysDate(days: number, base?: Date): Date {
+    const now = base || this.getNowDate()
+    return new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
+  }
 }

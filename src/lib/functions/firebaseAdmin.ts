@@ -32,7 +32,7 @@ function getFirebaseApp() {
   return getApp()
 }
 
-const firebaseAuth = () => getAuth(getFirebaseApp())
+export const firebaseAuth = () => getAuth(getFirebaseApp())
 
 export async function verifyIdToken(idToken: string) {
   try {

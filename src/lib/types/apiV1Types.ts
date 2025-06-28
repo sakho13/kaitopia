@@ -467,6 +467,15 @@ export type ApiV1OutTypeMap = {
     nextPage: number | null
     totalCount: number
   }
+
+  /**
+   * DELETE /api/manage/v1/user/guest
+   * @description 規定期間経過したゲストユーザを削除する
+   */
+  DeleteManageUserGuest: {
+    deletedUserCount: number
+    deletedUserIds: string[]
+  }
 }
 
 export type ApiV1ValidationResult<S, E extends keyof ApiV1ErrorMap> =
