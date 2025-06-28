@@ -3,18 +3,47 @@
 import { Pencil, Trash2 } from "lucide-react"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { useUserConfigStore } from "@/hooks/stores/useUserConfigStore"
-import { useGetManageUsers } from "@/hooks/useApiV1"
+import {
+  useDeleteManageGuestUsersOver5days,
+  useGetManageUsers,
+} from "@/hooks/useApiV1"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { encodeBase64 } from "@/lib/functions/encodeBase64"
+import { useToast } from "@/hooks/useToast"
+import { joincn } from "@/lib/functions/joincn"
 
 export default function Page() {
   const { config } = useUserConfigStore()
+  const { showSuccess, showError } = useToast()
   const {
     dataToGetManageUsers,
     totalCountToGetManageUsers,
     isLoadingToGetManageUsers,
     loadMoreToGetManageUsers,
+    refetchGetManageUsers,
   } = useGetManageUsers()
+  const { requestDeleteGuestUsers } = useDeleteManageGuestUsersOver5days()
+
+  const deleteGuestUsers = async () => {
+    if (confirm("5日間を経過したゲストユーザを削除しますか？")) {
+      const result = await requestDeleteGuestUsers()
+      if (result.success) {
+        showSuccess(
+          `ゲストユーザを削除しました ${result.data.deletedUserCount} 名`,
+        )
+        refetchGetManageUsers() // ユーザ一覧を再取得
+        return
+      }
+
+      showError(
+        `ゲストユーザの削除に失敗しました。 (${result.errors.join(", ")})`,
+      )
+    }
+  }
+
+  if (!("role" in config.userInfo)) {
+    return <p>loading...</p>
+  }
 
   return (
     <div>
@@ -29,7 +58,7 @@ export default function Page() {
 
           {config.userInfo.role === "ADMIN" && (
             <div>
-              <ButtonBase>ゲストクリア</ButtonBase>
+              <ButtonBase onClick={deleteGuestUsers}>ゲストクリア</ButtonBase>
             </div>
           )}
         </div>
@@ -49,7 +78,12 @@ export default function Page() {
             {dataToGetManageUsers.map((user, i) => (
               <tr
                 key={encodeBase64(user.id)}
-                className='border-t hover:bg-gray-50'
+                className={joincn(
+                  "border-t hover:bg-gray-50",
+                  user.deletedAt
+                    ? "opacity-50 hover:cursor-not-allowed hover:bg-gray-100"
+                    : "",
+                )}
               >
                 <td className='px-1 py-2 text-center select-none'>{i + 1}</td>
                 <td className='px-4 py-2 max-w-32 text-nowrap overflow-x-clip text-ellipsis'>
@@ -88,15 +122,17 @@ export default function Page() {
                     <Pencil size={16} strokeWidth={3} />
                   </ButtonBase>
 
-                  <ButtonBase
-                    colorMode='danger'
-                    className='px-4 py-2'
-                    // onClick={() => {
-                    //   setOpenDeleteExerciseDialog(exercise.exerciseId)
-                    // }}
-                  >
-                    <Trash2 size={16} strokeWidth={3} />
-                  </ButtonBase>
+                  {!user.deletedAt && config.userInfo.role === "ADMIN" ? (
+                    <ButtonBase
+                      colorMode='danger'
+                      className='px-4 py-2'
+                      // onClick={() => {
+                      //   setOpenDeleteExerciseDialog(exercise.exerciseId)
+                      // }}
+                    >
+                      <Trash2 size={16} strokeWidth={3} />
+                    </ButtonBase>
+                  ) : null}
                 </td>
               </tr>
             ))}

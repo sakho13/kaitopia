@@ -344,6 +344,28 @@ export function useGetManageUsers() {
   }
 }
 
+/**
+ * DELETE: `/api/manage/v1/user/guest`
+ */
+export function useDeleteManageGuestUsersOver5days() {
+  const { idToken } = useAuth()
+
+  const requestDeleteGuestUsers = async () => {
+    return await requestHttp(
+      "DeleteManageUserGuest",
+      "DeleteManageUserGuest",
+      "/api/manage/v1/user/guest",
+      idToken ?? "",
+      null,
+      "DELETE",
+    )
+  }
+
+  return {
+    requestDeleteGuestUsers,
+  }
+}
+
 // *******************
 //      user
 // *******************

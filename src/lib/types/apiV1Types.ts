@@ -229,6 +229,8 @@ export type ApiV1InTypeMap = {
     exerciseId: string
     answer: QuestionAnswerContent
   }
+
+  DeleteManageUserGuest: null
 }
 
 export type ApiV1OutTypeMap = {
