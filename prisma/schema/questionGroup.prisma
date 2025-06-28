@@ -1,0 +1,27 @@
+model QuestionGroup {
+  schoolId        String @map("school_id")
+  questionGroupId String @default(cuid(2)) @map("question_group_id")
+  name            String @map("name")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  school                 School                  @relation(fields: [schoolId], references: [id])
+  questionGroupQuestions QuestionGroupQuestion[]
+
+  @@id([schoolId, questionGroupId])
+}
+
+model QuestionGroupQuestion {
+  schoolId        String @map("school_id")
+  questionGroupId String @map("question_group_id")
+  questionId      String @map("question_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  questionGroup QuestionGroup @relation(fields: [schoolId, questionGroupId], references: [schoolId, questionGroupId])
+  question      Question      @relation(fields: [questionId], references: [id])
+
+  @@id([schoolId, questionGroupId, questionId])
+}

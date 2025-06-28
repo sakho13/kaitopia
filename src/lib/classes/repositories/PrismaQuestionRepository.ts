@@ -9,6 +9,11 @@ export class PrismaQuestionRepository
 {
   async findById(questionId: string): Promise<QuestionEntity | null> {
     const q = await this.dbConnection.question.findUnique({
+      include: {
+        versions: {
+          include: { questionAnswers: true },
+        },
+      },
       where: { id: questionId },
     })
     if (!q) return null
@@ -24,6 +29,26 @@ export class PrismaQuestionRepository
       createdAt: q.createdAt,
       updatedAt: q.updatedAt,
       deletedAt: q.deletedAt,
+      versions: q.versions.map((v) => {
+        return new QuestionVersionEntity({
+          questionId: v.questionId,
+          questionType: q.questionType,
+          answerType: q.answerType,
+
+          version: v.version,
+          content: v.content,
+          hint: v.hint,
+          questionAnswers: v.questionAnswers.map((a) => {
+            return {
+              answerId: a.answerId,
+              selectContent: a.selectContent,
+              isCorrect: a.isCorrect,
+              maxLength: a.maxLength,
+              minLength: a.minLength,
+            }
+          }),
+        })
+      }),
     })
   }
 
@@ -33,13 +58,34 @@ export class PrismaQuestionRepository
   ): Promise<QuestionVersionEntity | null> {
     const v = await this.dbConnection.questionVersion.findUnique({
       where: { questionId_version: { questionId, version } },
+      include: {
+        questionAnswers: true,
+        question: {
+          select: {
+            questionType: true,
+            answerType: true,
+          },
+        },
+      },
     })
     if (!v) return null
     return new QuestionVersionEntity({
       questionId: v.questionId,
+      questionType: v.question.questionType,
+      answerType: v.question.answerType,
+
       version: v.version,
       content: v.content,
       hint: v.hint,
+      questionAnswers: v.questionAnswers.map((a) => {
+        return {
+          answerId: a.answerId,
+          selectContent: a.selectContent,
+          isCorrect: a.isCorrect,
+          maxLength: a.maxLength,
+          minLength: a.minLength,
+        }
+      }),
     })
   }
 
@@ -49,6 +95,11 @@ export class PrismaQuestionRepository
       data: {
         title: question.value.title,
         currentVersionId: question.value.currentVersion,
+      },
+      include: {
+        versions: {
+          include: { questionAnswers: true },
+        },
       },
     })
     return new QuestionEntity({
@@ -63,6 +114,26 @@ export class PrismaQuestionRepository
       createdAt: q.createdAt,
       updatedAt: q.updatedAt,
       deletedAt: q.deletedAt,
+      versions: question.value.versions.map((v) => {
+        return new QuestionVersionEntity({
+          questionId: v.value.questionId,
+          questionType: q.questionType,
+          answerType: q.answerType,
+
+          version: v.value.version,
+          content: v.value.content,
+          hint: v.value.hint,
+          questionAnswers: v.value.questionAnswers.map((a) => {
+            return {
+              answerId: a.answerId,
+              selectContent: a.selectContent,
+              isCorrect: a.isCorrect,
+              maxLength: a.maxLength,
+              minLength: a.minLength,
+            }
+          }),
+        })
+      }),
     })
   }
 }

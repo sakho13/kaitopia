@@ -2,6 +2,8 @@ import {
   Exercise,
   Question,
   QuestionAnswer,
+  QuestionGroup,
+  QuestionGroupQuestion,
   QuestionVersion,
 } from "@prisma/client"
 
@@ -500,4 +502,30 @@ export const SeedDataIntroProgramming1 = {
       version: 1,
     },
   ],
+
+  groups: [
+    {
+      schoolId: "kaitopia_1",
+      questionGroupId: "intro_programming_1_algorithm",
+      name: "アルゴリズム",
+    },
+    {
+      schoolId: "kaitopia_1",
+      questionGroupId: "intro_programming_1_hardware",
+      name: "ハードウェア",
+    },
+  ] as QuestionGroup[],
+
+  groupQuestions: [
+    {
+      schoolId: "kaitopia_1",
+      questionGroupId: "intro_programming_1_algorithm",
+      questionId: "intro_programming_1_7",
+    },
+    {
+      schoolId: "kaitopia_1",
+      questionGroupId: "intro_programming_1_hardware",
+      questionId: "intro_programming_1_9",
+    },
+  ] as QuestionGroupQuestion[],
 }

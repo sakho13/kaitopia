@@ -1,12 +1,29 @@
+import { PrismaClient } from "@prisma/client"
 import { IQuestionRepository } from "@/lib/interfaces/IQuestionRepository"
 import { QuestionEntity } from "../entities/QuestionEntity"
 import { QuestionVersionEntity } from "../entities/QuestionVersionEntity"
+import { UserEntity } from "../entities/UserEntity"
+import { UserAuthenticationUtility } from "../utilities/UserAuthenticationUtility"
 
 export class ManageQuestionService2 {
-  constructor(private readonly _questionRepository: IQuestionRepository) {}
+  constructor(
+    private readonly _dbConnection: PrismaClient,
+    private readonly _questionRepository: IQuestionRepository,
+  ) {}
 
-  async getQuestion(questionId: string): Promise<QuestionEntity | null> {
-    return this._questionRepository.findById(questionId)
+  async getQuestion(
+    user: UserEntity,
+    questionId: string,
+  ): Promise<QuestionEntity | null> {
+    const q = await this._questionRepository.findById(questionId)
+    if (!q) return null
+
+    UserAuthenticationUtility.checkPermissionWithThrow(
+      user,
+      q.value.schoolId,
+      "read",
+    )
+    return q
   }
 
   async getQuestionVersion(
@@ -17,9 +34,15 @@ export class ManageQuestionService2 {
   }
 
   async editQuestion(
+    user: UserEntity,
     question: QuestionEntity,
     data: { title: string },
   ): Promise<QuestionEntity> {
+    UserAuthenticationUtility.checkPermissionWithThrow(
+      user,
+      question.value.schoolId,
+      "edit",
+    )
     const newQuestion = new QuestionEntity({
       ...question.value,
       title: data.title,

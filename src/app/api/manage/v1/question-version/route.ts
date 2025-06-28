@@ -5,24 +5,32 @@ import { prisma } from "@/lib/prisma"
 import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 import { PrismaQuestionRepository } from "@/lib/classes/repositories/PrismaQuestionRepository"
 import { ManageQuestionService2 } from "@/lib/classes/services/ManageQuestionService2"
+import { UserService2 } from "@/lib/classes/services/UserService2"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 
 export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("アクティブバージョン更新")
 
   return api.execute("PatchManageQuestionVersion", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    await api.checkAccessManagePage(request)
 
     const body = await request.json()
     const { error, result } = validatePatch(body)
     if (error) throw error
 
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const userService2 = new UserService2(
+      prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
+    )
+    const user = await userService2.getUserInfo(api.getFirebaseUid())
     if (!user) throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
     const questionRepository = new PrismaQuestionRepository(prisma)
-    const service = new ManageQuestionService2(questionRepository)
+    const service = new ManageQuestionService2(prisma, questionRepository)
 
-    const question = await service.getQuestion(result.questionId)
+    const question = await service.getQuestion(user, result.questionId)
     if (!question)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
@@ -32,13 +40,6 @@ export async function PATCH(request: NextRequest) {
     )
     if (!versionEntity) {
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
-    }
-
-    const access = await userService.userController.accessSchoolMethod(
-      question.value.schoolId,
-    )
-    if (!access.includes("edit")) {
-      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
     }
 
     await service.changeCurrentVersion(question, result.version)

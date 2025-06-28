@@ -3,6 +3,10 @@
 // *********************
 
 import { IgnoreKeysObject } from "../common/IgnoreKeysObject"
+import {
+  QuestionGroupBase,
+  QuestionGroupBaseIdentifier,
+} from "./questionGroupTypes"
 
 /**
  * ユーザが回答するときの問題の型
@@ -23,6 +27,7 @@ export type QuestionForUser = {
   isCanSkip: boolean | null
 
   answerType: QuestionAnswerTypeType
+  questionGroups: (QuestionGroupBaseIdentifier & QuestionGroupBase)[]
   answer: QuestionAnswerForUser<QuestionAnswerTypeType>
 } & (QuestionAnswerContent | object) // すでに回答していた場合に現れるオブジェクト
 

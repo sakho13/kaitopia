@@ -3,6 +3,7 @@ import { QuestionVersionEntity } from "../classes/entities/QuestionVersionEntity
 
 export interface IQuestionRepository {
   findById(questionId: string): Promise<QuestionEntity | null>
+
   findVersion(
     questionId: string,
     version: number,

@@ -1,10 +1,6 @@
 import { ISchoolRepository } from "@/lib/interfaces/ISchoolRepository"
 import { IUserRepository } from "@/lib/interfaces/IUserRepository"
-import {
-  EditableUserInfo,
-  UserAccessSchoolMethod,
-  UserBaseInfo,
-} from "@/lib/types/base/userTypes"
+import { EditableUserInfo, UserBaseInfo } from "@/lib/types/base/userTypes"
 import { PrismaClient } from "@prisma/client"
 import { PrismaUserRepository } from "../repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "../repositories/PrismaSchoolRepository"
@@ -42,6 +38,8 @@ export class UserService2 {
         updatedAt: new Date(),
         deletedAt: null,
         isGuest,
+        memberSchools: [],
+        ownerSchools: [],
       })
       const user = await userRepository.create(newUser)
       await schoolRepository.createSelfSchool(user)
@@ -64,55 +62,6 @@ export class UserService2 {
     user.validate()
 
     return await this._userRepository.save(user)
-  }
-
-  /**
-   * このユーザがこのスクールで持つ権限を取得する
-   * @returns UserAccessSchoolMethod[]
-   */
-  public async accessSchoolMethod(
-    user: UserEntity,
-    schoolId: string,
-  ): Promise<UserAccessSchoolMethod[]> {
-    const AllAccess: UserAccessSchoolMethod[] = [
-      "read",
-      "edit",
-      "create",
-      "publish",
-      "delete",
-    ]
-
-    if (user.userRole === "ADMIN") return AllAccess
-
-    const ownSchools = await this.getOwnSchools(user.userId)
-    const memberSchools = await this.getMemberSchools(user.userId)
-    if (ownSchools.length < 0) return []
-
-    // セルフスクールならば全ての権限を付与する
-    const selfSchool = ownSchools.find(
-      (s) => s.schoolId === schoolId && s.isSelfSchool,
-    )
-    if (selfSchool?.isSelfSchool) return AllAccess
-
-    // グローバルスクールならばReadのみ付与する
-    const globalSchools = memberSchools.find(
-      (s) => s.schoolId === schoolId && s.isGlobalSchool,
-    )
-    if (globalSchools) return ["read"]
-
-    if (user.userRole === "USER") {
-      // スクールのメンバーならばReadのみ付与する
-      const isInLimit = memberSchools.find(
-        (s) => s.schoolId === schoolId && s.isInLimit,
-      )
-      if (isInLimit) return ["read"]
-    }
-
-    if (user.userRole === "TEACHER") {
-      return []
-    }
-
-    return []
   }
 
   /**

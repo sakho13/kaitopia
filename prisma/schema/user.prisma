@@ -1,0 +1,29 @@
+model User {
+  id String @id @default(cuid(2))
+
+  firebaseUid String  @unique @map("firebase_uid")
+  isGuest     Boolean @default(false) @map("is_guest")
+
+  role Role @default(USER) @map("role")
+
+  name         String    @map("name")
+  email        String?   @map("email")
+  phoneNumber  String?   @map("phone_number")
+  birthDayDate DateTime? @map("birth_day_date")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  ownerSchools  SchoolOwner[]
+  memberSchools SchoolMember[]
+  // userAuthProviders UserAuthProvider[]
+}
+
+enum Role {
+  USER // default
+  MODERATOR // upgrade from USER
+  TEACHER // upgrade from MODERATOR
+
+  ADMIN // developer
+}
