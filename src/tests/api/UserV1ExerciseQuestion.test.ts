@@ -61,7 +61,8 @@ describe("API /api/user/v1/exercise/question", () => {
           (q: { answer: unknown }) =>
             typeof q.answer === "object" &&
             q.answer !== null &&
-            Object.keys(q.answer).length === 0,
+            Object.keys(q.answer).length === 0 &&
+            Array.isArray(q.questionGroups),
         ),
       ).toBe(true)
     })
@@ -95,6 +96,7 @@ describe("API /api/user/v1/exercise/question", () => {
           ]),
         }),
       })
+      expect(Array.isArray(json.data.questions[0].questionGroups)).toBe(true)
     })
 
     test("回答のために問題を取得できる", async () => {
@@ -130,7 +132,8 @@ describe("API /api/user/v1/exercise/question", () => {
           (q: { answer: unknown }) =>
             typeof q.answer === "object" &&
             q.answer !== null &&
-            Object.keys(q.answer).length > 0,
+            Object.keys(q.answer).length > 0 &&
+            Array.isArray(q.questionGroups),
         ),
       ).toBe(true)
     })
@@ -199,6 +202,7 @@ describe("API /api/user/v1/exercise/question", () => {
           ]),
         }),
       })
+      expect(Array.isArray(json.data.questions[0].questionGroups)).toBe(true)
     })
 
     test("通常ユーザで回答を送信しログとして記録される", async () => {

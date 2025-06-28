@@ -67,6 +67,7 @@ export class UserQuestionService extends ServiceBase {
             answerType: q.answerType,
             answer:
               {} as unknown as QuestionAnswerForUser<QuestionAnswerTypeType>,
+            questionGroups: [],
           })),
           answerLogSheetId: null,
         }
@@ -133,6 +134,7 @@ export class UserQuestionService extends ServiceBase {
 
               answerType: q.answerType,
               answer,
+              questionGroups: [],
             }
           }),
           answerLogSheetId: sheet.answerLogSheetId,
