@@ -16,6 +16,7 @@ import { LoginMode } from "@/lib/types/loginMode"
 import { FirebaseError } from "firebase/app"
 import { joincn } from "@/lib/functions/joincn"
 import { useAnalytics } from "@/hooks/useAnalytics"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const dynamic = "force-dynamic"
 
@@ -25,6 +26,7 @@ export default function LoginPage() {
     emailError,
     password,
     passwordError,
+    loading,
     onChangeEmail,
     onChangePassword,
     login,
@@ -59,6 +61,7 @@ export default function LoginPage() {
             )}
             value={email}
             onChange={(e) => onChangeEmail(e.target.value)}
+            disabled={loading}
           />
           {emailError && (
             <p className='text-red-500 text-sm mt-1'>{emailError}</p>
@@ -82,27 +85,42 @@ export default function LoginPage() {
             )}
             value={password}
             onChange={(e) => onChangePassword(e.target.value)}
+            disabled={loading}
           />
           {passwordError && (
             <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
           )}
         </div>
 
-        <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
-          ログイン
-        </ButtonBase>
+        {loading ? (
+          <Skeleton className='w-full h-10 rounded-xl' />
+        ) : (
+          <ButtonBase
+            type='submit'
+            sizeMode='full'
+            className='font-semibold'
+            disabled={loading}
+          >
+            {loading ? "ログイン中..." : "ログイン"}
+          </ButtonBase>
+        )}
       </form>
 
       <div className='mt-6 text-center text-sm text-gray-500'>または</div>
 
-      <ButtonBase
-        colorMode='ghost'
-        sizeMode='full'
-        className='mt-4'
-        onClick={() => login("GUEST")}
-      >
-        ゲストでログイン
-      </ButtonBase>
+      {loading ? (
+        <Skeleton className='w-full h-10 rounded-xl' />
+      ) : (
+        <ButtonBase
+          colorMode='ghost'
+          sizeMode='full'
+          className='mt-4'
+          onClick={() => login("GUEST")}
+          disabled={loading}
+        >
+          {loading ? "ログイン中..." : "ゲストでログイン"}
+        </ButtonBase>
+      )}
 
       {/* <ButtonBase
         colorMode='outline'
@@ -165,6 +183,8 @@ function useLoginPage() {
           uid: credential.user.uid,
         })
         showInfo("ゲストアカウントは5日後に削除されます")
+        router.replace("/v1/user")
+        return
       }
 
       if (mode === "EMAIL") {
@@ -201,6 +221,9 @@ function useLoginPage() {
             uid: credential.user.uid,
           })
           showSuccessShort("ログインしました。")
+
+          router.replace("/v1/user")
+          return
         }
       }
 
@@ -213,9 +236,10 @@ function useLoginPage() {
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
-      }
 
-      router.replace("/v1/user")
+        router.replace("/v1/user")
+        return
+      }
     } catch (error) {
       if (error instanceof FirebaseError) {
         if (error.code === "auth/user-not-found") {

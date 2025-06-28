@@ -1,6 +1,7 @@
 "use client"
 
 import { ButtonBase } from "@/components/atoms/ButtonBase"
+import { Skeleton } from "@/components/ui/skeleton"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
@@ -15,6 +16,7 @@ export const dynamic = "force-dynamic"
 export default function SignupPage() {
   const {
     idToken,
+    loading,
     email,
     password,
     confirm,
@@ -73,6 +75,7 @@ export default function SignupPage() {
             className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
             value={password}
             onChange={(e) => onChangePassword(e.target.value)}
+            disabled={loading}
           />
         </div>
 
@@ -90,12 +93,22 @@ export default function SignupPage() {
             className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary'
             value={confirm}
             onChange={(e) => onChangeConfirm(e.target.value)}
+            disabled={loading}
           />
         </div>
 
-        <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
-          サインアップ
-        </ButtonBase>
+        {loading ? (
+          <Skeleton className='w-full h-10 rounded-xl' />
+        ) : (
+          <ButtonBase
+            type='submit'
+            sizeMode='full'
+            className='font-semibold'
+            disabled={loading}
+          >
+            {loading ? "サインアップ中..." : "サインアップ"}
+          </ButtonBase>
+        )}
 
         <p className='mt-2 text-xs text-center text-gray-500'>
           <a
@@ -186,9 +199,8 @@ const useSignupPage = () => {
         if (result.data.state === "register") {
           showSuccess("ようこそ！ アカウントを登録しました！")
         }
+        router.replace("/v1/user")
       }
-
-      router.replace("/v1/user")
     } catch {
       showError(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
