@@ -27,6 +27,10 @@ jobs:
         working-directory: ./
         run: npm ci
 
+      - name: Run lint
+        working-directory: ./
+        run: npm run lint
+
       - name: Run builds
         working-directory: ./
         run: npm run build
