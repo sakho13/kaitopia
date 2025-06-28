@@ -13,6 +13,7 @@ export class PrismaManageUserRepository
     const users = await this.dbConnection.user.findMany({
       where: {
         isGuest: true,
+        deletedAt: null,
         createdAt: {
           lt: DateUtility.getBeforeDaysDate(GUEST_USER_DAYS),
         },
