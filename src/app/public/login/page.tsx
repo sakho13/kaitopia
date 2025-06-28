@@ -25,6 +25,7 @@ export default function LoginPage() {
     emailError,
     password,
     passwordError,
+    loading,
     onChangeEmail,
     onChangePassword,
     login,
@@ -88,8 +89,13 @@ export default function LoginPage() {
           )}
         </div>
 
-        <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
-          ログイン
+        <ButtonBase 
+          type='submit' 
+          sizeMode='full' 
+          className='font-semibold'
+          disabled={loading}
+        >
+          {loading ? "ログイン中..." : "ログイン"}
         </ButtonBase>
       </form>
 
@@ -100,8 +106,9 @@ export default function LoginPage() {
         sizeMode='full'
         className='mt-4'
         onClick={() => login("GUEST")}
+        disabled={loading}
       >
-        ゲストでログイン
+        {loading ? "ログイン中..." : "ゲストでログイン"}
       </ButtonBase>
 
       {/* <ButtonBase
@@ -165,6 +172,8 @@ function useLoginPage() {
           uid: credential.user.uid,
         })
         showInfo("ゲストアカウントは5日後に削除されます")
+        router.replace("/v1/user")
+        return // Early return to prevent duplicate navigation
       }
 
       if (mode === "EMAIL") {
@@ -200,7 +209,10 @@ function useLoginPage() {
           sendAnalyticsEvent("emailLogin", {
             uid: credential.user.uid,
           })
+          // Show toast and navigate simultaneously for better UX
           showSuccessShort("ログインしました。")
+          router.replace("/v1/user")
+          return // Early return to prevent duplicate navigation
         }
       }
 
@@ -213,9 +225,14 @@ function useLoginPage() {
           await handleSignOut()
           throw new Error(result.errors[0].message)
         }
+        
+        // Navigate immediately for Google login
+        router.replace("/v1/user")
+        return // Early return to prevent duplicate navigation
       }
 
-      router.replace("/v1/user")
+      // This should only be reached if no mode matched or early returns didn't trigger
+      // router.replace("/v1/user")
     } catch (error) {
       if (error instanceof FirebaseError) {
         if (error.code === "auth/user-not-found") {

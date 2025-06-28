@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic"
 export default function SignupPage() {
   const {
     idToken,
+    loading,
     email,
     password,
     confirm,
@@ -93,8 +94,13 @@ export default function SignupPage() {
           />
         </div>
 
-        <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
-          サインアップ
+        <ButtonBase 
+          type='submit' 
+          sizeMode='full' 
+          className='font-semibold'
+          disabled={loading}
+        >
+          {loading ? "サインアップ中..." : "サインアップ"}
         </ButtonBase>
 
         <p className='mt-2 text-xs text-center text-gray-500'>
@@ -186,9 +192,8 @@ const useSignupPage = () => {
         if (result.data.state === "register") {
           showSuccess("ようこそ！ アカウントを登録しました！")
         }
+        router.replace("/v1/user")
       }
-
-      router.replace("/v1/user")
     } catch {
       showError(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
