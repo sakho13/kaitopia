@@ -405,11 +405,9 @@ export type ApiV1OutTypeMap = {
   }
 
   GetManageQuestionGroups: {
-    questionGroups: (
-      QuestionGroupBaseIdentifier &
+    questionGroups: (QuestionGroupBaseIdentifier &
       QuestionGroupBase &
-      ReplacedDateToString<QuestionGroupBaseDate>
-    )[]
+      ReplacedDateToString<QuestionGroupBaseDate>)[]
   }
   /**
    * POST /api/manage/v1/exercise
