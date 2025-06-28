@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { DecodedIdToken } from "firebase-admin/auth"
 import { ApiV1Error } from "./ApiV1Error"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
-import { isGuestUser, verifyIdToken } from "@/lib/functions/firebaseAdmin"
 import { UserService } from "../services/UserService"
 import { prisma } from "@/lib/prisma"
+import { FirebaseAuthUserRepository } from "../repositories/FirebaseAuthUserRepository"
 
 export class ApiV1Wrapper {
-  private decodedToken: DecodedIdToken | null = null
+  private _firebaseUid = ""
+  private _isGuest = false
 
   constructor(private apiName: string) {}
 
@@ -53,12 +53,11 @@ export class ApiV1Wrapper {
     if (!token)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    const decodedToken = await verifyIdToken(token)
-    if (!decodedToken)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-    this.decodedToken = decodedToken
-
-    return decodedToken
+    const firebaseBaseRepo = new FirebaseAuthUserRepository()
+    const result = await firebaseBaseRepo.verifyIdToken(token)
+    this._firebaseUid = result.uid
+    this._isGuest = result.isGuest
+    return result
   }
 
   /**
@@ -82,14 +81,10 @@ export class ApiV1Wrapper {
   }
 
   public async isGuest() {
-    if (!this.decodedToken)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-    return isGuestUser(this.decodedToken)
+    return this._isGuest
   }
 
   public getFirebaseUid() {
-    if (!this.decodedToken)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-    return this.decodedToken.uid
+    return this._firebaseUid
   }
 }

@@ -9,12 +9,21 @@ import {
   UserRoleType,
 } from "@/lib/types/base/userTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
+import {
+  SchoolBase,
+  SchoolBaseDate,
+  SchoolBaseIdentity,
+} from "@/lib/types/base/schoolTypes"
+import { SchoolEntity } from "./SchoolEntity"
 
 type UserEntityType = UserBaseIdentity &
   UserBaseInfo &
   UserBaseInfoOption &
   UserBaseDate &
-  UserBaseManageOption
+  UserBaseManageOption & {
+    memberSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
+    ownerSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
+  }
 
 export class UserEntity extends EntityMutable<UserEntityType> {
   constructor(value: UserEntityType) {
@@ -42,6 +51,14 @@ export class UserEntity extends EntityMutable<UserEntityType> {
 
   get userRole(): UserRoleType {
     return this.value.role
+  }
+
+  get ownSchools() {
+    return this.value.ownerSchools.map((s) => new SchoolEntity(s))
+  }
+
+  get memberSchools() {
+    return this.value.memberSchools.map((s) => new SchoolEntity(s))
   }
 
   public get canAccessManagePage(): boolean {

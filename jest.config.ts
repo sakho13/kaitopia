@@ -1,12 +1,11 @@
-import { Config } from "jest"
+import type { Config } from "@jest/types"
 import nextJest from "next/jest.js"
 
 const createJestConfig = nextJest({
   dir: "./",
 })
 
-const config: Config = {
-  coverageProvider: "v8",
+const config: Config.InitialProjectOptions = {
   testEnvironment: "jest-environment-jsdom",
   setupFilesAfterEnv: [
     "<rootDir>/jest.setup.ts",
@@ -16,10 +15,8 @@ const config: Config = {
     "@/(.*)$": "<rootDir>/src/$1",
   },
   testMatch: ["**/tests/**/*.test.[jt]s?(x)"],
-  testTimeout: 30000,
   globalSetup: "<rootDir>/src/tests/jest.globalSetup.ts",
   globalTeardown: "<rootDir>/src/tests/jest.globalTeardown.ts",
-  maxWorkers: 1,
 }
 
 export default createJestConfig(config)

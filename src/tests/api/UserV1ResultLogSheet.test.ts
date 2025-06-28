@@ -363,13 +363,14 @@ describe("API /api/user/v1/result/log-sheet", () => {
           Authorization: `Bearer ${token}`,
         },
       )
-      expect(resultGetExerciseQuestion.ok).toBe(true)
-      expect(resultGetExerciseQuestion.status).toBe(200)
+
       const jsonGetExerciseQuestion = await resultGetExerciseQuestion.json()
       expect(jsonGetExerciseQuestion.data.answerLogSheetId).toBeDefined()
       expect(jsonGetExerciseQuestion.data.answerLogSheetId).toEqual(
         expect.any(String),
       )
+      expect(resultGetExerciseQuestion.ok).toBe(true)
+      expect(resultGetExerciseQuestion.status).toBe(200)
       const answerLogSheetId = jsonGetExerciseQuestion.data.answerLogSheetId
 
       await Promise.all(

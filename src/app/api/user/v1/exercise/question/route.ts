@@ -3,6 +3,8 @@ import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { ExerciseService } from "@/lib/classes/services/ExerciseService"
 import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 import { UserService } from "@/lib/classes/services/UserService"
+import { QuestionGroupService } from "@/lib/classes/services/QuestionGroupService"
+import { PrismaQuestionGroupRepository } from "@/lib/classes/repositories/PrismaQuestionGroupRepository"
 import { prisma } from "@/lib/prisma"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 import { NextRequest } from "next/server"
@@ -50,6 +52,28 @@ export async function GET(request: NextRequest) {
     const { questions, answerLogSheetId } =
       await userQuestionService.getQuestions(mode)
 
+    const questionGroupService = new QuestionGroupService(
+      prisma,
+      new PrismaQuestionGroupRepository(prisma),
+    )
+    const groups = await questionGroupService.getGroups(
+      questions.map((q) => q.questionId),
+    )
+    const groupMap = groups.reduce<Record<string, typeof groups[0]["groups"]>>(
+      (p, c) => ({ ...p, [c.questionId]: c.groups }),
+      {},
+    )
+
+    const questionsWithGroup = questions.map((q) => ({
+      ...q,
+      questionGroups:
+        groupMap[q.questionId]?.map((g) => ({
+          questionGroupId: g.value.questionGroupId,
+          schoolId: g.value.schoolId,
+          name: g.value.name,
+        })) ?? [],
+    }))
+
     const exerciseService = new ExerciseService(prisma)
     exerciseService.setUserController(userService.userController)
 
@@ -68,7 +92,7 @@ export async function GET(request: NextRequest) {
         isCanSkip: exercise.isCanSkip,
         isScoringBatch: exercise.isScoringBatch,
       },
-      questions: questions,
+      questions: questionsWithGroup,
     }
   })
 }

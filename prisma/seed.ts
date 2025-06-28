@@ -11,6 +11,8 @@ async function main() {
     await transferSchools(t)
     await transferExcises(t)
     await transferQuestions(t)
+    await transferQuestionGroups(t)
+    console.log("Seeding users, schools, exercises, and questions completed.")
 
     await t.question.updateMany({
       data: { currentVersionId: 1 },
@@ -23,6 +25,12 @@ async function main() {
         },
         schoolId: SeedDataIntroProgramming1.exercise.schoolId,
       },
+    })
+    console.log("Updated current version for questions.")
+
+    await t.questionGroupQuestion.createMany({
+      skipDuplicates: true,
+      data: SeedDataIntroProgramming1.groupQuestions,
     })
   })
 
@@ -211,5 +219,12 @@ async function transferQuestions(db: Prisma.TransactionClient) {
       exerciseId: SeedDataMopedLicense1.exercise.id,
       questionId: q.id,
     })),
+  })
+}
+
+async function transferQuestionGroups(db: Prisma.TransactionClient) {
+  await db.questionGroup.createMany({
+    skipDuplicates: true,
+    data: SeedDataIntroProgramming1.groups,
   })
 }

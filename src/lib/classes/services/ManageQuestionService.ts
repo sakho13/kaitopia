@@ -5,27 +5,22 @@ import {
 } from "@/lib/types/base/questionTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ServiceBase } from "../common/ServiceBase"
-import { UserController } from "../controller/UserController"
 import { ManageQuestionRepository } from "../repositories/ManageQuestionRepository"
 import { IgnoreKeysObject } from "@/lib/types/common/IgnoreKeysObject"
+import { UserEntity } from "../entities/UserEntity"
+import { UserAuthenticationUtility } from "../utilities/UserAuthenticationUtility"
 
 /**
  * 管理画面にて行う問題操作を行うサービスクラス
  */
 export class ManageQuestionService extends ServiceBase {
-  private userController: UserController
-
   private _exerciseId: string | null = null
 
-  constructor(
-    userController: UserController,
-    ...args: ConstructorParameters<typeof ServiceBase>
-  ) {
+  constructor(...args: ConstructorParameters<typeof ServiceBase>) {
     super(...args)
-    this.userController = userController
   }
 
-  public async getQuestionDetail(questionId: string) {
+  public async getQuestionDetail(user: UserEntity, questionId: string) {
     const question = await this.dbConnection.question.findUnique({
       select: {
         schoolId: true,
@@ -62,6 +57,12 @@ export class ManageQuestionService extends ServiceBase {
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
     }
 
+    UserAuthenticationUtility.checkPermissionWithThrow(
+      user,
+      question.schoolId,
+      "read",
+    )
+
     return question
   }
 
@@ -70,6 +71,7 @@ export class ManageQuestionService extends ServiceBase {
    * ※編集中バージョンも作成する
    */
   public async createQuestionWithExercise<A extends QuestionAnswerTypeType>(
+    user: UserEntity,
     schoolId: string,
     data: {
       title: string
@@ -92,10 +94,7 @@ export class ManageQuestionService extends ServiceBase {
       ])
     }
 
-    const accessRole = await this.userController.accessSchoolMethod(schoolId)
-    if (!accessRole.includes("create")) {
-      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
-    }
+    UserAuthenticationUtility.checkPermissionWithThrow(user, schoolId, "create")
 
     const createdQuestion = await this.dbConnection.$transaction(async (t) => {
       const questionRepository = new ManageQuestionRepository(t)
@@ -145,11 +144,12 @@ export class ManageQuestionService extends ServiceBase {
 
   // public async editQuestion(questionId: string, version: number) {}
 
-  public async deleteQuestion(schoolId: string, questionId: string) {
-    const accessRole = await this.userController.accessSchoolMethod(schoolId)
-    if (!accessRole.includes("delete")) {
-      throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
-    }
+  public async deleteQuestion(
+    user: UserEntity,
+    schoolId: string,
+    questionId: string,
+  ) {
+    UserAuthenticationUtility.checkPermissionWithThrow(user, schoolId, "delete")
 
     const deleted = await this.dbConnection.$transaction(async (t) => {
       const questionRepository = new ManageQuestionRepository(t)
@@ -162,7 +162,7 @@ export class ManageQuestionService extends ServiceBase {
   /**
    * 新しい編集中バージョンを作成する
    */
-  public async addNewQuestionVersion(questionId: string) {
+  public async addNewQuestionVersion(user: UserEntity, questionId: string) {
     await this.dbConnection.$transaction(async (t) => {
       const questionRepository = new ManageQuestionRepository(t)
       const question = await questionRepository.getQuestionDetails(questionId)
@@ -170,12 +170,11 @@ export class ManageQuestionService extends ServiceBase {
         throw new ApiV1Error([{ key: "NotFoundError", params: null }])
       }
 
-      const access = await this.userController.accessSchoolMethod(
+      UserAuthenticationUtility.checkPermissionWithThrow(
+        user,
         question.schoolId,
+        "edit",
       )
-      if (!access.includes("edit")) {
-        throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
-      }
 
       //
     })
@@ -187,6 +186,7 @@ export class ManageQuestionService extends ServiceBase {
    * 公開バージョンを変更する
    */
   public async changeCurrentVersion(
+    user: UserEntity,
     questionId: string,
     newVersionData: number,
   ) {
@@ -200,12 +200,11 @@ export class ManageQuestionService extends ServiceBase {
         throw new ApiV1Error([{ key: "NotFoundError", params: null }])
       }
 
-      const access = await this.userController.accessSchoolMethod(
+      UserAuthenticationUtility.checkPermissionWithThrow(
+        user,
         questionVersion.question.schoolId,
+        "edit",
       )
-      if (!access.includes("edit")) {
-        throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
-      }
 
       return await questionRepository.changeCurrentVersion(
         questionId,

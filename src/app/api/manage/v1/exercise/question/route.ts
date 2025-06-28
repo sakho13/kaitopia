@@ -10,12 +10,15 @@ import {
 } from "@/lib/types/base/questionTypes"
 import { UserService } from "@/lib/classes/services/UserService"
 import { ExerciseService } from "@/lib/classes/services/ExerciseService"
+import { UserService2 } from "@/lib/classes/services/UserService2"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の問題取得")
 
   return await api.execute("GetManageExerciseQuestion", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    await api.checkAccessManagePage(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     const questionId = request.nextUrl.searchParams.get("questionId")
@@ -30,14 +33,23 @@ export async function GET(request: NextRequest) {
         { key: "RequiredValueError", params: { key: "問題ID" } },
       ])
 
-    const manageQuestionService = new ManageQuestionService(
-      userService.userController,
+    const userService2 = new UserService2(
       prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
     )
+    const user = await userService2.getUserInfo(api.getFirebaseUid())
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    const manageQuestionService = new ManageQuestionService(prisma)
 
     manageQuestionService.exerciseId = exerciseId
 
-    const question = await manageQuestionService.getQuestionDetail(questionId)
+    const question = await manageQuestionService.getQuestionDetail(
+      user,
+      questionId,
+    )
     if (!question)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
@@ -73,18 +85,25 @@ export async function POST(request: NextRequest) {
     const userService = new UserService(prisma)
     await userService.getUserInfo(api.getFirebaseUid())
 
+    const userService2 = new UserService2(
+      prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
+    )
+    const user = await userService2.getUserInfo(api.getFirebaseUid())
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
     const exerciseService = new ExerciseService(prisma)
     exerciseService.setUserController(userService.userController)
     const exercise = await exerciseService.getExerciseById(
       validateResult.result.exerciseId,
     )
 
-    const manageQuestionService = new ManageQuestionService(
-      userService.userController,
-      prisma,
-    )
+    const manageQuestionService = new ManageQuestionService(prisma)
     manageQuestionService.exerciseId = exercise.id
     const question = await manageQuestionService.createQuestionWithExercise(
+      user,
       exercise.schoolId,
       {
         title: validateResult.result.title,
