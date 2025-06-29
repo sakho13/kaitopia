@@ -4,9 +4,13 @@ import { ButtonBase } from "@/components/atoms/ButtonBase"
 import { usePostUserLogin } from "@/hooks/useApiV1"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
-import { handleRegisterByFirebase } from "@/lib/functions/firebaseActions"
+import {
+  handleRegisterByFirebase,
+  sendAnalyticsEvent,
+} from "@/lib/functions/firebaseActions"
 import { checkEmail, checkPassword } from "@/lib/functions/validators"
 import { LoginMode } from "@/lib/types/loginMode"
+import { FirebaseError } from "firebase/app"
 import { redirect, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -16,8 +20,12 @@ export default function SignupPage() {
   const {
     idToken,
     email,
+    emailError,
     password,
+    passwordError,
     confirm,
+    confirmError,
+
     onChangeEmail,
     onChangePassword,
     onChangeConfirm,
@@ -57,6 +65,9 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => onChangeEmail(e.target.value)}
           />
+          {emailError && (
+            <p className='text-red-500 text-sm mt-1'>{emailError}</p>
+          )}
         </div>
 
         <div>
@@ -74,6 +85,9 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => onChangePassword(e.target.value)}
           />
+          {passwordError && (
+            <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
+          )}
         </div>
 
         <div>
@@ -91,6 +105,9 @@ export default function SignupPage() {
             value={confirm}
             onChange={(e) => onChangeConfirm(e.target.value)}
           />
+          {confirmError && (
+            <p className='text-red-500 text-sm mt-1'>{confirmError}</p>
+          )}
         </div>
 
         <ButtonBase type='submit' sizeMode='full' className='font-semibold'>
@@ -189,7 +206,20 @@ const useSignupPage = () => {
       }
 
       router.replace("/v1/user")
-    } catch {
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        if (
+          error.code === "auth/email-already-exists" ||
+          error.code === "auth/email-already-in-use"
+        ) {
+          setEmailError("このメールアドレスはすでに使用されています。")
+          return
+        }
+      }
+
+      sendAnalyticsEvent("authenticationError", {
+        error_message: JSON.stringify(error),
+      })
       showError(
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
       )
