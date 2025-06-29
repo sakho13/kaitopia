@@ -40,6 +40,11 @@ export class ExerciseRepository extends RepositoryBase {
                 answerType: true,
                 currentVersionId: true,
                 draftVersionId: true,
+                versions: {
+                  select: {
+                    version: true,
+                  },
+                },
               },
             },
           },

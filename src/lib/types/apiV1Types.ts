@@ -389,7 +389,9 @@ export type ApiV1OutTypeMap = {
     questions: (Omit<QuestionBaseIdentifier, "schoolId"> &
       QuestionBase &
       QuestionBasePublishedState &
-      QuestionBaseEditState)[]
+      QuestionBaseEditState & {
+        versions: number[]
+      })[]
   }
   /**
    * GET /api/manage/v1/exercises
