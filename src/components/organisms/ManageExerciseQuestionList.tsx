@@ -13,6 +13,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet"
+import { usePatchManageQuestionVersion } from "@/hooks/useApiV1"
+import { useToast } from "@/hooks/useToast"
 
 type Props = {
   exerciseId: string
@@ -25,7 +27,37 @@ export function ManageExerciseQuestionList({
   data,
   onUpdate,
 }: Props) {
+  const { showError, showSuccessShort } = useToast()
   const { value: isDialogOpen, onChange: setDialogOpen } = useBoolean()
+
+  const { requestPatchQuestionVersion } = usePatchManageQuestionVersion()
+
+  const updateCurrentVersion = async (questionId: string, value: unknown) => {
+    if (value === "-") {
+      showError("公開されているためバージョンを未選択に戻すことはできません")
+      return
+    }
+
+    const newVersion = Number(value)
+    const q = data.questions.find((q) => q.questionId === questionId)!
+    if (isNaN(newVersion)) return
+    if (q.currentVersion === newVersion) {
+      showError("選択されたバージョンはすでにアクティブです")
+      return
+    }
+
+    const updateResult = await requestPatchQuestionVersion(questionId, {
+      questionId,
+      version: newVersion,
+    })
+    if (!updateResult.success) {
+      showError("問題のバージョン更新に失敗しました")
+      return
+    }
+
+    showSuccessShort("問題のバージョンを更新しました")
+    if (onUpdate) onUpdate()
+  }
 
   return (
     <div>
@@ -90,12 +122,41 @@ export function ManageExerciseQuestionList({
                 </td>
               )
             } else if (header.id === "currentVersion") {
+              if (item.versions.length === 0) {
+                return (
+                  <td
+                    key={`${exerciseId}-${rowIndex}-${header.id}`}
+                    className='px-4 py-2 text-center'
+                  >
+                    -
+                  </td>
+                )
+              }
+
               return (
                 <td
                   key={`${exerciseId}-${rowIndex}-${header.id}`}
                   className='px-4 py-2 text-center'
                 >
-                  {item.currentVersion}
+                  <select
+                    value={
+                      item.currentVersion === null ? "-" : item.currentVersion
+                    }
+                    onChange={(e) => {
+                      updateCurrentVersion(item.questionId, e.target.value)
+                    }}
+                  >
+                    <option value='-'>未選択</option>
+
+                    {item.versions.map((version) => (
+                      <option
+                        key={`${exerciseId}-${rowIndex}-${header.id}-${version}`}
+                        value={version}
+                      >
+                        {version}
+                      </option>
+                    ))}
+                  </select>
                 </td>
               )
             } else if (header.id === "draftVersion") {
@@ -104,7 +165,7 @@ export function ManageExerciseQuestionList({
                   key={`${exerciseId}-${rowIndex}-${header.id}`}
                   className='px-4 py-2 text-center'
                 >
-                  {item.draftVersion ?? ""}
+                  {item.draftVersion ?? "-"}
                 </td>
               )
             }
