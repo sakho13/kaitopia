@@ -223,7 +223,7 @@ function useLoginPage() {
           return
         }
 
-        showError("メールアドレスまたはパスワードが正しくありません。")
+        setEmailError("メールアドレスまたはパスワードが正しくありません。")
         return
       }
 
