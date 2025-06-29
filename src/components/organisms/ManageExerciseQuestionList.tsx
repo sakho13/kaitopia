@@ -45,7 +45,7 @@ export function ManageExerciseQuestionList({
 
           <SheetContent className='w-[800px]'>
             <SheetHeader>
-              <SheetTitle>新しい問題集</SheetTitle>
+              <SheetTitle>新しい問題</SheetTitle>
             </SheetHeader>
 
             <div className='h-[80vh] overflow-y-scroll px-4'>
