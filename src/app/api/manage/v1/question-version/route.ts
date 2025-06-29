@@ -43,7 +43,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     await service.changeCurrentVersion(question, result.version)
-    return { questionId: result.questionId }
+    return { questionId: result.questionId, currentVersion: result.version }
   })
 }
 

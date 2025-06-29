@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
         answerType: q.question.answerType,
         currentVersion: q.question.currentVersionId,
         draftVersion: q.question.draftVersionId,
+        versions: q.question.versions.map((v) => v.version),
       })),
     }
   })

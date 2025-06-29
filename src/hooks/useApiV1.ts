@@ -93,6 +93,9 @@ export function useGetManageOwnSchools() {
   } as const
 }
 
+/**
+ * GET: `/api/manage/v1/question`
+ */
 export function useGetManageQuestion(questionId: string) {
   const { idToken } = useAuth()
 
@@ -109,6 +112,31 @@ export function useGetManageQuestion(questionId: string) {
     isLoadingToGetManageQuestion: isLoading,
     refetchManageQuestion: mutate,
   } as const
+}
+
+/**
+ * PATCH: `/api/manage/v1/question-version`
+ */
+export function usePatchManageQuestionVersion() {
+  const { idToken } = useAuth()
+
+  const requestPatchQuestionVersion = async (
+    questionId: string,
+    input: ApiV1InTypeMap["PatchManageQuestionVersion"],
+  ) => {
+    return await requestHttp(
+      "PatchManageQuestionVersion",
+      "PatchManageQuestionVersion",
+      `/api/manage/v1/question-version?questionId=${questionId}&version=${input.version}`,
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchQuestionVersion,
+  }
 }
 
 /**
