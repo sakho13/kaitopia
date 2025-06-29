@@ -16,6 +16,7 @@ import { IgnoreKeysObject } from "@/lib/types/common/IgnoreKeysObject"
 import { useObjectList } from "@/hooks/common/useObjectList"
 import { STATICS } from "@/lib/statics"
 import { Input } from "@/components/ui/input"
+import { PreviewMd } from "@/components/atoms/PreviewMd"
 
 type Props = (
   | {
@@ -282,6 +283,8 @@ function ManageExerciseQuestionFormNew({
           {questionContentError && (
             <p className='text-red-500 text-sm mt-1'>{questionContentError}</p>
           )}
+
+          <PreviewMd md={questionContent} />
         </div>
 
         <div>
