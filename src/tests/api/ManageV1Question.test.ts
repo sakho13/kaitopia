@@ -162,6 +162,7 @@ describe("API /api/manage/v1/question", () => {
           success: true,
           data: {
             questionId: "intro_programming_1_1",
+            currentVersion: 1,
           },
         })
       })
