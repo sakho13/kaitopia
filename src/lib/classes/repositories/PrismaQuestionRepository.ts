@@ -95,6 +95,8 @@ export class PrismaQuestionRepository
       data: {
         title: question.value.title,
         currentVersionId: question.value.currentVersion,
+        draftVersionId: question.value.draftVersion,
+        isPublished: question.value.isPublished,
       },
       include: {
         versions: {
