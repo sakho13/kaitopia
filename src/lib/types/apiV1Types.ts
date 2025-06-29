@@ -455,6 +455,7 @@ export type ApiV1OutTypeMap = {
 
   PatchManageQuestionVersion: {
     questionId: string
+    currentVersion: number
   }
 
   /**
