@@ -15,6 +15,7 @@ import {
 } from "../ui/sheet"
 import { usePatchManageQuestionVersion } from "@/hooks/useApiV1"
 import { useToast } from "@/hooks/useToast"
+import { useState } from "react"
 
 type Props = {
   exerciseId: string
@@ -29,6 +30,7 @@ export function ManageExerciseQuestionList({
 }: Props) {
   const { showError, showSuccessShort } = useToast()
   const { value: isDialogOpen, onChange: setDialogOpen } = useBoolean()
+  const [editQuestionId, setEditQuestionId] = useState<string | null>(null)
 
   const { requestPatchQuestionVersion } = usePatchManageQuestionVersion()
 
@@ -59,12 +61,24 @@ export function ManageExerciseQuestionList({
     if (onUpdate) onUpdate()
   }
 
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+      setEditQuestionId(null)
+    }
+    setDialogOpen(open)
+  }
+
+  const onEditQuestion = (questionId: string) => {
+    setEditQuestionId(questionId)
+    setDialogOpen(true)
+  }
+
   return (
     <div>
       <div className='flex justify-between items-center'>
         <h2 className='text-lg font-semibold select-none'>問題を編集</h2>
 
-        <Sheet open={isDialogOpen} onOpenChange={setDialogOpen}>
+        <Sheet open={isDialogOpen} onOpenChange={onOpenChange}>
           <SheetTrigger asChild>
             <ButtonBase
               colorMode='primary'
@@ -81,13 +95,23 @@ export function ManageExerciseQuestionList({
             </SheetHeader>
 
             <div className='h-[80vh] overflow-y-scroll px-4'>
-              <ManageExerciseQuestionForm
-                exerciseId={exerciseId}
-                onSaved={() => {
-                  if (onUpdate) onUpdate()
-                  setDialogOpen(false)
-                }}
-              />
+              {editQuestionId ? (
+                <ManageExerciseQuestionForm
+                  questionId={editQuestionId}
+                  onSaved={() => {
+                    if (onUpdate) onUpdate()
+                    setDialogOpen(false)
+                  }}
+                />
+              ) : (
+                <ManageExerciseQuestionForm
+                  exerciseId={exerciseId}
+                  onSaved={() => {
+                    if (onUpdate) onUpdate()
+                    setDialogOpen(false)
+                  }}
+                />
+              )}
             </div>
           </SheetContent>
         </Sheet>
@@ -116,7 +140,10 @@ export function ManageExerciseQuestionList({
               return (
                 <td
                   key={`${exerciseId}-${rowIndex}-${header.id}`}
-                  className='px-4 py-2'
+                  className='px-4 py-2 cursor-pointer select-none'
+                  onClick={() => {
+                    onEditQuestion(item.questionId)
+                  }}
                 >
                   {item.title}
                 </td>

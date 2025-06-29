@@ -1,9 +1,13 @@
 "use client"
 
+import { useEffect } from "react"
 import { CircleIcon, XIcon } from "lucide-react"
 import { useSelectInput } from "@/hooks/common/useSelectInput"
 import { useValidateInput } from "@/hooks/common/useValidateInput"
-import { usePostManageExerciseQuestion } from "@/hooks/useApiV1"
+import {
+  useGetManageQuestion,
+  usePostManageExerciseQuestion,
+} from "@/hooks/useApiV1"
 import { useToast } from "@/hooks/useToast"
 import { objectKeys } from "@/lib/functions/objectKeys"
 import {
@@ -17,6 +21,7 @@ import { useObjectList } from "@/hooks/common/useObjectList"
 import { STATICS } from "@/lib/statics"
 import { Input } from "@/components/ui/input"
 import { PreviewMd } from "@/components/atoms/PreviewMd"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type Props = (
   | {
@@ -30,6 +35,15 @@ type Props = (
 ) & {
   // 共通のプロパティがあればここに追加
   onSaved?: () => void
+}
+
+const validators = {
+  title: (value: string) => {
+    if (value.length < 1 || value.length > 64) {
+      return "問題タイトルは1文字以上64文字以下で入力してください"
+    }
+    return null
+  },
 }
 
 export function ManageExerciseQuestionForm(props: Props) {
@@ -73,12 +87,7 @@ function ManageExerciseQuestionFormNew({
     onChange: onChangeTitle,
   } = useValidateInput({
     initialValue: "",
-    validate: (value) => {
-      if (value.length < 1 || value.length > 64) {
-        return "問題タイトルは1文字以上64文字以下で入力してください"
-      }
-      return null
-    },
+    validate: validators.title,
   })
   const {
     selectedValue: selectedQuestionType,
@@ -422,15 +431,95 @@ function ManageExerciseQuestionFormEdit({
 }: {
   questionId: string
 }) {
-  const _saveQuestion = () => {}
+  const {
+    dataToGetManageQuestion,
+    refetchManageQuestion,
+    isLoadingToGetManageQuestion,
+  } = useGetManageQuestion(questionId)
+
+  const {
+    value: title,
+    errorMessage: titleError,
+    onChange: onChangeTitle,
+  } = useValidateInput({
+    initialValue: dataToGetManageQuestion?.success
+      ? dataToGetManageQuestion.data.question.title
+      : "",
+    validate: validators.title,
+  })
+
+  useEffect(() => {
+    if (!dataToGetManageQuestion?.success) return
+
+    onChangeTitle(dataToGetManageQuestion.data.question.title)
+  }, [dataToGetManageQuestion, onChangeTitle])
+
+  const _saveQuestion = () => {
+    //
+    refetchManageQuestion()
+  }
+
+  if (!dataToGetManageQuestion?.success) {
+    return <p>未対応 {questionId}</p>
+  }
 
   return (
     <>
-      <p>未対応 {questionId}</p>
+      <div className='grid gap-y-2'>
+        <div id='question-title'>
+          <label htmlFor='title'>問題タイトル</label>
+          {isLoadingToGetManageQuestion ? (
+            <Skeleton className='h-[3rem] w-full border' />
+          ) : (
+            <input
+              type='text'
+              id='title'
+              value={title}
+              onChange={(e) => onChangeTitle(e.target.value)}
+              className='w-full p-2 border rounded'
+            />
+          )}
+        </div>
+        {titleError && (
+          <p className='text-red-500 text-sm mt-1'>{titleError}</p>
+        )}
+      </div>
+
+      <div className='grid grid-cols-2 gap-x-4 py-2'>
+        <div id='question-question-type'>
+          <p>
+            <span>問題タイプ:</span>
+            {dataToGetManageQuestion.data.question.questionType}
+          </p>
+        </div>
+
+        <div id='question-answer-type'>
+          <p>
+            <span>回答タイプ:</span>
+            {dataToGetManageQuestion.data.question.answerType}
+          </p>
+        </div>
+      </div>
+
+      <div className='grid grid-cols-2 gap-x-4 py-2'>
+        <div id='question-question-type'>
+          <p>
+            <span>アクティブver:</span>
+            {dataToGetManageQuestion.data.currentVersion ?? "-"}
+          </p>
+        </div>
+
+        <div id='question-answer-type'>
+          <p>
+            <span>編集中ver:</span>
+            <select></select>
+          </p>
+        </div>
+      </div>
 
       <div className='mt-6 flex justify-end'>
         <ButtonBase colorMode='primary' sizeMode='full' onClick={_saveQuestion}>
-          作成
+          編集
         </ButtonBase>
       </div>
     </>
