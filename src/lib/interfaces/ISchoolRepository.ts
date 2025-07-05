@@ -1,6 +1,9 @@
 import { SchoolEntity } from "../classes/entities/SchoolEntity"
 import { UserEntity } from "../classes/entities/UserEntity"
 
+/**
+ * スクールは管理画面上でのみユーザへ意識させる存在
+ */
 export interface ISchoolRepository {
   findBySchoolId(schoolId: string): Promise<SchoolEntity | null>
 

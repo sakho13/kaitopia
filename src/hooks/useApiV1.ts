@@ -75,6 +75,32 @@ export function useGetRecommendExercises() {
 // *******************
 
 /**
+ * GET: `/api/manage/v1/dashboard?schoolId=xxxx`
+ */
+export function useGetManageDashboard(schoolId: string | null) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/manage/v1/dashboard", idToken, schoolId],
+    async ([url, token, sid]) =>
+      token
+        ? fetcher(
+            "GetManageDashboard",
+            "GET",
+            sid ? `${url}?schoolId=${sid}` : url,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetManageDashboard: data,
+    isLoadingToGetManageDashboard: isLoading,
+    refetchManageDashboard: mutate,
+  } as const
+}
+
+/**
  * GET: `/api/manage/v1/own-schools`
  */
 export function useGetManageOwnSchools() {

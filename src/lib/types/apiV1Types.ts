@@ -144,6 +144,14 @@ export type ApiV1InTypeMap = {
   PatchUserInfo: {
     user: Partial<ReplacedDateToString<EditableUserInfo>>
   }
+
+  /**
+   * GET /api/manage/v1/dashboard?schoolId=xxxx
+   */
+  GetManageDashboard: {
+    schoolId: string
+  }
+
   /**
    * GET /api/manage/v1/exercise?exerciseId=xxxx
    */
@@ -359,6 +367,18 @@ export type ApiV1OutTypeMap = {
     exercise: (ExerciseBaseIdentifier & ExerciseBase) | null
     createdAt: string
     updatedAt: string
+  }
+
+  /**
+   * GET /api/manage/v1/dashboard?schoolId=xxxx
+   */
+  GetManageDashboard: {
+    totalActiveUserCount: number
+    totalActiveGuestUserCount: number
+    totalUserCount: number
+
+    totalQuestionCount: number
+    totalExerciseCount: number
   }
 
   /**
