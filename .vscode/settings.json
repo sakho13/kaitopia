@@ -27,5 +27,5 @@
     "editor.defaultFormatter": "Prisma.prisma"
   },
   "biome.enabled": false,
-  "cSpell.words": ["joincn", "Kaitopia", "Navi", "turbopack"]
+  "cSpell.words": ["cloudrun", "joincn", "Kaitopia", "Navi", "turbopack"]
 }

@@ -144,6 +144,14 @@ export type ApiV1InTypeMap = {
   PatchUserInfo: {
     user: Partial<ReplacedDateToString<EditableUserInfo>>
   }
+
+  /**
+   * GET /api/manage/v1/dashboard?schoolId=xxxx
+   */
+  GetManageDashboard: {
+    schoolId: string
+  }
+
   /**
    * GET /api/manage/v1/exercise?exerciseId=xxxx
    */
@@ -362,6 +370,18 @@ export type ApiV1OutTypeMap = {
   }
 
   /**
+   * GET /api/manage/v1/dashboard?schoolId=xxxx
+   */
+  GetManageDashboard: {
+    totalActiveUserCount: number
+    totalActiveGuestUserCount: number
+    totalUserCount: number
+
+    totalQuestionCount: number
+    totalExerciseCount: number
+  }
+
+  /**
    * GET /api/manage/v1/own-schools
    */
   GetManageOwnSchools: {
@@ -389,7 +409,9 @@ export type ApiV1OutTypeMap = {
     questions: (Omit<QuestionBaseIdentifier, "schoolId"> &
       QuestionBase &
       QuestionBasePublishedState &
-      QuestionBaseEditState)[]
+      QuestionBaseEditState & {
+        versions: number[]
+      })[]
   }
   /**
    * GET /api/manage/v1/exercises
@@ -455,6 +477,7 @@ export type ApiV1OutTypeMap = {
 
   PatchManageQuestionVersion: {
     questionId: string
+    currentVersion: number
   }
 
   /**

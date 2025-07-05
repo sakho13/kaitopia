@@ -17,6 +17,7 @@ import { Skeleton } from "../ui/skeleton"
 import { ThinProgressBar } from "../atoms/ThinProgressBar"
 import { Fanfare } from "../atoms/Fanfare"
 import { PillLabel } from "../atoms/PillLabel"
+import { PreviewMd } from "../atoms/PreviewMd"
 
 type Props = {
   exerciseId: string
@@ -231,9 +232,7 @@ export function ExerciseManager({ exerciseId }: Props) {
       </div>
 
       <div id='question-content'>
-        <p className='text-lg font-medium select-none'>
-          {currentQuestion.content}
-        </p>
+        <PreviewMd md={currentQuestion.content} />
       </div>
 
       <div className='space-y-3'>

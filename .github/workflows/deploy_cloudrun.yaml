@@ -190,26 +190,26 @@ jobs:
               --platform managed
           fi
 
-  push-release-tag:
-    name: 📦 Push release tag
-    needs: switch-traffic
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.deployMode == 'production' }}
-    permissions:
-      contents: write
+  # push-release-tag:
+  #   name: 📦 Push release tag
+  #   needs: switch-traffic
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event.inputs.deployMode == 'production' }}
+  #   permissions:
+  #     contents: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Configure git for pushing tags
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "actions@github.com"
+  #     - name: Configure git for pushing tags
+  #       run: |
+  #         git config user.name "github-actions[bot]"
+  #         git config user.email "actions@github.com"
 
-      - name: Create and push release tag
-        run: |
-          git tag -a ${{ github.event.inputs.releaseTag }} -m "リリース ver${{ github.event.inputs.releaseTag }}"
-          git push origin ${{ github.event.inputs.releaseTag }}
+  #     - name: Create and push release tag
+  #       run: |
+  #         git tag -a ${{ github.event.inputs.releaseTag }} -m "リリース ver${{ github.event.inputs.releaseTag }}"
+  #         git push origin ${{ github.event.inputs.releaseTag }}

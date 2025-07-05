@@ -78,6 +78,7 @@ export default function Page() {
 
               <ManageNewExerciseForm
                 onClickButton={() => {
+                  refetchManageExercises()
                   setOpenNewExerciseDialog(false)
                 }}
               />

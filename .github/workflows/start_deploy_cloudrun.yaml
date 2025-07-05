@@ -1,0 +1,69 @@
+name: Deploy to Cloud Run with Release Tag
+
+# タグプッシュに応じて workflows/cloudrun-deploy.yaml を間接実行し、Cloud Runにデプロイします。
+# v1.1.1 の場合は deployMode=production として実行
+# v1.1.1-db の場合は deployMode=maintenance として実行し、workflows/maintenance_migrate.yaml を追加で実行
+# s1.1.1 の場合は deployMode=development として実行
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "v*.*.*-db"
+      - "s*.*.*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref_name, 'v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Parse tag name into inputs
+        id: parse
+        run: |
+          TAG_NAME=${GITHUB_REF_NAME#refs/tags/}
+          if [[ $TAG_NAME == s* ]]; then
+            echo "releaseTag=${TAG_NAME#s}" >> $GITHUB_OUTPUT
+            echo "deployMode=development"    >> $GITHUB_OUTPUT
+          elif [[ $TAG_NAME == v* ]]; then
+            if [[ $TAG_NAME == *-db ]]; then
+              REL=${TAG_NAME#v}; REL=${REL%-db}
+              echo "releaseTag=$REL"        >> $GITHUB_OUTPUT
+              echo "deployMode=maintenance" >> $GITHUB_OUTPUT
+            else
+              echo "releaseTag=${TAG_NAME#v}"    >> $GITHUB_OUTPUT
+              echo "deployMode=production"       >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: ワークフロー cloudrun-deploy を実行(通常デプロイ)
+        if: ${{ steps.parse.outputs.deployMode != 'maintenance' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run cloudrun-deploy.yaml \
+            --ref main \
+            --field releaseTag="${{ steps.parse.outputs.releaseTag }}" \
+            --field deployMode="${{ steps.parse.outputs.deployMode }}"
+
+      - name: ワークフロー cloudrun-deploy を実行(メンテナンスモード)
+        if: ${{ steps.parse.outputs.deployMode == 'maintenance' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run cloudrun-deploy.yaml \
+            --ref main \
+            --field releaseTag="${{ steps.parse.outputs.releaseTag }}" \
+            --field deployMode="${{ steps.parse.outputs.deployMode }}"
+            --field deployMaintenance=true
+
+      - name: ワークフロー maintenance_migrate を実行
+        if: ${{ steps.parse.outputs.deployMode == 'maintenance' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run maintenance_migrate.yaml \
+            --ref main

@@ -75,6 +75,32 @@ export function useGetRecommendExercises() {
 // *******************
 
 /**
+ * GET: `/api/manage/v1/dashboard?schoolId=xxxx`
+ */
+export function useGetManageDashboard(schoolId: string | null) {
+  const { idToken } = useAuth()
+
+  const { data, isLoading, mutate } = useSWRImmutable(
+    ["/api/manage/v1/dashboard", idToken, schoolId],
+    async ([url, token, sid]) =>
+      token
+        ? fetcher(
+            "GetManageDashboard",
+            "GET",
+            sid ? `${url}?schoolId=${sid}` : url,
+            token,
+          )
+        : null,
+  )
+
+  return {
+    dataToGetManageDashboard: data,
+    isLoadingToGetManageDashboard: isLoading,
+    refetchManageDashboard: mutate,
+  } as const
+}
+
+/**
  * GET: `/api/manage/v1/own-schools`
  */
 export function useGetManageOwnSchools() {
@@ -93,6 +119,9 @@ export function useGetManageOwnSchools() {
   } as const
 }
 
+/**
+ * GET: `/api/manage/v1/question`
+ */
 export function useGetManageQuestion(questionId: string) {
   const { idToken } = useAuth()
 
@@ -109,6 +138,31 @@ export function useGetManageQuestion(questionId: string) {
     isLoadingToGetManageQuestion: isLoading,
     refetchManageQuestion: mutate,
   } as const
+}
+
+/**
+ * PATCH: `/api/manage/v1/question-version`
+ */
+export function usePatchManageQuestionVersion() {
+  const { idToken } = useAuth()
+
+  const requestPatchQuestionVersion = async (
+    questionId: string,
+    input: ApiV1InTypeMap["PatchManageQuestionVersion"],
+  ) => {
+    return await requestHttp(
+      "PatchManageQuestionVersion",
+      "PatchManageQuestionVersion",
+      `/api/manage/v1/question-version?questionId=${questionId}&version=${input.version}`,
+      idToken ?? "",
+      input,
+      "PATCH",
+    )
+  }
+
+  return {
+    requestPatchQuestionVersion,
+  }
 }
 
 /**

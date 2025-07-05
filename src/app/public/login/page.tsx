@@ -246,10 +246,9 @@ function useLoginPage() {
           setEmailError("メールアドレスが登録されていません。")
           return
         }
-        if (error.code === "auth/wrong-password") {
-          setPasswordError("パスワードが間違っています。")
-          return
-        }
+
+        setEmailError("メールアドレスまたはパスワードが正しくありません。")
+        return
       }
 
       sendAnalyticsEvent("authenticationError", {

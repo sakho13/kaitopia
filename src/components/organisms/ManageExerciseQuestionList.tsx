@@ -13,6 +13,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet"
+import { usePatchManageQuestionVersion } from "@/hooks/useApiV1"
+import { useToast } from "@/hooks/useToast"
+import { useState } from "react"
 
 type Props = {
   exerciseId: string
@@ -25,14 +28,57 @@ export function ManageExerciseQuestionList({
   data,
   onUpdate,
 }: Props) {
+  const { showError, showSuccessShort } = useToast()
   const { value: isDialogOpen, onChange: setDialogOpen } = useBoolean()
+  const [editQuestionId, setEditQuestionId] = useState<string | null>(null)
+
+  const { requestPatchQuestionVersion } = usePatchManageQuestionVersion()
+
+  const updateCurrentVersion = async (questionId: string, value: unknown) => {
+    if (value === "-") {
+      showError("公開されているためバージョンを未選択に戻すことはできません")
+      return
+    }
+
+    const newVersion = Number(value)
+    const q = data.questions.find((q) => q.questionId === questionId)!
+    if (isNaN(newVersion)) return
+    if (q.currentVersion === newVersion) {
+      showError("選択されたバージョンはすでにアクティブです")
+      return
+    }
+
+    const updateResult = await requestPatchQuestionVersion(questionId, {
+      questionId,
+      version: newVersion,
+    })
+    if (!updateResult.success) {
+      showError("問題のバージョン更新に失敗しました")
+      return
+    }
+
+    showSuccessShort("問題のバージョンを更新しました")
+    if (onUpdate) onUpdate()
+  }
+
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+      setEditQuestionId(null)
+    }
+    setDialogOpen(open)
+  }
+
+  const onEditQuestion = (questionId: string) => {
+    setEditQuestionId(questionId)
+    setDialogOpen(true)
+  }
 
   return (
     <div>
       <div className='flex justify-between items-center'>
         <h2 className='text-lg font-semibold select-none'>問題を編集</h2>
 
-        <Sheet open={isDialogOpen} onOpenChange={setDialogOpen}>
+        <Sheet open={isDialogOpen} onOpenChange={onOpenChange}>
           <SheetTrigger asChild>
             <ButtonBase
               colorMode='primary'
@@ -45,17 +91,27 @@ export function ManageExerciseQuestionList({
 
           <SheetContent className='w-[800px]'>
             <SheetHeader>
-              <SheetTitle>新しい問題集</SheetTitle>
+              <SheetTitle>新しい問題</SheetTitle>
             </SheetHeader>
 
             <div className='h-[80vh] overflow-y-scroll px-4'>
-              <ManageExerciseQuestionForm
-                exerciseId={exerciseId}
-                onSaved={() => {
-                  if (onUpdate) onUpdate()
-                  setDialogOpen(false)
-                }}
-              />
+              {editQuestionId ? (
+                <ManageExerciseQuestionForm
+                  questionId={editQuestionId}
+                  onSaved={() => {
+                    if (onUpdate) onUpdate()
+                    setDialogOpen(false)
+                  }}
+                />
+              ) : (
+                <ManageExerciseQuestionForm
+                  exerciseId={exerciseId}
+                  onSaved={() => {
+                    if (onUpdate) onUpdate()
+                    setDialogOpen(false)
+                  }}
+                />
+              )}
             </div>
           </SheetContent>
         </Sheet>
@@ -84,18 +140,50 @@ export function ManageExerciseQuestionList({
               return (
                 <td
                   key={`${exerciseId}-${rowIndex}-${header.id}`}
-                  className='px-4 py-2'
+                  className='px-4 py-2 cursor-pointer select-none'
+                  onClick={() => {
+                    onEditQuestion(item.questionId)
+                  }}
                 >
                   {item.title}
                 </td>
               )
             } else if (header.id === "currentVersion") {
+              if (item.versions.length === 0) {
+                return (
+                  <td
+                    key={`${exerciseId}-${rowIndex}-${header.id}`}
+                    className='px-4 py-2 text-center'
+                  >
+                    -
+                  </td>
+                )
+              }
+
               return (
                 <td
                   key={`${exerciseId}-${rowIndex}-${header.id}`}
                   className='px-4 py-2 text-center'
                 >
-                  {item.currentVersion}
+                  <select
+                    value={
+                      item.currentVersion === null ? "-" : item.currentVersion
+                    }
+                    onChange={(e) => {
+                      updateCurrentVersion(item.questionId, e.target.value)
+                    }}
+                  >
+                    <option value='-'>未選択</option>
+
+                    {item.versions.map((version) => (
+                      <option
+                        key={`${exerciseId}-${rowIndex}-${header.id}-${version}`}
+                        value={version}
+                      >
+                        {version}
+                      </option>
+                    ))}
+                  </select>
                 </td>
               )
             } else if (header.id === "draftVersion") {
@@ -104,7 +192,7 @@ export function ManageExerciseQuestionList({
                   key={`${exerciseId}-${rowIndex}-${header.id}`}
                   className='px-4 py-2 text-center'
                 >
-                  {item.draftVersion ?? ""}
+                  {item.draftVersion ?? "-"}
                 </td>
               )
             }

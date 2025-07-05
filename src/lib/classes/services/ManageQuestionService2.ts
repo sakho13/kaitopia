@@ -59,6 +59,18 @@ export class ManageQuestionService2 {
       ...question.value,
       currentVersion: version,
     })
-    return this._questionRepository.save(newQuestion)
+
+    // 編集中バージョンへ更新したときに、編集中バージョンをnullへ
+    if (question.value.draftVersion === version) {
+      newQuestion.value.draftVersion = null
+    }
+
+    if (!question.value.isPublished && question.value.currentVersion !== null) {
+      newQuestion.value.isPublished = true
+    }
+
+    const updatedQuestion = await this._questionRepository.save(newQuestion)
+
+    return updatedQuestion
   }
 }
