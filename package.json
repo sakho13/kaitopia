@@ -76,7 +76,7 @@
     "@types/react-dom": "19",
     "eslint": "9",
     "eslint-config-next": "15.2.4",
-    "jest": "30.0.2",
+    "jest": "30.0.3",
     "jest-environment-jsdom": "29.7.0",
     "tailwindcss": "4",
     "ts-node": "10.9.2",
