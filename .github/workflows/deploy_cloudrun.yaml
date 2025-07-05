@@ -82,6 +82,12 @@ jobs:
           fi
           echo "TAG=$TAG" >> $GITHUB_ENV
 
+      - name: Bump version in package.json
+        run: |
+          TAG="${{ github.event.inputs.releaseTag }}"
+          echo "Bumping version to $TAG"
+          npm version $TAG --no-git-tag-version
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v1
         with:
@@ -190,26 +196,29 @@ jobs:
               --platform managed
           fi
 
-  # push-release-tag:
-  #   name: 📦 Push release tag
-  #   needs: switch-traffic
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event.inputs.deployMode == 'production' }}
-  #   permissions:
-  #     contents: write
+  prisma-migrate:
+    name: 🛠 Run Prisma Migrations
+    needs: switch-traffic
+    runs-on: ubuntu-latest
+    environment: production
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
+    if: ${{ github.event.inputs.deployMode == 'maintenance' }}
 
-  #     - name: Configure git for pushing tags
-  #       run: |
-  #         git config user.name "github-actions[bot]"
-  #         git config user.email "actions@github.com"
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-  #     - name: Create and push release tag
-  #       run: |
-  #         git tag -a ${{ github.event.inputs.releaseTag }} -m "リリース ver${{ github.event.inputs.releaseTag }}"
-  #         git push origin ${{ github.event.inputs.releaseTag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Deploy migrations
+        run: npx prisma migrate deploy

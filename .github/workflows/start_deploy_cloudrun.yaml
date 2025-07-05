@@ -12,6 +12,10 @@ on:
       - "v*.*.*-db"
       - "s*.*.*"
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -39,12 +43,18 @@ jobs:
             fi
           fi
 
+      - name: check workflow list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow list
+
       - name: ワークフロー cloudrun-deploy を実行(通常デプロイ)
         if: ${{ steps.parse.outputs.deployMode != 'maintenance' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh workflow run cloudrun-deploy.yaml \
+          gh workflow run 162534304 \
             --ref main \
             --field releaseTag="${{ steps.parse.outputs.releaseTag }}" \
             --field deployMode="${{ steps.parse.outputs.deployMode }}"
@@ -54,16 +64,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh workflow run cloudrun-deploy.yaml \
+          gh workflow run 162534304 \
             --ref main \
             --field releaseTag="${{ steps.parse.outputs.releaseTag }}" \
-            --field deployMode="${{ steps.parse.outputs.deployMode }}"
+            --field deployMode="${{ steps.parse.outputs.deployMode }}" \
             --field deployMaintenance=true
-
-      - name: ワークフロー maintenance_migrate を実行
-        if: ${{ steps.parse.outputs.deployMode == 'maintenance' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run maintenance_migrate.yaml \
-            --ref main
