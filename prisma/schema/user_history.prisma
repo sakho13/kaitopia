@@ -1,0 +1,21 @@
+model UserHistory {
+  userId    String @map("user_id")
+  historyNo Int    @default(autoincrement()) @map("history_no")
+
+  actionType UserHistoryActionType @map("action_type")
+
+  // actionType=QUIT
+  quitCode   String? @map("quit_code") // 退会後に再度アプリを利用する場合に必要なコード
+  quitReason String? @map("quit_reason") // 退会理由
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId, historyNo])
+}
+
+enum UserHistoryActionType {
+  QUIT // ユーザがアプリを退会した
+  RE_JOIN // ユーザがアプリを再度利用開始した
+}
