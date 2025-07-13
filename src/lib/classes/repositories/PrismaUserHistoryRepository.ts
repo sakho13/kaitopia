@@ -19,4 +19,19 @@ export class PrismaUserHistoryRepository
     })
     return new UserHistoryEntity(result)
   }
+
+  async getLatestQuitHistory(
+    userId: string,
+  ): Promise<UserHistoryEntity | null> {
+    const result = await this.dbConnection.userHistory.findFirst({
+      where: {
+        userId,
+        actionType: "QUIT",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+    return result ? new UserHistoryEntity(result) : null
+  }
 }
