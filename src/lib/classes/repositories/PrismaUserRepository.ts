@@ -147,7 +147,7 @@ export class PrismaUserRepository
   async delete(user: UserEntity): Promise<UserEntity> {
     const deletedUser = await this.dbConnection.user.update({
       where: { id: user.value.id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: DateUtility.getNowDate() },
     })
     return new UserEntity({
       ...deletedUser,
