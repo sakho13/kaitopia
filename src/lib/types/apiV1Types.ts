@@ -238,6 +238,13 @@ export type ApiV1InTypeMap = {
     answer: QuestionAnswerContent
   }
 
+  /**
+   * POST /api/user/v1/quit
+   */
+  PostUserQuit: {
+    reason: string
+  }
+
   DeleteManageUserGuest: null
 }
 
@@ -500,6 +507,14 @@ export type ApiV1OutTypeMap = {
   DeleteManageUserGuest: {
     deletedUserCount: number
     deletedUserIds: string[]
+  }
+
+  /**
+   * POST /api/user/v1/quit
+   */
+  PostUserQuit: {
+    deletedAt: string
+    quitCode: string
   }
 }
 
