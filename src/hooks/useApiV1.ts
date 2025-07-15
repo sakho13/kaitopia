@@ -504,6 +504,28 @@ export function usePostUserLogin() {
 }
 
 /**
+ * POST: `/api/user/v1/quit`
+ */
+export function usePostUserQuit() {
+  const { idToken } = useAuth()
+
+  const requestPostUserQuit = async (input: ApiV1InTypeMap["PostUserQuit"]) => {
+    return await requestHttp(
+      "PostUserQuit",
+      "PostUserQuit",
+      "/api/user/v1/quit",
+      idToken ?? "",
+      input,
+      "POST",
+    )
+  }
+
+  return {
+    requestPostUserQuit,
+  }
+}
+
+/**
  * GET: `/api/user/v1/exercise?exerciseId=xxxxx`
  */
 export function useGetUserExercise(exerciseId: string) {
