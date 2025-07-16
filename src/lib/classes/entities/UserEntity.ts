@@ -76,4 +76,8 @@ export class UserEntity extends EntityMutable<UserEntityType> {
   get isGuest(): boolean {
     return this.value.isGuest
   }
+
+  public get isDeleted(): boolean {
+    return this.value.deletedAt !== null
+  }
 }

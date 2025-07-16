@@ -1,15 +1,17 @@
+import { prisma } from "@/lib/prisma"
 import { ISchoolRepository } from "@/lib/interfaces/ISchoolRepository"
 import { IUserRepository } from "@/lib/interfaces/IUserRepository"
 import { EditableUserInfo, UserBaseInfo } from "@/lib/types/base/userTypes"
-import { PrismaClient } from "@prisma/client"
 import { PrismaUserRepository } from "../repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "../repositories/PrismaSchoolRepository"
 import { UserEntity } from "../entities/UserEntity"
 import { ReplacedDateToString } from "@/lib/types/common/ReplacedDateToString"
+import { PrismaUserHistoryRepository } from "../repositories/PrismaUserHistoryRepository"
+import { UserHistoryEntity } from "../entities/UserHistoryEntity"
 
 export class UserService2 {
   constructor(
-    private readonly _dbConnection: PrismaClient,
+    private readonly _dbConnection: typeof prisma,
     private readonly _userRepository: IUserRepository,
     private readonly _schoolRepository: ISchoolRepository,
   ) {}
@@ -62,6 +64,52 @@ export class UserService2 {
     user.validate()
 
     return await this._userRepository.save(user)
+  }
+
+  /**
+   * ユーザを退会させる
+   * @param user
+   * @param quitProperty
+   * @returns 削除日時
+   */
+  public async quitUser(user: UserEntity, quitProperty: { reason: string }) {
+    if (user.isDeleted) {
+      const userHistoryRepository = new PrismaUserHistoryRepository(
+        this._dbConnection,
+      )
+      const quitHistory = await userHistoryRepository.getLatestQuitHistory(
+        user.userId,
+      )
+
+      if (quitHistory) {
+        return {
+          deletedAt: user.value.deletedAt!,
+          quitCode: quitHistory.quitProperty.quitCode,
+        }
+      }
+    }
+
+    return await this._dbConnection.$transaction(async (t) => {
+      const userRepository = new PrismaUserRepository(t)
+      const deletedUser = await userRepository.delete(user)
+
+      const userHistoryRepository = new PrismaUserHistoryRepository(t)
+
+      const quitHistory = new UserHistoryEntity({
+        userId: deletedUser.userId,
+        actionType: "QUIT",
+        quitCode: null, // 退会コードは自動生成されるためnullを指定
+        quitReason: quitProperty.reason,
+        historyNo: 0, // historyNoは自動生成されるため0を指定
+      })
+
+      await userHistoryRepository.addUserHistory(quitHistory)
+
+      return {
+        deletedAt: deletedUser.value.deletedAt!,
+        quitCode: quitHistory.quitProperty.quitCode,
+      }
+    })
   }
 
   /**
