@@ -1,6 +1,6 @@
 model UserHistory {
   userId    String @map("user_id")
-  historyNo Int    @default(autoincrement()) @map("history_no")
+  historyNo String @default(cuid(2)) @map("history_no")
 
   actionType UserHistoryActionType @map("action_type")
 

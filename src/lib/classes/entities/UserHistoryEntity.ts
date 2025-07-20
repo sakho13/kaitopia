@@ -6,7 +6,7 @@ import { StringUtility } from "../common/StringUtility"
 
 type UserHistoryEntityType = {
   userId: string
-  historyNo: number
+  historyNo: string
   actionType: UserHistoryActionType
 
   quitCode: string | null
