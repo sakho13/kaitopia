@@ -81,6 +81,10 @@ export const ApiV1ErrorMapObj = {
     message: "認証有効期限が切れました。再ログインしてください。",
     status: 401,
   },
+  DeletedUserError: {
+    message: `このアカウントは削除されています。再度利用する場合は、管理者にお問い合わせください。`,
+    status: 403,
+  },
   RoleTypeError: {
     message: "アクセス権限がありません",
     status: 403,
