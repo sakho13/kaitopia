@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { ISchoolRepository } from "@/lib/interfaces/ISchoolRepository"
 import { IUserRepository } from "@/lib/interfaces/IUserRepository"
-import { EditableUserInfo, UserBaseInfo } from "@/lib/types/base/userTypes"
+import { EditableUserInfo } from "@/lib/types/base/userTypes"
 import { PrismaUserRepository } from "../repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "../repositories/PrismaSchoolRepository"
 import { UserEntity } from "../entities/UserEntity"
