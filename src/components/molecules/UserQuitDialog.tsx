@@ -24,7 +24,7 @@ export function UserQuitDialog() {
   const { showWarn, showInfo } = useToast()
   const { requestPostUserQuit } = usePostUserQuit()
 
-  const { value: loading, onChange: onChangeLoading } = useBoolean(true)
+  const { value: loading, onChange: onChangeLoading } = useBoolean(false)
 
   const { value: isOpen, onChange: onChangeDialog } = useBoolean(false)
   const {
