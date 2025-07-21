@@ -486,14 +486,14 @@ export function usePatchUserInfo() {
 /**
  * POST: `/api/user/v1/login`
  */
-export function usePostUserLogin() {
+export function usePostUserLogin(quitCode?: string) {
   const requestPostLogin = async (token: string) => {
     return await requestHttp(
       "PostUserLogin",
       "PostUserLogin",
       "/api/user/v1/login",
       token,
-      null,
+      { quitCode },
       "POST",
     )
   }
