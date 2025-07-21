@@ -80,7 +80,7 @@ export class UserService2 {
         actionType: "QUIT",
         quitCode: null, // 退会コードは自動生成されるためnullを指定
         quitReason: quitProperty.reason,
-        historyNo: "", // historyNoは自動生成されるため0を指定
+        historyNo: "", // historyNoは自動生成されるため空文字を指定
       })
 
       await userHistoryRepository.addUserHistory(quitHistory)
