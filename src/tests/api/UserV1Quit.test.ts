@@ -31,7 +31,6 @@ describe("API /api/user/v1/quit", () => {
       const signupResultJson = await signupResult.json()
       expect(signupResultJson.success).toBe(true)
       expect(signupResultJson.data.user).toBeDefined()
-      expect(signupResultJson.data.user).toBeDefined()
       expect(signupResultJson.data.user.id).toBeDefined()
 
       const quitResult = await TestUtility.runApi(
