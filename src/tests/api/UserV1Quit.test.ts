@@ -4,6 +4,7 @@
 
 import { POST } from "@/app/api/user/v1/quit/route"
 import { GET as GetUserInfo } from "@/app/api/user/v1/info/route"
+import { POST as PostUserLogin } from "@/app/api/user/v1/login/route"
 import { TestUtility } from "@/tests/TestUtility"
 
 describe("API /api/user/v1/quit", () => {
@@ -67,6 +68,189 @@ describe("API /api/user/v1/quit", () => {
       const userInfoJson = await userInfoResult.json()
       expect(userInfoJson.success).toBe(false)
       expect(userInfoJson.errors).toEqual([
+        {
+          code: "DeletedUserError",
+          message:
+            "このアカウントは削除されています。再度利用する場合は、管理者にお問い合わせください。",
+        },
+      ])
+    })
+
+    test("一度退会したユーザで再度退会を実施でエラーになる", async () => {
+      const randEmail = TestUtility.getRandomEmail()
+      const token = await TestUtility.getTokenByEmailAndSignUp(
+        randEmail,
+        "password",
+      )
+      expect(token).toBeDefined()
+
+      const signupResult = await TestUtility.signUpByToken(token)
+
+      expect(signupResult.ok).toBe(true)
+      const signupResultJson = await signupResult.json()
+      expect(signupResultJson.success).toBe(true)
+      expect(signupResultJson.data.user.id).toBeDefined()
+
+      // 退会
+      const quitResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/user/v1/quit",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          reason: "退会理由のテスト",
+        },
+      )
+
+      expect(quitResult.ok).toBe(true)
+      const quitResultJson = await quitResult.json()
+      expect(quitResultJson.success).toBe(true)
+      expect(quitResultJson.data.quitCode).toBeDefined()
+
+      // 再度退会を試みる
+      const secondQuitResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/user/v1/quit",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          reason: "再度の退会理由のテスト",
+        },
+      )
+
+      expect(secondQuitResult.status).toBe(403)
+      const secondQuitJson = await secondQuitResult.json()
+      expect(secondQuitJson.success).toBe(false)
+      expect(secondQuitJson.errors).toEqual([
+        {
+          code: "DeletedUserError",
+          message:
+            "このアカウントは削除されています。再度利用する場合は、管理者にお問い合わせください。",
+        },
+      ])
+    })
+
+    test("退会後に再登録できる", async () => {
+      const randEmail = TestUtility.getRandomEmail()
+      const token = await TestUtility.getTokenByEmailAndSignUp(
+        randEmail,
+        "password",
+      )
+      expect(token).toBeDefined()
+
+      const signupResult = await TestUtility.signUpByToken(token)
+
+      expect(signupResult.ok).toBe(true)
+      const signupResultJson = await signupResult.json()
+      expect(signupResultJson.success).toBe(true)
+      expect(signupResultJson.data.user.id).toBeDefined()
+
+      const userId = signupResultJson.data.user.id
+
+      // 退会
+      const quitResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/user/v1/quit",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          reason: "退会理由のテスト",
+        },
+      )
+
+      expect(quitResult.ok).toBe(true)
+      const quitResultJson = await quitResult.json()
+      expect(quitResultJson.success).toBe(true)
+      expect(quitResultJson.data.quitCode).toBeDefined()
+
+      // 再登録
+      const reRegisterResult = await TestUtility.runApi(
+        PostUserLogin,
+        "POST",
+        "/api/user/v1/login",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          quitCode: quitResultJson.data.quitCode,
+        },
+      )
+
+      expect(reRegisterResult.ok).toBe(true)
+      const reRegisterJson = await reRegisterResult.json()
+      expect(reRegisterJson.success).toBe(true)
+
+      const userInfoResult = await TestUtility.runApi(
+        GetUserInfo,
+        "GET",
+        "/api/user/v1/info",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+      )
+
+      expect(userInfoResult.ok).toBe(true)
+      const userInfoJson = await userInfoResult.json()
+      expect(userInfoJson.success).toBe(true)
+      expect(userInfoJson.data.user.id).toBe(userId)
+    })
+
+    test("退会後に再登録時に退会コードが不正な場合はエラーになる", async () => {
+      const randEmail = TestUtility.getRandomEmail()
+      const token = await TestUtility.getTokenByEmailAndSignUp(
+        randEmail,
+        "password",
+      )
+      expect(token).toBeDefined()
+
+      const signupResult = await TestUtility.signUpByToken(token)
+
+      expect(signupResult.ok).toBe(true)
+      const signupResultJson = await signupResult.json()
+      expect(signupResultJson.success).toBe(true)
+      expect(signupResultJson.data.user.id).toBeDefined()
+
+      // 退会
+      const quitResult = await TestUtility.runApi(
+        POST,
+        "POST",
+        "/api/user/v1/quit",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          reason: "退会理由のテスト",
+        },
+      )
+
+      expect(quitResult.ok).toBe(true)
+      const quitResultJson = await quitResult.json()
+      expect(quitResultJson.success).toBe(true)
+      expect(quitResultJson.data.quitCode).toBeDefined()
+
+      // 再登録
+      const reRegisterResult = await TestUtility.runApi(
+        PostUserLogin,
+        "POST",
+        "/api/user/v1/login",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          quitCode: quitResultJson.data.quitCode + "invalid",
+        },
+      )
+
+      expect(reRegisterResult.status).toBe(403)
+      const reRegisterJson = await reRegisterResult.json()
+      expect(reRegisterJson.success).toBe(false)
+      expect(reRegisterJson.errors).toEqual([
         {
           code: "DeletedUserError",
           message:
