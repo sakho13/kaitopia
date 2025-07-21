@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation"
 export function UserQuitDialog() {
   const router = useRouter()
   const { signOut } = useAuth()
-  const { showWarn, showInfo } = useToast()
+  const { showWarn, showInfoLong } = useToast()
   const { requestPostUserQuit } = usePostUserQuit()
 
   const { value: loading, onChange: onChangeLoading } = useBoolean(false)
@@ -49,8 +49,10 @@ export function UserQuitDialog() {
       if (result.success) {
         await signOut()
         closeDialog()
-        router.push("/")
-        showInfo("退会処理が完了しました。")
+        router.push(`/?quitCode=${result.data.quitCode}`)
+        showInfoLong(
+          "退会処理が完了しました。退会コード: " + result.data.quitCode,
+        )
         return
       }
       showWarn(result.errors[0].message)
