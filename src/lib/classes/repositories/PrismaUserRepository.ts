@@ -135,6 +135,7 @@ export class PrismaUserRepository
         role: user.value.role,
         birthDayDate: user.value.birthDayDate,
         isGuest: user.value.isGuest,
+        updatedAt: DateUtility.getNowDate(),
       },
     })
     return new UserEntity({
@@ -147,12 +148,27 @@ export class PrismaUserRepository
   async delete(user: UserEntity): Promise<UserEntity> {
     const deletedUser = await this.dbConnection.user.update({
       where: { id: user.value.id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: DateUtility.getNowDate() },
     })
     return new UserEntity({
       ...deletedUser,
       memberSchools: [],
       ownerSchools: [],
+    })
+  }
+
+  async reRegister(user: UserEntity): Promise<UserEntity> {
+    const reRegisteredUser = await this.dbConnection.user.update({
+      where: { id: user.value.id },
+      data: {
+        deletedAt: null,
+        updatedAt: DateUtility.getNowDate(),
+      },
+    })
+    return new UserEntity({
+      ...reRegisteredUser,
+      memberSchools: user.memberSchools.map((s) => s.value),
+      ownerSchools: user.ownSchools.map((s) => s.value),
     })
   }
 }

@@ -81,6 +81,10 @@ export const ApiV1ErrorMapObj = {
     message: "認証有効期限が切れました。再ログインしてください。",
     status: 401,
   },
+  DeletedUserError: {
+    message: `このアカウントは削除されています。再度利用する場合は、管理者にお問い合わせください。`,
+    status: 403,
+  },
   RoleTypeError: {
     message: "アクセス権限がありません",
     status: 403,
@@ -217,7 +221,9 @@ export type ApiV1InTypeMap = {
   /**
    * POST /api/user/v1/user/login
    */
-  PostUserLogin: null
+  PostUserLogin: {
+    quitCode?: string
+  }
 
   /**
    * 一括採点or結果を取得したい場合に実行される
@@ -238,6 +244,13 @@ export type ApiV1InTypeMap = {
     answer: QuestionAnswerContent
   }
 
+  /**
+   * POST /api/user/v1/quit
+   */
+  PostUserQuit: {
+    reason: string
+  }
+
   DeleteManageUserGuest: null
 }
 
@@ -248,8 +261,12 @@ export type ApiV1OutTypeMap = {
       ReplacedDateToString<Omit<UserBaseDate, "deletedAt">>
   }
   PatchUserInfo: ApiV1OutTypeMap["GetUserInfo"]
+
+  /**
+   * POST /api/user/v1/login
+   */
   PostUserLogin: {
-    state: "register" | "login"
+    state: "register" | "login" | "re-register"
     user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
     isGuest: boolean
   }
@@ -500,6 +517,14 @@ export type ApiV1OutTypeMap = {
   DeleteManageUserGuest: {
     deletedUserCount: number
     deletedUserIds: string[]
+  }
+
+  /**
+   * POST /api/user/v1/quit
+   */
+  PostUserQuit: {
+    deletedAt: string
+    quitCode: string
   }
 }
 

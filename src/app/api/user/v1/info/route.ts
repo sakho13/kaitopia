@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
     return {
       user: {
         id: user.userId,
@@ -63,6 +67,10 @@ export async function PATCH(request: NextRequest) {
     const user = await userService.getUserInfo(api.getFirebaseUid())
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
 
     const result = await userService.editUserInfo(user, {
       name: validationResult.result.user.name,

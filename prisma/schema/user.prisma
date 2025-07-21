@@ -17,7 +17,7 @@ model User {
 
   ownerSchools  SchoolOwner[]
   memberSchools SchoolMember[]
-  // userAuthProviders UserAuthProvider[]
+  userHistories UserHistory[]
 }
 
 enum Role {

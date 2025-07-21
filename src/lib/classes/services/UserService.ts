@@ -5,6 +5,9 @@ import { UserRepository } from "../repositories/UserRepository"
 import { ReplacedDateToString } from "@/lib/types/common/ReplacedDateToString"
 import { ApiV1Error } from "../common/ApiV1Error"
 
+/**
+ * @deprecated `UserService2` を優先的に使用してください。
+ */
 export class UserService extends ServiceBase {
   private _userController: UserController
 

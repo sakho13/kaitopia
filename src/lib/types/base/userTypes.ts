@@ -66,3 +66,16 @@ export type UserAccessSchoolMethod =
   | "edit"
   | "publish"
   | "delete"
+
+/**
+ * ユーザ履歴のアクション
+ */
+export const UserHistoryActionMap = {
+  /** ユーザがアプリを退会した */
+  QUIT: "QUIT",
+  /** ユーザがアプリを再度利用開始した */
+  RE_JOIN: "RE_JOIN",
+} as const
+
+export type UserHistoryActionType =
+  (typeof UserHistoryActionMap)[keyof typeof UserHistoryActionMap]
