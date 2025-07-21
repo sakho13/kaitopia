@@ -57,16 +57,7 @@ export class UserService2 {
    */
   public async quitUser(user: UserEntity, quitProperty: { reason: string }) {
     if (user.isDeleted) {
-      const userHistoryRepository = new PrismaUserHistoryRepository(
-        this._dbConnection,
-      )
-      const quitHistory = await userHistoryRepository.getLatestQuitHistory(
-        user.userId,
-      )
-
-      if (quitHistory) {
-        throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
-      }
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
     }
 
     return await this._dbConnection.$transaction(async (t) => {
