@@ -49,7 +49,7 @@ export function UserQuitDialog() {
       if (result.success) {
         await signOut()
         closeDialog()
-        router.push(`/?quitCode=${result.data.quitCode}`)
+        router.push(`/`)
         showInfoLong(
           "退会処理が完了しました。退会コード: " + result.data.quitCode,
         )
