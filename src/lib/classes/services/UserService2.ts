@@ -8,6 +8,7 @@ import { UserEntity } from "../entities/UserEntity"
 import { ReplacedDateToString } from "@/lib/types/common/ReplacedDateToString"
 import { PrismaUserHistoryRepository } from "../repositories/PrismaUserHistoryRepository"
 import { UserHistoryEntity } from "../entities/UserHistoryEntity"
+import { ApiV1Error } from "../common/ApiV1Error"
 
 export class UserService2 {
   constructor(
@@ -64,10 +65,7 @@ export class UserService2 {
       )
 
       if (quitHistory) {
-        return {
-          deletedAt: user.value.deletedAt!,
-          quitCode: quitHistory.quitProperty.quitCode,
-        }
+        throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
       }
     }
 
@@ -91,6 +89,44 @@ export class UserService2 {
         deletedAt: deletedUser.value.deletedAt!,
         quitCode: quitHistory.quitProperty.quitCode,
       }
+    })
+  }
+
+  /**
+   * ユーザの復帰を行う
+   * @param user
+   * @param quitCode 退会時に生成された退会コード
+   */
+  public async reRegisterUser(
+    user: UserEntity,
+    quitCode: string,
+  ): Promise<UserEntity> {
+    return await this._dbConnection.$transaction(async (t) => {
+      const userHistoryRepository = new PrismaUserHistoryRepository(t)
+      const quitHistory = await userHistoryRepository.getLatestQuitHistory(
+        user.userId,
+      )
+      if (!quitHistory) {
+        throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+      }
+
+      if (quitHistory.quitProperty.quitCode !== quitCode) {
+        throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+      }
+
+      const userRepository = new PrismaUserRepository(t)
+      const reRegisteredUser = await userRepository.reRegister(user)
+
+      // 復帰履歴の登録
+      await userHistoryRepository.addUserHistory(
+        new UserHistoryEntity({
+          ...quitHistory.value,
+          actionType: "RE_JOIN",
+          quitReason: null, // 復帰時理由は不要
+        }),
+      )
+
+      return reRegisteredUser
     })
   }
 

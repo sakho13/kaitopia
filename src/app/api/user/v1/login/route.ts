@@ -6,6 +6,7 @@ import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolR
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
 import { UserService2 } from "@/lib/classes/services/UserService2"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
+import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 
 export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ登録")
@@ -44,6 +45,36 @@ export async function POST(request: NextRequest) {
 
     if (user && user.isDeleted) {
       // ユーザが削除されている場合の処理
+      const body = await request.json()
+      if (!("quitCode" in body) || typeof body.quitCode !== "string") {
+        throw new ApiV1Error([
+          {
+            key: "DeletedUserError",
+            params: null,
+          },
+        ])
+      }
+
+      // 退会コードが一致するか確認
+      const reRegisteredUser = await userService.reRegisterUser(
+        user,
+        body.quitCode,
+      )
+
+      return {
+        state: "re-register",
+        user: {
+          id: reRegisteredUser.userId,
+          name: reRegisteredUser.value.name,
+          email: reRegisteredUser.value.email,
+          phoneNumber: reRegisteredUser.value.phoneNumber,
+          birthDayDate: reRegisteredUser.value.birthDayDate
+            ? reRegisteredUser.value.birthDayDate.toISOString()
+            : null,
+          role: reRegisteredUser.value.role,
+        },
+        isGuest: reRegisteredUser.isGuest,
+      }
     }
 
     // ユーザ登録

@@ -221,7 +221,9 @@ export type ApiV1InTypeMap = {
   /**
    * POST /api/user/v1/user/login
    */
-  PostUserLogin: null
+  PostUserLogin: {
+    quitCode?: string
+  }
 
   /**
    * 一括採点or結果を取得したい場合に実行される
@@ -259,8 +261,12 @@ export type ApiV1OutTypeMap = {
       ReplacedDateToString<Omit<UserBaseDate, "deletedAt">>
   }
   PatchUserInfo: ApiV1OutTypeMap["GetUserInfo"]
+
+  /**
+   * POST /api/user/v1/login
+   */
   PostUserLogin: {
-    state: "register" | "login"
+    state: "register" | "login" | "re-register"
     user: UserBaseInfo & ReplacedDateToString<UserBaseInfoOption>
     isGuest: boolean
   }

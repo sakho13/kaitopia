@@ -45,6 +45,10 @@ export class UserEntity extends EntityMutable<UserEntityType> {
     }
   }
 
+  public reRegister() {
+    this.value.deletedAt = null
+  }
+
   get userId(): string {
     return this.value.id
   }
