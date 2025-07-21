@@ -15,13 +15,15 @@ type UserHistoryEntityType = {
 
 export class UserHistoryEntity extends EntityMutable<UserHistoryEntityType> {
   constructor(value: UserHistoryEntityType) {
-    super(value)
+    const v = { ...value }
 
-    if (value.actionType === "QUIT") {
-      if (value.quitCode === null) {
-        value.quitCode = UserHistoryEntity.generateQuitCode(value.userId)
+    if (v.actionType === "QUIT") {
+      if (v.quitCode === null) {
+        v.quitCode = UserHistoryEntity.generateQuitCode(v.userId)
       }
     }
+
+    super(v)
   }
 
   validate(): void | Promise<void> {
