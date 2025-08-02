@@ -28,19 +28,30 @@ export async function GET(request: NextRequest) {
       await manageUserService.getUsersForManageAdmin(count, page)
 
     return {
-      users: users.map((u) => ({
-        id: u.id,
-        firebaseUid: u.firebaseUid,
-        name: u.name,
-        email: u.email,
-        phoneNumber: u.phoneNumber,
-        role: u.role,
-        isGuest: u.isGuest,
-        birthDayDate: u.birthDayDate?.toISOString() ?? null,
-        createdAt: u.createdAt.toISOString(),
-        updatedAt: u.updatedAt.toISOString(),
-        deletedAt: u.deletedAt?.toISOString() ?? null,
-      })),
+      users: users.map((u) => {
+        const emailProvider = u.authProviders.find(
+          (p) => p.providerType === "FIREBASE_EMAIL",
+        )
+        const guestProvider = u.authProviders.find(
+          (p) => p.providerType === "FIREBASE_GUEST",
+        )
+        return {
+          id: u.id,
+          firebaseUid:
+            emailProvider?.providerUid ?? guestProvider?.providerUid ?? "",
+          name: u.name,
+          email: u.email,
+          phoneNumber: u.phoneNumber,
+          role: u.role,
+          isGuest: u.authProviders.some(
+            (p) => p.providerType === "FIREBASE_GUEST",
+          ),
+          birthDayDate: u.birthDayDate?.toISOString() ?? null,
+          createdAt: u.createdAt.toISOString(),
+          updatedAt: u.updatedAt.toISOString(),
+          deletedAt: u.deletedAt?.toISOString() ?? null,
+        }
+      }),
       totalCount,
       nextPage,
     }

@@ -18,7 +18,10 @@ export function GET(request: NextRequest) {
     )
 
     const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
+    await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
 
     const userQuestionService = new UserQuestionService(
       userService.userController,

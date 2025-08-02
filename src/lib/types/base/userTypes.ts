@@ -1,10 +1,13 @@
 import { School } from "./schoolTypes"
+import { AuthProvider } from "./authProviderTypes"
 
 export type User = UserBaseInfo &
   UserBaseInfoOption &
   UserBaseIdentity &
   UserBaseDate &
-  UserRelationSchools
+  UserRelationSchools & {
+    authProviders: AuthProvider[]
+  }
 
 /**
  * 編集可能なユーザ情報項目
@@ -23,14 +26,8 @@ export type UserBaseInfoOption = {
   birthDayDate: Date | null
 }
 
-export type UserBaseManageOption = {
-  isGuest: boolean
-}
-
 export type UserBaseIdentity = {
   id: string
-
-  firebaseUid: string
 }
 
 export type UserBaseDate = {

@@ -4,6 +4,7 @@ import { UserEntity } from "../entities/UserEntity"
 import { IExternalAuthenticationRepository } from "@/lib/interfaces/IExternalAuthenticationRepository"
 import { IManageUserRepository } from "@/lib/interfaces/IManageUserRepository"
 import { PrismaManageUserRepository } from "../repositories/PrismaManageUserRepository"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 
 /**
  * 管理用ユーザ操作サービスクラス
@@ -38,7 +39,9 @@ export class ManageUserService2 {
     const deletedUserIds = await this._dbConnection.$transaction(async (tx) => {
       // 認証プロバイダ側から削除
       const deletedFromAuthProvider = await this._externalAuthRepo.deleteUsers(
-        guestUsers.map((user) => user.value.firebaseUid),
+        guestUsers.map((user) =>
+          user.getAuthProviderUid(AuthProviderType.FIREBASE_GUEST)!,
+        ),
       )
       if (deletedFromAuthProvider.errors.length > 0) {
         throw new ApiV1Error(

@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
     await api.authorize(request)
     const userService = new UserService(prisma)
 
-    const userInfo = await userService.getUserInfo(api.getFirebaseUid())
+    const userInfo = await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!userInfo)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 

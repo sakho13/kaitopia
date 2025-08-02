@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { ISchoolRepository } from "@/lib/interfaces/ISchoolRepository"
 import { IUserRepository } from "@/lib/interfaces/IUserRepository"
 import { EditableUserInfo } from "@/lib/types/base/userTypes"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 import { PrismaUserRepository } from "../repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "../repositories/PrismaSchoolRepository"
 import { UserEntity } from "../entities/UserEntity"
@@ -17,8 +18,14 @@ export class UserService2 {
     private readonly _schoolRepository: ISchoolRepository,
   ) {}
 
-  public async getUserInfo(firebaseUid: string) {
-    return await this._userRepository.findByFirebaseUid(firebaseUid)
+  public async getUserInfo(
+    providerUid: string,
+    providerType: AuthProviderType,
+  ) {
+    return await this._userRepository.findByAuthProvider(
+      providerUid,
+      providerType,
+    )
   }
 
   public async registerUserInfo(userEntity: UserEntity) {

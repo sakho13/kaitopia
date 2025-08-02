@@ -40,8 +40,11 @@ export async function GET(request: NextRequest) {
         },
       ])
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
+      const userService = new UserService(prisma)
+      await userService.getUserInfo(
+        api.getFirebaseUid(),
+        api.getProviderType()!,
+      )
 
     const userQuestionService = new UserQuestionService(
       userService.userController,
@@ -109,8 +112,11 @@ export async function POST(request: NextRequest) {
     const { error, result: body } = validatePost(await request.json())
     if (error) throw error
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
+      const userService = new UserService(prisma)
+      await userService.getUserInfo(
+        api.getFirebaseUid(),
+        api.getProviderType()!,
+      )
 
     const userQuestionService = new UserQuestionService(
       userService.userController,
@@ -149,8 +155,11 @@ export async function PATCH(request: NextRequest) {
     const { error, result } = validatePatch(await request.json())
     if (error) throw error
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
+      const userService = new UserService(prisma)
+      await userService.getUserInfo(
+        api.getFirebaseUid(),
+        api.getProviderType()!,
+      )
 
     const userQuestionService = new UserQuestionService(
       userService.userController,

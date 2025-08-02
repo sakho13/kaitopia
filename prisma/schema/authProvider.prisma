@@ -1,0 +1,16 @@
+enum AuthProviderType {
+  FIREBASE_GUEST
+  FIREBASE_EMAIL
+}
+
+model AuthProvider {
+  id          String           @id @default(cuid(2))
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String           @map("user_id")
+  providerType AuthProviderType @map("provider_type")
+  providerUid  String           @map("provider_uid")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@unique([providerUid, providerType])
+}

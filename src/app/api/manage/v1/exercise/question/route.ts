@@ -38,7 +38,10 @@ export async function GET(request: NextRequest) {
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-    const user = await userService2.getUserInfo(api.getFirebaseUid())
+    const user = await userService2.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
@@ -83,14 +86,20 @@ export async function POST(request: NextRequest) {
     if (validateResult.error) throw validateResult.error
 
     const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
+    await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
 
     const userService2 = new UserService2(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-    const user = await userService2.getUserInfo(api.getFirebaseUid())
+    const user = await userService2.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 

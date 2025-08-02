@@ -1,9 +1,11 @@
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
+
 export interface IExternalAuthenticationRepository {
   verifyIdToken(
     idToken: string,
   ): Promise<{
-    uid: string
-    isGuest: boolean
+    providerUid: string
+    providerType: AuthProviderType
     email: string | null
     phoneNumber: string | null
   }>

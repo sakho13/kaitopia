@@ -4,10 +4,11 @@ import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { UserService } from "../services/UserService"
 import { prisma } from "@/lib/prisma"
 import { FirebaseAuthUserRepository } from "../repositories/FirebaseAuthUserRepository"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 
 export class ApiV1Wrapper {
   private _firebaseUid = ""
-  private _isGuest = false
+  private _providerType: AuthProviderType | null = null
 
   constructor(private apiName: string) {}
 
@@ -55,8 +56,8 @@ export class ApiV1Wrapper {
 
     const firebaseBaseRepo = new FirebaseAuthUserRepository()
     const result = await firebaseBaseRepo.verifyIdToken(token)
-    this._firebaseUid = result.uid
-    this._isGuest = result.isGuest
+    this._firebaseUid = result.providerUid
+    this._providerType = result.providerType
     return result
   }
 
@@ -69,7 +70,10 @@ export class ApiV1Wrapper {
     await this.authorize(request)
 
     const userService = new UserService(prisma)
-    const user = await userService.getUserInfo(this.getFirebaseUid())
+    const user = await userService.getUserInfo(
+      this.getFirebaseUid(),
+      this.getProviderType()!,
+    )
 
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -81,7 +85,11 @@ export class ApiV1Wrapper {
   }
 
   public async isGuest() {
-    return this._isGuest
+    return this._providerType === "FIREBASE_GUEST"
+  }
+
+  public getProviderType() {
+    return this._providerType
   }
 
   public getFirebaseUid() {

@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
 
-    const userInfo = await userService.getUserInfo(api.getFirebaseUid())
+    const userInfo = await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!userInfo) {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
     }

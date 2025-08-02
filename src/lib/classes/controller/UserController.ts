@@ -3,6 +3,7 @@ import {
   UserBaseInfo,
   UserRoleType,
 } from "@/lib/types/base/userTypes"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ControllerBase } from "../common/ControllerBase"
 import { SchoolRepository } from "../repositories/SchoolRepository"
@@ -14,27 +15,35 @@ export class UserController extends ControllerBase {
   private _userRole: UserRoleType | null = null
   private _isGuest: boolean = false
 
-  public async getUserInfo(firebaseUid: string) {
-    const user = await this._fetchUserInfoByFirebaseUid(firebaseUid)
+  public async getUserInfo(
+    providerUid: string,
+    providerType: AuthProviderType,
+  ) {
+    const user = await this._fetchUserInfoByAuthProvider(
+      providerUid,
+      providerType,
+    )
     if (!user) return null
 
     this._userId = user.id
     this._userRole = user.role
-    this._isGuest = user.isGuest
+    this._isGuest = user.authProviders.some(
+      (p) => p.providerType === "FIREBASE_GUEST",
+    )
     return user
   }
 
   public async registerUserInfo(
-    firebaseUid: string,
-    isGuest: boolean,
+    providerUid: string,
+    providerType: AuthProviderType,
     data: UserBaseInfo,
   ) {
     return this.dbConnection.$transaction(async (t) => {
       const userRepository = new UserRepository(t)
       const schoolRepository = new SchoolRepository(t)
-      const user = await userRepository.createUserByFirebaseUid(
-        firebaseUid,
-        isGuest,
+      const user = await userRepository.createUserByAuthProvider(
+        providerUid,
+        providerType,
         {
           ...data,
           birthDayDate: null,
@@ -140,9 +149,15 @@ export class UserController extends ControllerBase {
     return await schoolRepository.findMemberSchools(this._userId)
   }
 
-  private async _fetchUserInfoByFirebaseUid(firebaseUid: string) {
+  private async _fetchUserInfoByAuthProvider(
+    providerUid: string,
+    providerType: AuthProviderType,
+  ) {
     const userRepository = new UserRepository(this.dbConnection)
-    return await userRepository.findUserByFirebaseUid(firebaseUid)
+    return await userRepository.findUserByAuthProvider(
+      providerUid,
+      providerType,
+    )
   }
 
   public get userId() {

@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
       userRepository,
       schoolRepository,
     )
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const user = await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
@@ -64,7 +67,10 @@ export async function PATCH(request: NextRequest) {
       schoolRepository,
     )
 
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const user = await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 

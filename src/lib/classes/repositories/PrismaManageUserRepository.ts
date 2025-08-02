@@ -12,12 +12,13 @@ export class PrismaManageUserRepository
   async findGuestUsersOver5Days(): Promise<UserEntity[]> {
     const users = await this.dbConnection.user.findMany({
       where: {
-        isGuest: true,
+        authProviders: { some: { providerType: "FIREBASE_GUEST" } },
         deletedAt: null,
         createdAt: {
           lt: DateUtility.getBeforeDaysDate(GUEST_USER_DAYS),
         },
       },
+      include: { authProviders: true },
     })
 
     return users.map(
@@ -26,6 +27,7 @@ export class PrismaManageUserRepository
           ...user,
           memberSchools: [],
           ownerSchools: [],
+          authProviders: user.authProviders,
         }),
     )
   }

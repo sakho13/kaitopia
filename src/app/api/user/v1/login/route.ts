@@ -24,7 +24,10 @@ export async function POST(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
 
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const user = await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
 
     if (user && !user.isDeleted) {
       return {
@@ -81,11 +84,9 @@ export async function POST(request: NextRequest) {
 
     // ユーザ名はランダムで生成する(今後、ログイン時に登録するようにする)
     const userName = `user-${Math.floor(Math.random() * 10000)}`
-    const isGuest = await api.isGuest()
 
     const newUser = await userService.registerUserInfo(
       new UserEntity({
-        firebaseUid: api.getFirebaseUid(),
         id: "", // IDは自動生成されるため空文字
         name: userName,
         email: email ?? null,
@@ -95,7 +96,16 @@ export async function POST(request: NextRequest) {
         createdAt: DateUtility.getNowDate(),
         updatedAt: DateUtility.getNowDate(),
         deletedAt: null,
-        isGuest,
+        authProviders: [
+          {
+            id: "",
+            userId: "",
+            providerUid: api.getFirebaseUid(),
+            providerType: api.getProviderType()!,
+            createdAt: DateUtility.getNowDate(),
+            updatedAt: DateUtility.getNowDate(),
+          },
+        ],
         memberSchools: [],
         ownerSchools: [],
       }),

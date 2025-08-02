@@ -1,6 +1,7 @@
 // API Route 内で使用するリポジトリクラスを定義する
 
 import { UserBaseInfo, UserBaseInfoOption } from "@/lib/types/base/userTypes"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 import { RepositoryBase } from "../common/RepositoryBase"
 
 export class UserRepository extends RepositoryBase {
@@ -19,13 +20,12 @@ export class UserRepository extends RepositoryBase {
         birthDayDate: true,
 
         role: true,
-        isGuest: true,
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
 
-        firebaseUid: true,
         ownerSchools: true,
+        authProviders: true,
       },
       take: limit,
       skip: offset,
@@ -57,7 +57,7 @@ export class UserRepository extends RepositoryBase {
         ownerSchools: true,
         createdAt: true,
         updatedAt: true,
-        isGuest: true,
+        authProviders: true,
       },
       where: {
         id: userId,
@@ -65,7 +65,10 @@ export class UserRepository extends RepositoryBase {
     })
   }
 
-  public async findUserByFirebaseUid(firebaseUid: string) {
+  public async findUserByAuthProvider(
+    providerUid: string,
+    providerType: AuthProviderType,
+  ) {
     return await this.dbConnection.user.findFirst({
       select: {
         id: true,
@@ -77,28 +80,32 @@ export class UserRepository extends RepositoryBase {
         ownerSchools: true,
         createdAt: true,
         updatedAt: true,
-        isGuest: true,
+        authProviders: true,
       },
       where: {
-        firebaseUid: firebaseUid,
+        authProviders: { some: { providerUid, providerType } },
       },
     })
   }
 
-  public async createUserByFirebaseUid(
-    firebaseUid: string,
-    isGuest: boolean,
+  public async createUserByAuthProvider(
+    providerUid: string,
+    providerType: AuthProviderType,
     data: UserBaseInfo & UserBaseInfoOption,
   ) {
     return await this.dbConnection.user.create({
       data: {
-        firebaseUid: firebaseUid,
         name: data.name,
         email: data.email,
         phoneNumber: data.phoneNumber,
         birthDayDate: data.birthDayDate || null,
         role: data.role,
-        isGuest: isGuest,
+        authProviders: {
+          create: {
+            providerUid,
+            providerType,
+          },
+        },
       },
     })
   }
@@ -120,13 +127,14 @@ export class UserRepository extends RepositoryBase {
     })
   }
 
-  public async updateUserRoleByFirebaseUid(
-    firebaseUid: string,
+  public async updateUserRoleByAuthProvider(
+    providerUid: string,
+    providerType: AuthProviderType,
     role: UserBaseInfo["role"],
   ) {
     return await this.dbConnection.user.update({
       where: {
-        firebaseUid: firebaseUid,
+        authProviders: { some: { providerUid, providerType } },
       },
       data: {
         role: role,

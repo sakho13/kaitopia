@@ -5,9 +5,12 @@ import {
   UserBaseIdentity,
   UserBaseInfo,
   UserBaseInfoOption,
-  UserBaseManageOption,
   UserRoleType,
 } from "@/lib/types/base/userTypes"
+import {
+  AuthProvider,
+  AuthProviderType,
+} from "@/lib/types/base/authProviderTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 import {
   SchoolBase,
@@ -19,8 +22,8 @@ import { SchoolEntity } from "./SchoolEntity"
 type UserEntityType = UserBaseIdentity &
   UserBaseInfo &
   UserBaseInfoOption &
-  UserBaseDate &
-  UserBaseManageOption & {
+  UserBaseDate & {
+    authProviders: AuthProvider[]
     memberSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
     ownerSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
   }
@@ -77,8 +80,26 @@ export class UserEntity extends EntityMutable<UserEntityType> {
     return this.userRole === "ADMIN"
   }
 
+  get authProviders(): AuthProvider[] {
+    return this.value.authProviders
+  }
+
+  public getAuthProvider(providerType: AuthProviderType): AuthProvider | null {
+    return (
+      this.value.authProviders.find(
+        (p) => p.providerType === providerType,
+      ) ?? null
+    )
+  }
+
+  public getAuthProviderUid(providerType: AuthProviderType): string | null {
+    return this.getAuthProvider(providerType)?.providerUid ?? null
+  }
+
   get isGuest(): boolean {
-    return this.value.isGuest
+    return this.value.authProviders.some(
+      (p) => p.providerType === "FIREBASE_GUEST",
+    )
   }
 
   public get isDeleted(): boolean {

@@ -2,22 +2,28 @@ import { FirebaseAuthError } from "firebase-admin/auth"
 import { firebaseAuth } from "@/lib/functions/firebaseAdmin"
 import { IExternalAuthenticationRepository } from "@/lib/interfaces/IExternalAuthenticationRepository"
 import { ApiV1Error } from "../common/ApiV1Error"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 
 export class FirebaseAuthUserRepository
   implements IExternalAuthenticationRepository
 {
   async verifyIdToken(idToken: string): Promise<{
-    uid: string
-    isGuest: boolean
+    providerUid: string
+    providerType: AuthProviderType
     email: string | null
     phoneNumber: string | null
   }> {
     try {
       const result = await firebaseAuth().verifyIdToken(idToken)
 
+      const providerType: AuthProviderType =
+        result.firebase.sign_in_provider === "anonymous"
+          ? "FIREBASE_GUEST"
+          : "FIREBASE_EMAIL"
+
       return {
-        uid: result.uid,
-        isGuest: result.firebase.sign_in_provider === "anonymous",
+        providerUid: result.uid,
+        providerType,
         email: result.email ?? null,
         phoneNumber: result.phone_number ?? null,
       }

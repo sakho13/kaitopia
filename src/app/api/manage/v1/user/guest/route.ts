@@ -21,7 +21,10 @@ export async function DELETE(req: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
 
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const user = await userService.getUserInfo(
+      api.getFirebaseUid(),
+      api.getProviderType()!,
+    )
     if (!user) {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
     }

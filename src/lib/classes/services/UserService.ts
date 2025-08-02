@@ -1,4 +1,5 @@
 import { EditableUserInfo, UserBaseInfo } from "@/lib/types/base/userTypes"
+import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 import { ServiceBase } from "../common/ServiceBase"
 import { UserController } from "../controller/UserController"
 import { UserRepository } from "../repositories/UserRepository"
@@ -16,18 +17,21 @@ export class UserService extends ServiceBase {
     this._userController = new UserController(this.dbConnection)
   }
 
-  public async getUserInfo(firebaseUid: string) {
-    return await this._userController.getUserInfo(firebaseUid)
+  public async getUserInfo(
+    providerUid: string,
+    providerType: AuthProviderType,
+  ) {
+    return await this._userController.getUserInfo(providerUid, providerType)
   }
 
   public async registerUserInfo(
-    firebaseUid: string,
-    isGuest: boolean,
+    providerUid: string,
+    providerType: AuthProviderType,
     data: UserBaseInfo,
   ) {
     return await this._userController.registerUserInfo(
-      firebaseUid,
-      isGuest,
+      providerUid,
+      providerType,
       data,
     )
   }
