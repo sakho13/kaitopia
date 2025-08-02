@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
     const user = await userService2.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user)
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     const userService = new UserService(prisma)
     await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
 
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
     const user = await userService2.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user)

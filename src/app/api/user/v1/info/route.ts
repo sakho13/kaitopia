@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       schoolRepository,
     )
     const user = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user)
@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest) {
     )
 
     const user = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user)

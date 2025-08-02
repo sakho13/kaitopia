@@ -22,7 +22,7 @@ export async function DELETE(req: NextRequest) {
     )
 
     const user = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user) {

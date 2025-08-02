@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
     const user = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user) {

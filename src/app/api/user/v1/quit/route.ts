@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     )
 
     const userInfo = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!userInfo) {

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const userService = new UserService(prisma)
 
     const userInfo = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!userInfo)

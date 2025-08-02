@@ -7,7 +7,7 @@ import { FirebaseAuthUserRepository } from "../repositories/FirebaseAuthUserRepo
 import { AuthProviderType } from "@/lib/types/base/authProviderTypes"
 
 export class ApiV1Wrapper {
-  private _firebaseUid = ""
+  private _providerUid = ""
   private _providerType: AuthProviderType | null = null
 
   constructor(private apiName: string) {}
@@ -56,7 +56,7 @@ export class ApiV1Wrapper {
 
     const firebaseBaseRepo = new FirebaseAuthUserRepository()
     const result = await firebaseBaseRepo.verifyIdToken(token)
-    this._firebaseUid = result.providerUid
+    this._providerUid = result.providerUid
     this._providerType = result.providerType
     return result
   }
@@ -71,7 +71,7 @@ export class ApiV1Wrapper {
 
     const userService = new UserService(prisma)
     const user = await userService.getUserInfo(
-      this.getFirebaseUid(),
+      this.getProviderUid(),
       this.getProviderType()!,
     )
 
@@ -92,7 +92,7 @@ export class ApiV1Wrapper {
     return this._providerType
   }
 
-  public getFirebaseUid() {
-    return this._firebaseUid
+  public getProviderUid() {
+    return this._providerUid
   }
 }

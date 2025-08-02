@@ -25,7 +25,7 @@ export async function PATCH(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
     const user = await userService2.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user) throw new ApiV1Error([{ key: "NotFoundError", params: null }])

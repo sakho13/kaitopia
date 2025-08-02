@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
     const user = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
     if (!user)

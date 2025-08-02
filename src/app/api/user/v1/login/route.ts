@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     )
 
     const user = await userService.getUserInfo(
-      api.getFirebaseUid(),
+      api.getProviderUid(),
       api.getProviderType()!,
     )
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
           {
             id: "",
             userId: "",
-            providerUid: api.getFirebaseUid(),
+            providerUid: api.getProviderUid(),
             providerType: api.getProviderType()!,
             createdAt: DateUtility.getNowDate(),
             updatedAt: DateUtility.getNowDate(),
