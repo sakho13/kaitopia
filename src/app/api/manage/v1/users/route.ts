@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         )
         return {
           id: u.id,
-          firebaseUid:
+          providerUid:
             emailProvider?.providerUid ?? guestProvider?.providerUid ?? "",
           name: u.name,
           email: u.email,
