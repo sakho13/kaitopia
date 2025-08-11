@@ -80,10 +80,16 @@ export class ApiV1Wrapper {
     return { userService }
   }
 
+  /**
+   * @deprecated ここに持たせるべきではない
+   */
   public async isGuest() {
     return this._isGuest
   }
 
+  /**
+   * @deprecated ここに持たせるべきではない
+   */
   public getFirebaseUid() {
     return this._firebaseUid
   }

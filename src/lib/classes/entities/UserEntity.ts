@@ -53,6 +53,16 @@ export class UserEntity extends EntityMutable<UserEntityType> {
     return this.value.id
   }
 
+  get username(): string {
+    return this.value.name
+  }
+
+  get birthDayString(): string | null {
+    return this.value.birthDayDate
+      ? this.value.birthDayDate.toISOString()
+      : null
+  }
+
   get userRole(): UserRoleType {
     return this.value.role
   }

@@ -17,6 +17,14 @@ export class UserService2 {
     private readonly _schoolRepository: ISchoolRepository,
   ) {}
 
+  public static createByPrisma(prismaClient: typeof prisma = prisma) {
+    return new UserService2(
+      prismaClient,
+      new PrismaUserRepository(prismaClient),
+      new PrismaSchoolRepository(prismaClient),
+    )
+  }
+
   public async getUserInfo(firebaseUid: string) {
     return await this._userRepository.findByFirebaseUid(firebaseUid)
   }
