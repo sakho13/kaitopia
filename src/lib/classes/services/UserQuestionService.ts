@@ -15,6 +15,9 @@ import { UserQuestionRepository } from "../repositories/UserQuestionRepository"
 import { STATICS } from "@/lib/statics"
 
 export class UserQuestionService extends ServiceBase {
+  /**
+   * @deprecated
+   */
   private userController: UserController
 
   private _exerciseId: string | null = null

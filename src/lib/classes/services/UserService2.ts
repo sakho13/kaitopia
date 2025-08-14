@@ -32,10 +32,8 @@ export class UserService2 {
   public async registerUserInfo(userEntity: UserEntity) {
     return this._dbConnection.$transaction(async (t) => {
       const userRepository = new PrismaUserRepository(t)
-      const schoolRepository = new PrismaSchoolRepository(t)
 
       const user = await userRepository.create(userEntity)
-      await schoolRepository.createSelfSchool(user)
       return user
     })
   }

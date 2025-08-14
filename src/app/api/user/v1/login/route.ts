@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   // ケース３：再ログイン
 
   return await api.execute("PostUserLogin", async () => {
-    const { email, phoneNumber } = await api.authorize(request)
+    const { email, phoneNumber, uid, isGuest } = await api.authorize(request)
 
     const userService = new UserService2(
       prisma,
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
 
-    const user = await userService.getUserInfo(api.getFirebaseUid())
+    const user = await userService.getUserInfo(uid)
 
     if (user && !user.isDeleted) {
       return {
@@ -34,10 +34,8 @@ export async function POST(request: NextRequest) {
           name: user.value.name,
           email: user.value.email,
           phoneNumber: user.value.phoneNumber,
-          birthDayDate: user.value.birthDayDate
-            ? user.value.birthDayDate.toISOString()
-            : null,
-          role: user.value.role,
+          birthDayDate: user.birthDayString,
+          role: user.userRole,
         },
         isGuest: user.isGuest,
       }
@@ -81,11 +79,10 @@ export async function POST(request: NextRequest) {
 
     // ユーザ名はランダムで生成する(今後、ログイン時に登録するようにする)
     const userName = `user-${Math.floor(Math.random() * 10000)}`
-    const isGuest = await api.isGuest()
 
     const newUser = await userService.registerUserInfo(
       new UserEntity({
-        firebaseUid: api.getFirebaseUid(),
+        firebaseUid: uid,
         id: "", // IDは自動生成されるため空文字
         name: userName,
         email: email ?? null,
@@ -105,13 +102,11 @@ export async function POST(request: NextRequest) {
       state: "register",
       user: {
         id: newUser.userId,
-        name: newUser.value.name,
+        name: newUser.username,
         email: newUser.value.email,
         phoneNumber: newUser.value.phoneNumber,
-        birthDayDate: newUser.value.birthDayDate
-          ? newUser.value.birthDayDate.toISOString()
-          : null,
-        role: newUser.value.role,
+        birthDayDate: newUser.birthDayString,
+        role: newUser.userRole,
       },
       isGuest: newUser.isGuest,
     }
