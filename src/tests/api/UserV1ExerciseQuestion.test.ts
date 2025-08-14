@@ -4,6 +4,7 @@
 
 import { GET, PATCH, POST } from "@/app/api/user/v1/exercise/question/route"
 import { GET as GetUserV1ExerciseResults } from "@/app/api/user/v1/exercise/results/route"
+import { GET as GetUserV1ResultLogs } from "@/app/api/user/v1/result/logs/route"
 import { TestUtility } from "../TestUtility"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
@@ -65,6 +66,25 @@ describe("API /api/user/v1/exercise/question", () => {
             Array.isArray(q.questionGroups),
         ),
       ).toBe(true)
+
+      const resultLogsResult = await TestUtility.runApi(
+        GetUserV1ResultLogs,
+        "GET",
+        "/api/user/v1/result/logs",
+        {
+          Authorization: `Bearer ${newUserToken}`,
+        },
+      )
+      expect(resultLogsResult.ok).toBe(true)
+      const jsonResultLogs = await resultLogsResult.json()
+      expect(jsonResultLogs).toEqual({
+        success: true,
+        data: {
+          nextPage: null,
+          resultLogs: [],
+          totalCount: 0,
+        },
+      })
     })
   })
 
@@ -136,6 +156,29 @@ describe("API /api/user/v1/exercise/question", () => {
             Array.isArray(q.questionGroups),
         ),
       ).toBe(true)
+
+      const resultLogsResult = await TestUtility.runApi(
+        GetUserV1ResultLogs,
+        "GET",
+        "/api/user/v1/result/logs",
+        {
+          Authorization: `Bearer ${newUserToken}`,
+        },
+      )
+      expect(resultLogsResult.ok).toBe(true)
+      const jsonResultLogs = await resultLogsResult.json()
+      expect(jsonResultLogs).toEqual({
+        success: true,
+        data: {
+          nextPage: null,
+          resultLogs: [
+            expect.objectContaining({
+              isInProgress: true,
+            }),
+          ],
+          totalCount: 1,
+        },
+      })
     })
 
     test("ゲストユーザで回答前に詳細を見る", async () => {
