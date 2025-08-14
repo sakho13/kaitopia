@@ -1,6 +1,7 @@
 import { IUserLogRepository } from "@/lib/interfaces/IUserLogRepository"
 import { UserEntity } from "../entities/UserEntity"
-import { AnswerLogSheetSummary } from "@/lib/types/base/userLogTypes"
+import { AnswerLogSheetSummary, AnswerLogSheetDetail } from "@/lib/types/base/userLogTypes"
+import { ApiV1Error } from "../common/ApiV1Error"
 
 /**
  * ユーザーの回答結果を管理するサービス
@@ -38,5 +39,26 @@ export class UserResultService {
       nextPage,
       totalCount,
     }
+  }
+
+  /**
+   * 特定の回答ログシートの詳細を取得する
+   * @param user - ユーザーエンティティ
+   * @param answerLogSheetId - 回答ログシートID
+   */
+  async getAnswerLogSheetDetail(
+    user: UserEntity,
+    answerLogSheetId: string,
+  ): Promise<AnswerLogSheetDetail> {
+    const sheet = await this._userLogRepository.findDetailByUserIdAndSheetId(
+      user.userId,
+      answerLogSheetId,
+    )
+
+    if (!sheet) {
+      throw new ApiV1Error([{ key: "NotFoundError", params: null }])
+    }
+
+    return sheet
   }
 }

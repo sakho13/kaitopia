@@ -1,4 +1,4 @@
-import { AnswerLogSheetSummary } from "@/lib/types/base/userLogTypes"
+import { AnswerLogSheetSummary, AnswerLogSheetDetail } from "@/lib/types/base/userLogTypes"
 
 /**
  * ユーザーの回答ログを管理するリポジトリインターフェース
@@ -21,4 +21,14 @@ export interface IUserLogRepository {
    * @param userId - ユーザーID
    */
   countAllByUserId(userId: string): Promise<number>
+
+  /**
+   * 特定の回答ログシートの詳細を取得する
+   * @param userId - ユーザーID
+   * @param answerLogSheetId - 回答ログシートID
+   */
+  findDetailByUserIdAndSheetId(
+    userId: string,
+    answerLogSheetId: string,
+  ): Promise<AnswerLogSheetDetail | null>
 }
