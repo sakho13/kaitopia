@@ -1,34 +1,48 @@
 import { NextRequest } from "next/server"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService } from "@/lib/classes/services/UserService"
+import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
+import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserResultService } from "@/lib/classes/services/UserResultService"
+import { PrismaUserLogRepository } from "@/lib/classes/repositories/PrismaUserLogRepository"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { prisma } from "@/lib/prisma"
-import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザの回答ログ取得")
 
-  return api.execute("GetUserResultLog", async () => {
-    await api.authorize(request)
+  return await api.execute("GetUserResultLog", async () => {
+    const { uid } = await api.authorize(request)
 
     const page = parseInt(request.nextUrl.searchParams.get("page") || "1") ?? 1
-
     const count = parseInt(
       request.nextUrl.searchParams.get("count") ?? "10",
       10,
     )
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-
-    const userQuestionService = new UserQuestionService(
-      userService.userController,
+    const userService = new UserService2(
       prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
     )
-    const { answerLogSheets, nextPage, totalCount } =
-      await userQuestionService.getAnswerLogSheets(count, page)
+    
+    const user = await userService.getUserInfo(uid)
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
+    const userResultService = new UserResultService(
+      new PrismaUserLogRepository(prisma),
+    )
+    
+    const { resultLogs, nextPage, totalCount } =
+      await userResultService.getAnswerLogs(user, count, page)
 
     return {
-      resultLogs: answerLogSheets.map((log) => ({
+      resultLogs: resultLogs.map((log) => ({
         answerLogSheetId: log.answerLogSheetId,
         exercise: log.exercise
           ? {
@@ -37,7 +51,7 @@ export function GET(request: NextRequest) {
             }
           : null,
         isInProgress: log.isInProgress,
-        totalQuestionCount: log._count.questionUserLogs,
+        totalQuestionCount: log.totalQuestionCount,
         totalCorrectCount: log.totalCorrectCount,
         totalIncorrectCount: log.totalIncorrectCount,
         totalUnansweredCount: log.totalUnansweredCount,
