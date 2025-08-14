@@ -1,15 +1,17 @@
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { ExerciseService } from "@/lib/classes/services/ExerciseService"
-import { UserService } from "@/lib/classes/services/UserService"
+import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { prisma } from "@/lib/prisma"
 import { NextRequest } from "next/server"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
-  return api.execute("GetUserExerciseInfo", async () => {
-    await api.authorize(request)
+  return await api.execute("GetUserExerciseInfo", async () => {
+    const { uid } = await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length === 0)
@@ -20,26 +22,23 @@ export function GET(request: NextRequest) {
         },
       ])
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-    const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
+    const userService = new UserService2(
+      prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
+    )
+    
+    const user = await userService.getUserInfo(uid)
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    const exercise = await exerciseService.getExerciseById(exerciseId)
-
-    return {
-      exercise: {
-        title: exercise.title,
-        description: exercise.description,
-        isPublished: exercise.isPublished,
-        isCanSkip: exercise.isCanSkip,
-        isScoringBatch: exercise.isScoringBatch,
-      },
-      questions: exercise.exerciseQuestions.map((q) => ({
-        title: q.question.title,
-        questionType: q.question.questionType,
-        answerType: q.question.answerType,
-      })),
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
     }
+
+    const userExerciseService = new UserExerciseService(prisma)
+    const result = await userExerciseService.getExerciseInfo(user, exerciseId)
+
+    return result
   })
 }
