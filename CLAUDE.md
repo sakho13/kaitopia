@@ -29,9 +29,24 @@
 ## プロジェクト構造
 
 - `src/` - Next.js アプリケーションのソースコード
+- `src/app/` - Next.js アプリケーションのルートディレクトリ
+  - `src/app/api/` - API 基底エンドポイント
+  - `src/app/api/user/` - 通常ユーザ向けの API エンドポイント
+  - `src/app/api/manage/` - 管理者画面向けの API エンドポイント
 - `src/tests/` - ユニットテスト(Jest) テストコード
 - `src/components/` - 再利用可能なコンポーネント(Atomic Design)
 - `src/components/ui/` - shadcn/ui コンポーネント専用
+- `src/lib/`
+  - `src/lib/functions/` - 単独で成立する基本的な関数群
+  - `src/lib/interfaces/` - クリーンアーキテクチャにおけるインターフェース定義
+  - `src/lib/classes/`
+    - `src/lib/classes/entities` - エンティティクラス
+    - `src/lib/classes/repositories/` - リポジトリクラス
+    - `src/lib/classes/services/` - サービスクラス
+    - `src/lib/classes/utilities/` - グルーピングされた関数群 静的メソッドのみを持つクラス
+  - `src/lib/types/` - プロジェクトに関連する型定義
+    - `src/lib/types/common` - プログラミングにおける基本的な型定義
+    - `src/lib/types/base/` - 機能に関連する型定義
 - `prisma/` - Prisma スキーマとマイグレーション
 - `docs/` - 各種設計書
 - `__tests__/` - UI/インテグレーションテスト(Playwright) テストコード
