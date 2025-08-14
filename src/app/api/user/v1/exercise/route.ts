@@ -4,6 +4,7 @@ import { UserService2 } from "@/lib/classes/services/UserService2"
 import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
+import { UserController } from "@/lib/classes/controller/UserController"
 import { prisma } from "@/lib/prisma"
 import { NextRequest } from "next/server"
 
@@ -36,9 +37,26 @@ export async function GET(request: NextRequest) {
       throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
     }
 
-    const userExerciseService = new UserExerciseService(prisma)
-    const result = await userExerciseService.getExerciseInfo(user, exerciseId)
+    // UserControllerを初期化してユーザー情報を設定
+    const userController = new UserController(prisma)
+    await userController.getUserInfo(uid)
 
-    return result
+    const userExerciseService = new UserExerciseService(prisma, userController)
+    const exercise = await userExerciseService.getExerciseInfo(user, exerciseId)
+
+    return {
+      exercise: {
+        title: exercise.title,
+        description: exercise.description,
+        isPublished: exercise.isPublished,
+        isCanSkip: exercise.isCanSkip,
+        isScoringBatch: exercise.isScoringBatch,
+      },
+      questions: exercise.exerciseQuestions.map((q) => ({
+        title: q.question.title,
+        questionType: q.question.questionType,
+        answerType: q.question.answerType,
+      })),
+    }
   })
 }
