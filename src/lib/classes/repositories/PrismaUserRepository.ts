@@ -8,50 +8,62 @@ export class PrismaUserRepository
   implements IUserRepository
 {
   async findByFirebaseUid(firebaseUid: string): Promise<UserEntity | null> {
-    const user = await this.dbConnection.user.findUnique({
-      where: { firebaseUid },
-      include: {
-        ownerSchools: {
-          select: {
-            school: true,
-          },
-          where: {
-            OR: [
-              {
-                school: { isSelfSchool: true },
-                owner: { firebaseUid },
-              },
-            ],
-          },
-        },
-        memberSchools: {
-          select: {
-            school: true,
-          },
-          where: {
-            OR: [
-              { school: { isGlobal: true } },
-              {
-                member: { firebaseUid },
-                limitAt: null,
-              },
-              {
-                member: { firebaseUid },
-                limitAt: {
-                  gte: DateUtility.getNowDate(),
+    const [user, globalSchools] = await Promise.all([
+      this.dbConnection.user.findUnique({
+        where: { firebaseUid },
+        include: {
+          ownerSchools: {
+            select: {
+              school: true,
+            },
+            where: {
+              OR: [
+                {
+                  school: { isSelfSchool: true },
+                  owner: { firebaseUid },
                 },
-              },
-            ],
+              ],
+            },
+          },
+          memberSchools: {
+            select: {
+              school: true,
+            },
+            where: {
+              OR: [
+                {
+                  member: { firebaseUid },
+                  limitAt: null,
+                },
+                {
+                  member: { firebaseUid },
+                  limitAt: {
+                    gte: DateUtility.getNowDate(),
+                  },
+                },
+              ],
+            },
           },
         },
-      },
-    })
+      }),
+      this.dbConnection.school.findMany({
+        where: { isGlobal: true },
+      }),
+    ])
+
     if (!user) {
       return null
     }
+
+    const memberSchools = [
+      ...user.memberSchools.map(({ school }) => school),
+      ...globalSchools,
+    ]
+
+    console.log(user)
     return new UserEntity({
       ...user,
-      memberSchools: user.memberSchools.map(({ school }) => school),
+      memberSchools,
       ownerSchools: user.ownerSchools.map(({ school }) => school),
     })
   }
