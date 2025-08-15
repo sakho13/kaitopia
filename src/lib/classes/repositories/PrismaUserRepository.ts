@@ -60,7 +60,6 @@ export class PrismaUserRepository
       ...globalSchools,
     ]
 
-    console.log(user)
     return new UserEntity({
       ...user,
       memberSchools,

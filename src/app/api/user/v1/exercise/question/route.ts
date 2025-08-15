@@ -1,16 +1,15 @@
+import { NextRequest } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserService } from "@/lib/classes/services/UserService"
 import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
 import { QuestionGroupService } from "@/lib/classes/services/QuestionGroupService"
 import { PrismaQuestionGroupRepository } from "@/lib/classes/repositories/PrismaQuestionGroupRepository"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
-import { UserController } from "@/lib/classes/controller/UserController"
-import { prisma } from "@/lib/prisma"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
-import { NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
@@ -43,12 +42,12 @@ export async function GET(request: NextRequest) {
         },
       ])
 
-    const userService = new UserService2(
+    const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-    
+
     const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -57,18 +56,11 @@ export async function GET(request: NextRequest) {
       throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
     }
 
-    // UserControllerを初期化してユーザー情報を設定
-    const userController = new UserController(prisma)
-    await userController.getUserInfo(uid)
-
-    const userQuestionService = new UserQuestionService(
-      userController,
-      prisma,
-    )
+    const userQuestionService = new UserQuestionService(prisma)
     userQuestionService.exerciseId = exerciseId
 
     const { questions, answerLogSheetId } =
-      await userQuestionService.getQuestions(mode)
+      await userQuestionService.getQuestions(user, mode)
 
     const questionGroupService = new QuestionGroupService(
       prisma,
@@ -77,10 +69,9 @@ export async function GET(request: NextRequest) {
     const groups = await questionGroupService.getGroups(
       questions.map((q) => q.questionId),
     )
-    const groupMap = groups.reduce<Record<string, typeof groups[0]["groups"]>>(
-      (p, c) => ({ ...p, [c.questionId]: c.groups }),
-      {},
-    )
+    const groupMap = groups.reduce<
+      Record<string, (typeof groups)[0]["groups"]>
+    >((p, c) => ({ ...p, [c.questionId]: c.groups }), {})
 
     const questionsWithGroup = questions.map((q) => ({
       ...q,
@@ -92,7 +83,7 @@ export async function GET(request: NextRequest) {
         })) ?? [],
     }))
 
-    const userExerciseService = new UserExerciseService(prisma, userController)
+    const userExerciseService = new UserExerciseService(prisma)
     const exercise = await userExerciseService.getExerciseInfo(user, exerciseId)
 
     // ユーザへ次に行うべきことを通知するためのモード
@@ -125,12 +116,12 @@ export async function POST(request: NextRequest) {
     const { error, result: body } = validatePost(await request.json())
     if (error) throw error
 
-    const userService = new UserService2(
+    const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-    
+
     const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -139,17 +130,11 @@ export async function POST(request: NextRequest) {
       throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
     }
 
-    // UserControllerを初期化してユーザー情報を設定
-    const userController = new UserController(prisma)
-    await userController.getUserInfo(uid)
-
-    const userQuestionService = new UserQuestionService(
-      userController,
-      prisma,
-    )
+    const userQuestionService = new UserQuestionService(prisma)
 
     userQuestionService.exerciseId = body.exerciseId
     const completeResult = await userQuestionService.submitAnswerState(
+      user,
       body.answerLogSheetId,
     )
 
@@ -180,12 +165,12 @@ export async function PATCH(request: NextRequest) {
     const { error, result } = validatePatch(await request.json())
     if (error) throw error
 
-    const userService = new UserService2(
+    const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-    
+
     const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -194,19 +179,13 @@ export async function PATCH(request: NextRequest) {
       throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
     }
 
-    // UserControllerを初期化してユーザー情報を設定
-    const userController = new UserController(prisma)
-    await userController.getUserInfo(uid)
-
-    const userQuestionService = new UserQuestionService(
-      userController,
-      prisma,
-    )
+    const userQuestionService = new UserQuestionService(prisma)
 
     const { answerLogSheetId, exerciseId, questionUserLogId } = result
     userQuestionService.exerciseId = exerciseId
 
     const saveResult = await userQuestionService.saveAnswerLog(
+      user,
       answerLogSheetId,
       questionUserLogId,
       result.answer,

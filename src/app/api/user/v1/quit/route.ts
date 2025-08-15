@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
-import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserService } from "@/lib/classes/services/UserService"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       throw validationResult.error
     }
 
-    const userService = new UserService2(
+    const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),

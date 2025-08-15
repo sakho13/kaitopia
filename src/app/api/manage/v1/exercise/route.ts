@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { ExerciseService } from "@/lib/classes/services/ExerciseService"
-import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の取得")
 
   return await api.execute("GetManageExercise", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    const { user } = await api.checkAccessManagePage(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length < 2)
@@ -18,9 +18,8 @@ export async function GET(request: NextRequest) {
       ])
 
     const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
 
-    const exercise = await exerciseService.getExerciseById(exerciseId)
+    const exercise = await exerciseService.getExerciseById(user, exerciseId)
 
     return {
       exercise: {
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の作成")
 
   return await api.execute("PostManageExercise", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    const { user } = await api.checkAccessManagePage(request)
 
     const body = await request.json()
 
@@ -60,9 +59,9 @@ export async function POST(request: NextRequest) {
     if (validationResult.error) throw validationResult.error
 
     const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
 
     const result = await exerciseService.createExercise(
+      user,
       validationResult.result.schoolId,
       validationResult.result.property,
     )
@@ -83,7 +82,7 @@ export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の更新")
 
   return api.execute("PatchManageExercise", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    const { user } = await api.checkAccessManagePage(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length < 2)
@@ -97,9 +96,12 @@ export async function PATCH(request: NextRequest) {
     if (error) throw error
 
     const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
 
-    const result = await exerciseService.updateExercise(exerciseId, resultBody)
+    const result = await exerciseService.updateExercise(
+      user,
+      exerciseId,
+      resultBody,
+    )
 
     return {
       exercise: {
@@ -117,7 +119,7 @@ export function DELETE(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の削除")
 
   return api.execute("DeleteManageExercise", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    const { user } = await api.checkAccessManagePage(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length < 2)
@@ -126,9 +128,8 @@ export function DELETE(request: NextRequest) {
       ])
 
     const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
 
-    await exerciseService.deleteExercise(exerciseId)
+    await exerciseService.deleteExercise(user, exerciseId)
 
     return {
       exerciseId,

@@ -4,7 +4,7 @@ import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { UserEntity } from "@/lib/classes/entities/UserEntity"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
-import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserService } from "@/lib/classes/services/UserService"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   return await api.execute("PostUserLogin", async () => {
     const { email, phoneNumber, uid, isGuest } = await api.authorize(request)
 
-    const userService = new UserService2(
+    const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),

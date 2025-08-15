@@ -1,6 +1,7 @@
 import { EntityMutable } from "@/lib/interfaces/EntityMutable"
 import { STATICS } from "@/lib/statics"
 import {
+  UserAccessSchoolMethod,
   UserBaseDate,
   UserBaseIdentity,
   UserBaseInfo,
@@ -47,6 +48,64 @@ export class UserEntity extends EntityMutable<UserEntityType> {
 
   public reRegister() {
     this.value.deletedAt = null
+  }
+
+  /**
+   * このユーザがこのスクールで持つ権限を取得する
+   * @param schoolId
+   * @returns UserAccessSchoolMethod[]
+   */
+  public checkAccessSchoolMethod(schoolId: string): UserAccessSchoolMethod[] {
+    const AllAccess: UserAccessSchoolMethod[] = [
+      "read",
+      "edit",
+      "create",
+      "publish",
+      "delete",
+    ]
+
+    if (this.userRole === "ADMIN") return AllAccess
+
+    const ownSchools = this.ownSchools
+    const memberSchools = this.memberSchools
+    if (ownSchools.length < 0) return []
+
+    // セルフスクールならば全ての権限を付与する
+    const selfSchool = ownSchools.find(
+      (s) => s.schoolId === schoolId && s.isSelfSchool,
+    )
+    if (selfSchool?.isSelfSchool) return AllAccess
+
+    // グローバルスクールならばReadのみ付与する
+    const globalSchools = memberSchools.find(
+      (s) => s.schoolId === schoolId && s.isGlobalSchool,
+    )
+    if (globalSchools) return ["read"]
+
+    if (this.userRole === "USER") {
+      // スクールのメンバーならばReadのみ付与する
+      const isInMember = memberSchools.find(
+        (s) => s.schoolId === schoolId,
+        // &&
+        // s.members.some(
+        //   (m) =>
+        //     m.limitAt === null || m.limitAt >= DateUtility.getNowDate(),
+        // ),
+      )
+      if (isInMember) return ["read"]
+
+      return []
+    }
+
+    if (this.userRole === "MODERATOR") {
+      return []
+    }
+
+    if (this.userRole === "TEACHER") {
+      return []
+    }
+
+    return []
   }
 
   get userId(): string {

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserService } from "@/lib/classes/services/UserService"
 import { validateBodyWrapper } from "@/lib/functions/validateBodyWrapper"
 
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   return await api.execute("GetUserInfo", async () => {
     const { uid } = await api.authorize(request)
 
-    const userService = UserService2.createByPrisma(prisma)
+    const userService = UserService.createByPrisma(prisma)
     const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -50,7 +50,7 @@ export async function PATCH(request: NextRequest) {
     const validationResult = validatePatch(body)
     if (validationResult.error) throw validationResult.error
 
-    const userService = UserService2.createByPrisma(prisma)
+    const userService = UserService.createByPrisma(prisma)
 
     const user = await userService.getUserInfo(uid)
     if (!user)

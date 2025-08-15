@@ -1,4 +1,6 @@
 import { $Enums } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
+import { STATICS } from "@/lib/statics"
 import {
   QuestionAnswerContent,
   QuestionAnswerForUser,
@@ -7,28 +9,15 @@ import {
   QuestionTypeType,
 } from "@/lib/types/base/questionTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
-import { ServiceBase } from "../common/ServiceBase"
-import { UserController } from "../controller/UserController"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
 import { UserLogRepository } from "../repositories/UserLogRepository"
 import { UserQuestionRepository } from "../repositories/UserQuestionRepository"
-import { STATICS } from "@/lib/statics"
+import { UserEntity } from "../entities/UserEntity"
 
-export class UserQuestionService extends ServiceBase {
-  /**
-   * @deprecated
-   */
-  private userController: UserController
-
+export class UserQuestionService {
   private _exerciseId: string | null = null
 
-  constructor(
-    userController: UserController,
-    ...args: ConstructorParameters<typeof ServiceBase>
-  ) {
-    super(...args)
-    this.userController = userController
-  }
+  constructor(private readonly _dbConnection: typeof prisma = prisma) {}
 
   /**
    * 問題リストを取得する
@@ -39,15 +28,18 @@ export class UserQuestionService extends ServiceBase {
    *   * answer: 回答を前提に問題を取得する(回答画面での取得)
    *   * restart: answer実行済みの問題を取得する
    */
-  public async getQuestions(mode: "show" | "answer" | "restart"): Promise<{
+  public async getQuestions(
+    user: UserEntity,
+    mode: "show" | "answer" | "restart",
+  ): Promise<{
     questions: QuestionForUser[]
     answerLogSheetId: string | null
   }> {
     if (this._exerciseId) {
       if (mode === "show") {
         const userQuestionRepository = new UserQuestionRepository(
-          this._userId,
-          this.dbConnection,
+          user.userId,
+          this._dbConnection,
         )
         const questions =
           await userQuestionRepository.findQuestionsByExerciseId(
@@ -78,10 +70,10 @@ export class UserQuestionService extends ServiceBase {
 
       if (mode === "answer" || mode === "restart") {
         // ゲストユーザの上限チェック
-        if (this.userController.isGuest) {
+        if (user.isGuest) {
           const userLogRepository = new UserLogRepository(
-            this._userId,
-            this.dbConnection,
+            user.userId,
+            this._dbConnection,
           )
           const count = await userLogRepository.countCompletedAnswerLogSheets()
           if (count >= STATICS.GUEST_LIMIT.EXERCISE_COUNT) {
@@ -96,6 +88,7 @@ export class UserQuestionService extends ServiceBase {
 
         const { questions, sheet, exercise } =
           await this._insertAnswerLogSheetAndPropertyByExercise(
+            user,
             this._exerciseId,
           )
         return {
@@ -155,6 +148,7 @@ export class UserQuestionService extends ServiceBase {
    * @param answer
    */
   public async saveAnswerLog(
+    user: UserEntity,
     answerLogSheetId: string,
     questionUserLogId: string,
     answer: QuestionAnswerContent,
@@ -167,8 +161,8 @@ export class UserQuestionService extends ServiceBase {
     totalUnansweredCount: number
   } | null> {
     const userLogRepository = new UserLogRepository(
-      this._userId,
-      this.dbConnection,
+      user.userId,
+      this._dbConnection,
     )
     const latest = await userLogRepository.findLatestAnswerLogSheetByExerciseId(
       this._exerciseId!,
@@ -223,7 +217,7 @@ export class UserQuestionService extends ServiceBase {
       // * 一括採点で回答済み
 
       // 回答トランザクション
-      const answerResult = await this.dbConnection.$transaction(async (t) => {
+      const answerResult = await this._dbConnection.$transaction(async (t) => {
         userLogRepository.resetDbConnection(t)
 
         if (
@@ -295,9 +289,9 @@ export class UserQuestionService extends ServiceBase {
   /**
    * 回答状態を固定/保存する
    */
-  public async submitAnswerState(answerLogSheetId: string) {
-    return await this.dbConnection.$transaction(async (t) => {
-      const userLogRepository = new UserLogRepository(this._userId, t)
+  public async submitAnswerState(user: UserEntity, answerLogSheetId: string) {
+    return await this._dbConnection.$transaction(async (t) => {
+      const userLogRepository = new UserLogRepository(user.userId, t)
       const sheet = await userLogRepository.findAnswerLogSheetById(
         answerLogSheetId,
       )
@@ -334,11 +328,15 @@ export class UserQuestionService extends ServiceBase {
    * @param page
    * @returns
    */
-  public async getAnswerLogSheets(limit: number = 10, page?: number) {
+  public async getAnswerLogSheets(
+    user: UserEntity,
+    limit: number = 10,
+    page?: number,
+  ) {
     const offset = page ? (page - 1) * limit : undefined
     const userLogRepository = new UserLogRepository(
-      this._userId,
-      this.dbConnection,
+      user.userId,
+      this._dbConnection,
     )
 
     const answerLogSheets = await userLogRepository.findAllAnswerLogSheets(
@@ -354,10 +352,10 @@ export class UserQuestionService extends ServiceBase {
   /**
    * 問題の回答履歴を取得する
    */
-  public async getAnswerLogSheet(answerLogSheetId: string) {
+  public async getAnswerLogSheet(user: UserEntity, answerLogSheetId: string) {
     const userLogRepository = new UserLogRepository(
-      this._userId,
-      this.dbConnection,
+      user.userId,
+      this._dbConnection,
     )
 
     const sheet = await userLogRepository.findAnswerLogSheetForResultById(
@@ -491,7 +489,7 @@ export class UserQuestionService extends ServiceBase {
     answerLogSheetId: string,
     questionUserLogId: string,
   ) {
-    const result = await this.dbConnection.$transaction(async (t) => {
+    const result = await this._dbConnection.$transaction(async (t) => {
       const questionUserLog = await t.questionUserLog.findUnique({
         select: {
           userId: true,
@@ -634,14 +632,15 @@ export class UserQuestionService extends ServiceBase {
    * @returns
    */
   private async _insertAnswerLogSheetAndPropertyByExercise(
+    user: UserEntity,
     exerciseId: string,
     createNew: boolean = false,
   ) {
     const exercise = await this._getExerciseById(exerciseId)
 
     const userLogRepository = new UserLogRepository(
-      this._userId,
-      this.dbConnection,
+      user.userId,
+      this._dbConnection,
     )
 
     const latest = await userLogRepository.findLatestAnswerLogSheetByExerciseId(
@@ -651,8 +650,8 @@ export class UserQuestionService extends ServiceBase {
     // 既出なら過去分を削除して新しいものを作成する
     if (latest && !createNew && latest.exerciseId === exerciseId) {
       const userLogRepository = new UserLogRepository(
-        this._userId,
-        this.dbConnection,
+        user.userId,
+        this._dbConnection,
       )
       await userLogRepository.resetAnswerLogSheetById(latest.answerLogSheetId)
     }
@@ -667,10 +666,10 @@ export class UserQuestionService extends ServiceBase {
     }
 
     // 最新の問題集に設定している情報からログシートを作成する
-    const { questions, sheet } = await this.dbConnection.$transaction(
+    const { questions, sheet } = await this._dbConnection.$transaction(
       async (t) => {
         const userQuestionRepository = new UserQuestionRepository(
-          this._userId,
+          user.userId,
           t,
         )
         let questions = await userQuestionRepository.findQuestionsByExerciseId(
@@ -697,7 +696,7 @@ export class UserQuestionService extends ServiceBase {
           questions = questions.slice(0, exercise.questionCount)
         }
 
-        const userLogRepository = new UserLogRepository(this._userId, t)
+        const userLogRepository = new UserLogRepository(user.userId, t)
         const sheet =
           await userLogRepository.createExerciseAnswerLogSheetByQuestions(
             exerciseId,
@@ -716,7 +715,7 @@ export class UserQuestionService extends ServiceBase {
   }
 
   private async _getExerciseById(exerciseId: string) {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
     const exercise = await exerciseRepository.findExerciseById(exerciseId)
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
@@ -838,12 +837,6 @@ export class UserQuestionService extends ServiceBase {
         minLength: 0,
       },
     }
-  }
-
-  private get _userId() {
-    if (this.userController.userId === null)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-    return this.userController.userId
   }
 
   public set exerciseId(exerciseId: string) {

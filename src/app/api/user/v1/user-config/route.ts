@@ -1,14 +1,14 @@
 import { NextRequest } from "next/server"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserService } from "@/lib/classes/services/UserService"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ設定の取得")
 
   return await api.execute("GetUserConfig", async () => {
     const { uid } = await api.authorize(request)
-    const userService = UserService2.createByPrisma()
+    const userService = UserService.createByPrisma()
 
     const user = await userService.getUserInfo(uid)
     if (!user)

@@ -30,6 +30,38 @@ export class PrismaManageUserRepository
     )
   }
 
+  async findAll(limit?: number, offset?: number): Promise<UserEntity[]> {
+    const users = await this.dbConnection.user.findMany({
+      select: {
+        id: true,
+
+        name: true,
+        email: true,
+        phoneNumber: true,
+        birthDayDate: true,
+
+        role: true,
+        isGuest: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+
+        firebaseUid: true,
+      },
+      take: limit,
+      skip: offset,
+      orderBy: [{ createdAt: "desc" }],
+    })
+    return users.map(
+      (user) =>
+        new UserEntity({ ...user, ownerSchools: [], memberSchools: [] }),
+    )
+  }
+
+  public async countAllUsers() {
+    return await this.dbConnection.user.count()
+  }
+
   async deleteUsers(userIds: string[]): Promise<void> {
     await this.dbConnection.user.updateMany({
       where: {

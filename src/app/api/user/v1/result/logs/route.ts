@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
-import { UserService2 } from "@/lib/classes/services/UserService2"
+import { UserService } from "@/lib/classes/services/UserService"
 import { UserResultService } from "@/lib/classes/services/UserResultService"
 import { PrismaUserLogRepository } from "@/lib/classes/repositories/PrismaUserLogRepository"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
@@ -20,12 +20,12 @@ export async function GET(request: NextRequest) {
       10,
     )
 
-    const userService = new UserService2(
+    const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-    
+
     const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const userResultService = new UserResultService(
       new PrismaUserLogRepository(prisma),
     )
-    
+
     const { resultLogs, nextPage, totalCount } =
       await userResultService.getAnswerLogs(user, count, page)
 
