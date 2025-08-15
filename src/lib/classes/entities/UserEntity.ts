@@ -67,6 +67,10 @@ export class UserEntity extends EntityMutable<UserEntityType> {
     return this.value.role
   }
 
+  get schools(): SchoolEntity[] {
+    return [...this.ownSchools, ...this.memberSchools]
+  }
+
   get ownSchools() {
     return this.value.ownerSchools.map((s) => new SchoolEntity(s))
   }
