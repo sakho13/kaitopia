@@ -1,8 +1,8 @@
 model AuthProvider {
   id String @id @default(cuid(2))
 
-  userId       String
-  providerType ProviderType
+  userId       String @map("user_id")
+  providerType ProviderType @map("provider_type")
   externalId   String @map("external_id")
   metadata     Json?
 
@@ -15,7 +15,6 @@ model AuthProvider {
 
   @@unique([providerType, externalId])
   @@index([userId, isActive])
-  @@map("auth_providers")
 }
 
 enum ProviderType {
