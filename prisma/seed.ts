@@ -68,6 +68,26 @@ async function transferUsers(db: Prisma.TransactionClient) {
       },
     ],
   })
+
+  await db.authProvider.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        id: "auth_kaitopia-user+001_email",
+        userId: "kaitopia-user+001",
+        externalId: "3na1wqgfg7Jj71amJifrwGrCtkCg",
+        providerType: "FIREBASE_EMAIL",
+        isActive: true,
+      },
+      {
+        id: "auth_kaitopia-admin+001_email",
+        userId: "kaitopia-admin+001",
+        externalId: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
+        providerType: "FIREBASE_EMAIL",
+        isActive: true,
+      },
+    ],
+  })
 }
 
 async function transferSchools(db: Prisma.TransactionClient) {
