@@ -16,6 +16,8 @@ import {
   SchoolBaseIdentity,
 } from "@/lib/types/base/schoolTypes"
 import { SchoolEntity } from "./SchoolEntity"
+import { AuthProviderEntity } from "./AuthProviderEntity"
+import { AuthProvider, ProviderTypeType } from "@/lib/types/base/authProviderTypes"
 
 type UserEntityType = UserBaseIdentity &
   UserBaseInfo &
@@ -24,6 +26,7 @@ type UserEntityType = UserBaseIdentity &
   UserBaseManageOption & {
     memberSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
     ownerSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
+    authProviders?: AuthProvider[]
   }
 
 export class UserEntity extends EntityMutable<UserEntityType> {
@@ -156,5 +159,100 @@ export class UserEntity extends EntityMutable<UserEntityType> {
 
   public get isDeleted(): boolean {
     return this.value.deletedAt !== null
+  }
+
+  // 認証プロバイダ関連のメソッド
+
+  /**
+   * 認証プロバイダのリストを取得
+   */
+  get authProviders(): AuthProviderEntity[] {
+    return (this.value.authProviders || []).map(
+      (provider) => new AuthProviderEntity(provider),
+    )
+  }
+
+  /**
+   * アクティブな認証プロバイダのリストを取得
+   */
+  get activeAuthProviders(): AuthProviderEntity[] {
+    return this.authProviders.filter((provider) => provider.isActive)
+  }
+
+  /**
+   * 特定の認証プロバイダタイプを持っているかチェック
+   */
+  public hasAuthProvider(providerType: ProviderTypeType): boolean {
+    return this.activeAuthProviders.some(
+      (provider) => provider.providerType === providerType,
+    )
+  }
+
+  /**
+   * 特定の認証プロバイダタイプのアクティブなプロバイダを取得
+   */
+  public getAuthProvider(
+    providerType: ProviderTypeType,
+  ): AuthProviderEntity | null {
+    return (
+      this.activeAuthProviders.find(
+        (provider) => provider.providerType === providerType,
+      ) || null
+    )
+  }
+
+  /**
+   * Firebase Guest認証を持っているかチェック
+   */
+  get hasFirebaseGuest(): boolean {
+    return this.hasAuthProvider("FIREBASE_GUEST")
+  }
+
+  /**
+   * Firebase Email認証を持っているかチェック
+   */
+  get hasFirebaseEmail(): boolean {
+    return this.hasAuthProvider("FIREBASE_EMAIL")
+  }
+
+  /**
+   * Firebase Google認証を持っているかチェック
+   */
+  get hasFirebaseGoogle(): boolean {
+    return this.hasAuthProvider("FIREBASE_GOOGLE")
+  }
+
+  /**
+   * プライマリ認証プロバイダを取得
+   * 優先度: FIREBASE_EMAIL > FIREBASE_GOOGLE > FIREBASE_GUEST
+   */
+  get primaryAuthProvider(): AuthProviderEntity | null {
+    const activeProviders = this.activeAuthProviders
+
+    // FIREBASE_EMAIL が最優先
+    const emailProvider = activeProviders.find((p) => p.isFirebaseEmail)
+    if (emailProvider) return emailProvider
+
+    // 次に FIREBASE_GOOGLE
+    const googleProvider = activeProviders.find((p) => p.isFirebaseGoogle)
+    if (googleProvider) return googleProvider
+
+    // 最後に FIREBASE_GUEST
+    const guestProvider = activeProviders.find((p) => p.isFirebaseGuest)
+    if (guestProvider) return guestProvider
+
+    return null
+  }
+
+  /**
+   * 現在のゲスト状態を認証プロバイダから判断
+   * 新しい認証システムでは、Firebase Guest認証のみを持つユーザーがゲスト
+   */
+  get isGuestByAuthProvider(): boolean {
+    const activeProviders = this.activeAuthProviders
+    return (
+      activeProviders.length === 1 &&
+      activeProviders[0].providerType === "FIREBASE_GUEST"
+    )
   }
 }
