@@ -1,19 +1,21 @@
+import { NextRequest } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { ExerciseService } from "@/lib/classes/services/ExerciseService"
-import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 import { UserService } from "@/lib/classes/services/UserService"
+import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
+import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
 import { QuestionGroupService } from "@/lib/classes/services/QuestionGroupService"
 import { PrismaQuestionGroupRepository } from "@/lib/classes/repositories/PrismaQuestionGroupRepository"
-import { prisma } from "@/lib/prisma"
+import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
+import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
-import { NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
   return await api.execute("GetUserExerciseQuestion", async () => {
-    await api.authorize(request)
+    const { uid } = await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length === 0)
@@ -40,17 +42,25 @@ export async function GET(request: NextRequest) {
         },
       ])
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-
-    const userQuestionService = new UserQuestionService(
-      userService.userController,
+    const userService = new UserService(
       prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
     )
+
+    const user = await userService.getUserInfo(uid)
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
+    const userQuestionService = new UserQuestionService(prisma)
     userQuestionService.exerciseId = exerciseId
 
     const { questions, answerLogSheetId } =
-      await userQuestionService.getQuestions(mode)
+      await userQuestionService.getQuestions(user, mode)
 
     const questionGroupService = new QuestionGroupService(
       prisma,
@@ -59,10 +69,9 @@ export async function GET(request: NextRequest) {
     const groups = await questionGroupService.getGroups(
       questions.map((q) => q.questionId),
     )
-    const groupMap = groups.reduce<Record<string, typeof groups[0]["groups"]>>(
-      (p, c) => ({ ...p, [c.questionId]: c.groups }),
-      {},
-    )
+    const groupMap = groups.reduce<
+      Record<string, (typeof groups)[0]["groups"]>
+    >((p, c) => ({ ...p, [c.questionId]: c.groups }), {})
 
     const questionsWithGroup = questions.map((q) => ({
       ...q,
@@ -74,10 +83,8 @@ export async function GET(request: NextRequest) {
         })) ?? [],
     }))
 
-    const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
-
-    const exercise = await exerciseService.getExerciseById(exerciseId)
+    const userExerciseService = new UserExerciseService(prisma)
+    const exercise = await userExerciseService.getExerciseInfo(user, exerciseId)
 
     // ユーザへ次に行うべきことを通知するためのモード
     const fn = mode === "show" ? null : mode === "answer" ? "answer" : null
@@ -104,21 +111,30 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集として採点")
 
   return await api.execute("PostUserExerciseQuestion", async () => {
-    await api.authorize(request)
+    const { uid } = await api.authorize(request)
 
     const { error, result: body } = validatePost(await request.json())
     if (error) throw error
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-
-    const userQuestionService = new UserQuestionService(
-      userService.userController,
+    const userService = new UserService(
       prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
     )
+
+    const user = await userService.getUserInfo(uid)
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
+    const userQuestionService = new UserQuestionService(prisma)
 
     userQuestionService.exerciseId = body.exerciseId
     const completeResult = await userQuestionService.submitAnswerState(
+      user,
       body.answerLogSheetId,
     )
 
@@ -144,23 +160,32 @@ export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の回答")
 
   return await api.execute("PatchUserExerciseQuestion", async () => {
-    await api.authorize(request)
+    const { uid } = await api.authorize(request)
 
     const { error, result } = validatePatch(await request.json())
     if (error) throw error
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-
-    const userQuestionService = new UserQuestionService(
-      userService.userController,
+    const userService = new UserService(
       prisma,
+      new PrismaUserRepository(prisma),
+      new PrismaSchoolRepository(prisma),
     )
+
+    const user = await userService.getUserInfo(uid)
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
+    const userQuestionService = new UserQuestionService(prisma)
 
     const { answerLogSheetId, exerciseId, questionUserLogId } = result
     userQuestionService.exerciseId = exerciseId
 
     const saveResult = await userQuestionService.saveAnswerLog(
+      user,
       answerLogSheetId,
       questionUserLogId,
       result.answer,

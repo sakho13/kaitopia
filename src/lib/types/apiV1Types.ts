@@ -259,6 +259,7 @@ export type ApiV1OutTypeMap = {
     user: UserBaseInfo &
       ReplacedDateToString<UserBaseInfoOption> &
       ReplacedDateToString<Omit<UserBaseDate, "deletedAt">>
+    schools: { schoolId: string; schoolName: string }[]
   }
   PatchUserInfo: ApiV1OutTypeMap["GetUserInfo"]
 

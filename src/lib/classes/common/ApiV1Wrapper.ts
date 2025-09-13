@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ApiV1Error } from "./ApiV1Error"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
-import { UserService } from "../services/UserService"
 import { prisma } from "@/lib/prisma"
 import { FirebaseAuthUserRepository } from "../repositories/FirebaseAuthUserRepository"
+import { UserService } from "../services/UserService"
 
 export class ApiV1Wrapper {
   private _firebaseUid = ""
@@ -66,24 +66,31 @@ export class ApiV1Wrapper {
    * @returns
    */
   public async checkAccessManagePage(request: NextRequest) {
-    await this.authorize(request)
+    const { uid } = await this.authorize(request)
 
-    const userService = new UserService(prisma)
-    const user = await userService.getUserInfo(this.getFirebaseUid())
+    // 管理者ページAPIはユーザが存在していることが前提であるため
+    const userService = UserService.createByPrisma(prisma)
+    const user = await userService.getUserInfo(uid)
 
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    if (!userService.canAccessManagePage)
+    if (!user.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
-    return { userService }
+    return { user }
   }
 
+  /**
+   * @deprecated ここに持たせるべきではない
+   */
   public async isGuest() {
     return this._isGuest
   }
 
+  /**
+   * @deprecated ここに持たせるべきではない
+   */
   public getFirebaseUid() {
     return this._firebaseUid
   }
