@@ -2,10 +2,11 @@ import { UserEntity } from "@/lib/classes/entities/UserEntity"
 import {
   IUserAuthRepository,
   AuthProviderData,
-  AuthProviderEntity,
 } from "@/lib/interfaces/IUserAuthRepository"
 import { ProviderTypeType } from "@/lib/types/base/authProviderTypes"
 import { RepositoryBase } from "../common/RepositoryBase"
+import { AuthProviderEntity } from "../entities/AuthProviderEntity"
+import { DateUtility } from "../common/DateUtility"
 
 /**
  * Prismaを使用した認証プロバイダリポジトリの実装
@@ -106,16 +107,19 @@ export class PrismaUserAuthRepository
       },
     })
 
-    return authProviders.map((provider) => ({
-      id: provider.id,
-      userId: provider.userId,
-      providerType: provider.providerType,
-      externalId: provider.externalId,
-      metadata: provider.metadata as Record<string, unknown> | null,
-      isActive: provider.isActive,
-      createdAt: provider.createdAt,
-      updatedAt: provider.updatedAt,
-    }))
+    return authProviders.map(
+      (provider) =>
+        new AuthProviderEntity({
+          id: provider.id,
+          userId: provider.userId,
+          providerType: provider.providerType,
+          externalId: provider.externalId,
+          metadata: provider.metadata as Record<string, unknown> | null,
+          isActive: provider.isActive,
+          createdAt: provider.createdAt,
+          updatedAt: provider.updatedAt,
+        }),
+    )
   }
 
   /**
@@ -134,7 +138,7 @@ export class PrismaUserAuthRepository
       },
     })
 
-    return {
+    return new AuthProviderEntity({
       id: authProvider.id,
       userId: authProvider.userId,
       providerType: authProvider.providerType,
@@ -143,7 +147,7 @@ export class PrismaUserAuthRepository
       isActive: authProvider.isActive,
       createdAt: authProvider.createdAt,
       updatedAt: authProvider.updatedAt,
-    }
+    })
   }
 
   /**
@@ -161,7 +165,7 @@ export class PrismaUserAuthRepository
       },
       data: {
         isActive: false,
-        updatedAt: new Date(),
+        updatedAt: DateUtility.getNowDate(),
       },
     })
   }

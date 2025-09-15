@@ -3,6 +3,7 @@ import {
   AuthProvider,
   ProviderTypeType,
 } from "@/lib/types/base/authProviderTypes"
+import { DateUtility } from "../common/DateUtility"
 
 /**
  * 認証プロバイダエンティティ
@@ -34,7 +35,7 @@ export class AuthProviderEntity extends EntityMutable<AuthProvider> {
    */
   public deactivate(): void {
     this.value.isActive = false
-    this.value.updatedAt = new Date()
+    this.value.updatedAt = DateUtility.getNowDate()
   }
 
   /**
@@ -42,7 +43,7 @@ export class AuthProviderEntity extends EntityMutable<AuthProvider> {
    */
   public activate(): void {
     this.value.isActive = true
-    this.value.updatedAt = new Date()
+    this.value.updatedAt = DateUtility.getNowDate()
   }
 
   // Getters

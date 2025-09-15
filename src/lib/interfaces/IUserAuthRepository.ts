@@ -1,19 +1,14 @@
 import { UserEntity } from "@/lib/classes/entities/UserEntity"
 import {
-  AuthProvider,
   AuthProviderCreateData,
   ProviderTypeType,
 } from "@/lib/types/base/authProviderTypes"
+import { AuthProviderEntity } from "../classes/entities/AuthProviderEntity"
 
 /**
  * 認証プロバイダデータ
  */
 export type AuthProviderData = AuthProviderCreateData
-
-/**
- * 認証プロバイダエンティティ
- */
-export type AuthProviderEntity = AuthProvider
 
 /**
  * ユーザー認証リポジトリインターフェース
