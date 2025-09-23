@@ -55,6 +55,11 @@ export class AuthProviderEntity extends EntityMutable<AuthProvider> {
     return this.value.userId
   }
 
+  set userId(userId: string) {
+    this.value.userId = userId
+    this.validate()
+  }
+
   get providerType(): ProviderTypeType {
     return this.value.providerType
   }

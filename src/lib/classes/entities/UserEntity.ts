@@ -6,7 +6,6 @@ import {
   UserBaseIdentity,
   UserBaseInfo,
   UserBaseInfoOption,
-  UserBaseManageOption,
   UserRoleType,
 } from "@/lib/types/base/userTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
@@ -17,13 +16,16 @@ import {
 } from "@/lib/types/base/schoolTypes"
 import { SchoolEntity } from "./SchoolEntity"
 import { AuthProviderEntity } from "./AuthProviderEntity"
-import { AuthProvider, ProviderTypeType } from "@/lib/types/base/authProviderTypes"
+import {
+  AuthProvider,
+  ProviderTypeType,
+} from "@/lib/types/base/authProviderTypes"
+import { DateUtility } from "../common/DateUtility"
 
 type UserEntityType = UserBaseIdentity &
   UserBaseInfo &
   UserBaseInfoOption &
-  UserBaseDate &
-  UserBaseManageOption & {
+  UserBaseDate & {
     memberSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
     ownerSchools: (SchoolBase & SchoolBaseIdentity & SchoolBaseDate)[]
     authProviders?: AuthProvider[]
@@ -51,6 +53,28 @@ export class UserEntity extends EntityMutable<UserEntityType> {
 
   public reRegister() {
     this.value.deletedAt = null
+  }
+
+  public static createNew(
+    property: Partial<
+      UserBaseInfo & UserBaseInfoOption & { firebaseUid: string }
+    >,
+  ): UserEntity {
+    return new UserEntity({
+      ...property,
+      id: "", // IDは自動生成されるため空文字
+      name: this._defaultUserName(),
+      role: "USER",
+      createdAt: DateUtility.getNowDate(),
+      updatedAt: DateUtility.getNowDate(),
+      memberSchools: [],
+      ownerSchools: [],
+      authProviders: [],
+      birthDayDate: null,
+      deletedAt: null,
+      email: null,
+      phoneNumber: null,
+    })
   }
 
   /**
@@ -111,6 +135,10 @@ export class UserEntity extends EntityMutable<UserEntityType> {
     return []
   }
 
+  private static _defaultUserName() {
+    return `user-${Math.floor(Math.random() * 10000)}`
+  }
+
   get userId(): string {
     return this.value.id
   }
@@ -151,10 +179,6 @@ export class UserEntity extends EntityMutable<UserEntityType> {
 
   public get isAdmin(): boolean {
     return this.userRole === "ADMIN"
-  }
-
-  get isGuest(): boolean {
-    return this.value.isGuest
   }
 
   public get isDeleted(): boolean {
