@@ -52,18 +52,14 @@ async function transferUsers(db: Prisma.TransactionClient) {
     data: [
       {
         id: "kaitopia-user+001",
-        firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
         name: "Kaitopia User 001",
         email: "kaitopia-user+001@kaitopia.com",
-        isGuest: false,
         role: "USER",
       },
       {
         id: "kaitopia-admin+001",
-        firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
         name: "Kaitopia Admin 001",
         email: "kaitopia-admin+001@kaitopia.com",
-        isGuest: false,
         role: "ADMIN",
       },
     ],
