@@ -70,7 +70,7 @@ export class UserQuestionService {
 
       if (mode === "answer" || mode === "restart") {
         // ゲストユーザの上限チェック
-        if (user.isGuest) {
+        if (user.isGuestByAuthProvider) {
           const userLogRepository = new UserLogRepository(
             user.userId,
             this._dbConnection,

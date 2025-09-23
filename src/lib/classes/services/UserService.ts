@@ -12,6 +12,7 @@ import { ApiV1Error } from "../common/ApiV1Error"
 import { ProviderTypeType } from "@/lib/types/base/authProviderTypes"
 import { PrismaUserAuthRepository } from "../repositories/PrismaUserAuthRepository"
 import { AuthProviderEntity } from "../entities/AuthProviderEntity"
+import { IAuthProvider } from "@/lib/interfaces/IAuthProvider"
 
 export class UserService {
   constructor(
@@ -32,12 +33,20 @@ export class UserService {
     return await this._userRepository.findByFirebaseUid(firebaseUid)
   }
 
-  public async registerUserInfo(userEntity: UserEntity) {
-    return this._dbConnection.$transaction(async (t) => {
+  public async registerUserInfo(
+    userEntity: UserEntity,
+    authProvider: IAuthProvider,
+  ): Promise<UserEntity> {
+    return await this._dbConnection.$transaction(async (t) => {
       const userRepository = new PrismaUserRepository(t)
+      const authProviderRepository = new PrismaUserAuthRepository(t)
 
       const user = await userRepository.create(userEntity)
-      return user
+      await authProviderRepository.createAuthProvider(user, authProvider)
+      const newUser = await userRepository.findByFirebaseUid(
+        authProvider.externalId,
+      )
+      return newUser!
     })
   }
 
@@ -149,65 +158,65 @@ export class UserService {
    * ユーザーの認証プロバイダを追加
    * 例: ゲスト → メール、メール → Google
    */
-  public async addUserAuthProvider(
-    userId: string,
-    fromProviderType: ProviderTypeType,
-    toProviderType: ProviderTypeType,
-    newExternalId: string,
-    metadata?: unknown,
-  ): Promise<{ deactivated: AuthProviderEntity; created: AuthProviderEntity }> {
-    return await this._dbConnection.$transaction(async (t) => {
-      const userAuthRepository = new PrismaUserAuthRepository(t)
+  // public async addUserAuthProvider(
+  //   userId: string,
+  //   fromProviderType: ProviderTypeType,
+  //   toProviderType: ProviderTypeType,
+  //   newExternalId: string,
+  //   metadata?: unknown,
+  // ): Promise<{ deactivated: AuthProviderEntity; created: AuthProviderEntity }> {
+  //   return await this._dbConnection.$transaction(async (t) => {
+  //     const userAuthRepository = new PrismaUserAuthRepository(t)
 
-      // アップグレード可能な組み合わせをチェック
-      this.validateUpgradePath(fromProviderType, toProviderType)
+  //     // アップグレード可能な組み合わせをチェック
+  //     this.validateUpgradePath(fromProviderType, toProviderType)
 
-      const existingProviders =
-        await userAuthRepository.findActiveAuthProviders(userId)
-      const fromProvider = existingProviders.find(
-        (provider) =>
-          provider.providerType === fromProviderType && provider.isActive,
-      )
+  //     const existingProviders =
+  //       await userAuthRepository.findActiveAuthProviders(userId)
+  //     const fromProvider = existingProviders.find(
+  //       (provider) =>
+  //         provider.providerType === fromProviderType && provider.isActive,
+  //     )
 
-      if (!fromProvider) {
-        throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-      }
+  //     if (!fromProvider) {
+  //       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+  //     }
 
-      // 新しいexternalIdが既に他のユーザーで使用されていないかチェック
-      const existingUser = await userAuthRepository.findUserByAuth(
-        toProviderType,
-        newExternalId,
-      )
-      if (existingUser && existingUser.userId !== userId) {
-        throw new ApiV1Error([
-          { key: "AuthProviderAlreadyExistsError", params: null },
-        ])
-      }
+  //     // 新しいexternalIdが既に他のユーザーで使用されていないかチェック
+  //     const existingUser = await userAuthRepository.findUserByAuth(
+  //       toProviderType,
+  //       newExternalId,
+  //     )
+  //     if (existingUser && existingUser.userId !== userId) {
+  //       throw new ApiV1Error([
+  //         { key: "AuthProviderAlreadyExistsError", params: null },
+  //       ])
+  //     }
 
-      // ゲストユーザーからのアップグレードの場合、ゲストユーザを無効化する
-      if (fromProviderType === "FIREBASE_GUEST") {
-        // ゲストユーザを無効化
-        await userAuthRepository.deactivateAuthProvider(
-          userId,
-          fromProviderType,
-        )
-      }
+  //     // ゲストユーザーからのアップグレードの場合、ゲストユーザを無効化する
+  //     if (fromProviderType === "FIREBASE_GUEST") {
+  //       // ゲストユーザを無効化
+  //       await userAuthRepository.deactivateAuthProvider(
+  //         userId,
+  //         fromProviderType,
+  //       )
+  //     }
 
-      // 新しいプロバイダを作成
-      const createdProvider = await userAuthRepository.createAuthProvider({
-        userId,
-        providerType: toProviderType,
-        externalId: newExternalId,
-        metadata,
-        isActive: true,
-      })
+  //     // 新しいプロバイダを作成
+  //     const createdProvider = await userAuthRepository.createAuthProvider({
+  //       userId,
+  //       providerType: toProviderType,
+  //       externalId: newExternalId,
+  //       metadata,
+  //       isActive: true,
+  //     })
 
-      return {
-        deactivated: fromProvider,
-        created: createdProvider,
-      }
-    })
-  }
+  //     return {
+  //       deactivated: fromProvider,
+  //       created: createdProvider,
+  //     }
+  //   })
+  // }
 
   /**
    * ユーザーの認証プロバイダ一覧を取得
