@@ -2,14 +2,13 @@ import { NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService } from "@/lib/classes/services/UserService"
 import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
   return await api.execute("GetUserExerciseInfo", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length === 0)
@@ -20,9 +19,6 @@ export async function GET(request: NextRequest) {
         },
       ])
 
-    const userService = UserService.createByPrisma(prisma)
-
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 

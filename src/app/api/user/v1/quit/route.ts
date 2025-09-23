@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ退会")
 
   return await api.execute("PostUserQuit", async () => {
-    await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const body = await request.json()
     const validationResult = validatePost(body)
@@ -25,12 +25,11 @@ export async function POST(request: NextRequest) {
       new PrismaSchoolRepository(prisma),
     )
 
-    const userInfo = await userService.getUserInfo(api.getFirebaseUid())
-    if (!userInfo) {
+    if (!user) {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
     }
 
-    const { deletedAt, quitCode } = await userService.quitUser(userInfo, {
+    const { deletedAt, quitCode } = await userService.quitUser(user, {
       reason: validationResult.result.reason,
     })
 

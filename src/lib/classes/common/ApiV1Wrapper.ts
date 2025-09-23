@@ -4,10 +4,10 @@ import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
 import { prisma } from "@/lib/prisma"
 import { FirebaseAuthUserRepository } from "../repositories/FirebaseAuthUserRepository"
 import { UserService } from "../services/UserService"
+import { UserEntity } from "../entities/UserEntity"
 
 export class ApiV1Wrapper {
-  private _firebaseUid = ""
-  private _isGuest = false
+  private _user: UserEntity | null = null
 
   constructor(private apiName: string) {}
 
@@ -54,10 +54,13 @@ export class ApiV1Wrapper {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
     const firebaseBaseRepo = new FirebaseAuthUserRepository()
-    const result = await firebaseBaseRepo.verifyIdToken(token)
-    this._firebaseUid = result.uid
-    this._isGuest = result.isGuest
-    return result
+    const firebaseResult = await firebaseBaseRepo.verifyIdTokenV2(token)
+
+    // 認証プロバイダ経由でユーザーを取得
+    const userService = UserService.createByPrisma(prisma)
+    this._user = await userService.getUserInfo(firebaseResult.externalId)
+
+    return { user: this._user, authProvider: firebaseResult }
   }
 
   /**
@@ -66,11 +69,7 @@ export class ApiV1Wrapper {
    * @returns
    */
   public async checkAccessManagePage(request: NextRequest) {
-    const { uid } = await this.authorize(request)
-
-    // 管理者ページAPIはユーザが存在していることが前提であるため
-    const userService = UserService.createByPrisma(prisma)
-    const user = await userService.getUserInfo(uid)
+    const { user } = await this.authorize(request)
 
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
@@ -82,16 +81,19 @@ export class ApiV1Wrapper {
   }
 
   /**
-   * @deprecated ここに持たせるべきではない
+   * 認証されたユーザーを取得
    */
-  public async isGuest() {
-    return this._isGuest
+  public getAuthenticatedUser(): UserEntity | null {
+    return this._user
   }
 
   /**
-   * @deprecated ここに持たせるべきではない
+   * 認証されたユーザーを取得（必須）
    */
-  public getFirebaseUid() {
-    return this._firebaseUid
+  public getRequiredAuthenticatedUser(): UserEntity {
+    if (!this._user) {
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    }
+    return this._user
   }
 }

@@ -1,18 +1,15 @@
 import { NextRequest } from "next/server"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService } from "@/lib/classes/services/UserService"
 import { UserResultService } from "@/lib/classes/services/UserResultService"
 import { PrismaUserLogRepository } from "@/lib/classes/repositories/PrismaUserLogRepository"
-import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
-import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集結果の取得")
 
   return await api.execute("GetUserExerciseResults", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const ignoreInProgress =
       request.nextUrl.searchParams.get("ignoreInProgress") || "false"
@@ -30,13 +27,6 @@ export async function GET(request: NextRequest) {
       10,
     )
 
-    const userService = new UserService(
-      prisma,
-      new PrismaUserRepository(prisma),
-      new PrismaSchoolRepository(prisma),
-    )
-
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 

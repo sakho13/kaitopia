@@ -2,20 +2,17 @@ import { NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserService } from "@/lib/classes/services/UserService"
 import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
 import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
 import { QuestionGroupService } from "@/lib/classes/services/QuestionGroupService"
 import { PrismaQuestionGroupRepository } from "@/lib/classes/repositories/PrismaQuestionGroupRepository"
-import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
-import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { ApiV1InTypeMap, ApiV1ValidationResult } from "@/lib/types/apiV1Types"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
   return await api.execute("GetUserExerciseQuestion", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length === 0)
@@ -42,13 +39,6 @@ export async function GET(request: NextRequest) {
         },
       ])
 
-    const userService = new UserService(
-      prisma,
-      new PrismaUserRepository(prisma),
-      new PrismaSchoolRepository(prisma),
-    )
-
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
@@ -111,18 +101,11 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集として採点")
 
   return await api.execute("PostUserExerciseQuestion", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const { error, result: body } = validatePost(await request.json())
     if (error) throw error
 
-    const userService = new UserService(
-      prisma,
-      new PrismaUserRepository(prisma),
-      new PrismaSchoolRepository(prisma),
-    )
-
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
@@ -160,18 +143,11 @@ export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の回答")
 
   return await api.execute("PatchUserExerciseQuestion", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const { error, result } = validatePatch(await request.json())
     if (error) throw error
 
-    const userService = new UserService(
-      prisma,
-      new PrismaUserRepository(prisma),
-      new PrismaSchoolRepository(prisma),
-    )
-
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
