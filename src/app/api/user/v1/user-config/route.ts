@@ -7,10 +7,9 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ設定の取得")
 
   return await api.execute("GetUserConfig", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
     const userService = UserService.createByPrisma()
 
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
         role: user.userRole,
       },
       canAccessManagePage: user.canAccessManagePage,
-      isGuest: await api.isGuest(),
+      isGuest: user.isGuestByAuthProvider,
       schools: schools.map((s) => ({
         id: s.schoolId,
         name: s.schoolName,

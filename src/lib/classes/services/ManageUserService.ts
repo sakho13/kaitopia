@@ -38,7 +38,7 @@ export class ManageUserService {
     const deletedUserIds = await this._dbConnection.$transaction(async (tx) => {
       // 認証プロバイダ側から削除
       const deletedFromAuthProvider = await this._externalAuthRepo.deleteUsers(
-        guestUsers.map((user) => user.value.firebaseUid),
+        guestUsers.map((user) => user.userId),
       )
       if (deletedFromAuthProvider.errors.length > 0) {
         throw new ApiV1Error(

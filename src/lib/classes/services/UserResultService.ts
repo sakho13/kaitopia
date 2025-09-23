@@ -1,6 +1,9 @@
 import { IUserLogRepository } from "@/lib/interfaces/IUserLogRepository"
 import { UserEntity } from "../entities/UserEntity"
-import { AnswerLogSheetSummary, AnswerLogSheetDetail } from "@/lib/types/base/userLogTypes"
+import {
+  AnswerLogSheetSummary,
+  AnswerLogSheetDetail,
+} from "@/lib/types/base/userLogTypes"
 import { ApiV1Error } from "../common/ApiV1Error"
 
 /**
@@ -25,7 +28,7 @@ export class UserResultService {
     totalCount: number
   }> {
     const offset = (page - 1) * limit
-    
+
     const [resultLogs, totalCount] = await Promise.all([
       this._userLogRepository.findAllByUserId(user.userId, limit, offset),
       this._userLogRepository.countAllByUserId(user.userId),
@@ -59,15 +62,15 @@ export class UserResultService {
     totalCount: number
   }> {
     const offset = (page - 1) * limit
-    
+
     const [answerLogSheets, totalCount] = await Promise.all([
       this._userLogRepository.findAllByUserId(user.userId, limit, offset),
       this._userLogRepository.countAllByUserId(user.userId),
     ])
 
     // ignoreInProgressがtrueの場合、進行中のものを除外
-    const filteredSheets = ignoreInProgress 
-      ? answerLogSheets.filter(sheet => !sheet.isInProgress)
+    const filteredSheets = ignoreInProgress
+      ? answerLogSheets.filter((sheet) => !sheet.isInProgress)
       : answerLogSheets
 
     const hasNextPage = offset + limit < totalCount

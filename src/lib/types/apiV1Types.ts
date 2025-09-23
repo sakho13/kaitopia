@@ -76,6 +76,15 @@ export const ApiV1ErrorMapObj = {
     message: "認証に失敗しました。再ログインしてください。",
     status: 401,
   },
+  AuthProviderAlreadyExistsError: {
+    message: "この認証IDはすでに他のユーザーで使用されています。",
+    status: 400,
+  },
+  InvalidAuthProviderUpgradeError: {
+    message: "{from}から{to}への認証プロバイダのアップグレードはできません。",
+    params: ["from", "to"],
+    status: 400,
+  },
   TokenExpiredError: {
     // ユーザに表示してはならない
     message: "認証有効期限が切れました。再ログインしてください。",

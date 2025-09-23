@@ -3,7 +3,12 @@
     "allow": [
       "mcp__serena__search_for_pattern",
       "mcp__serena__find_symbol",
-      "mcp__playwright__browser_click"
+      "mcp__playwright__browser_click",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__find_file",
+      "mcp__serena__list_dir",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

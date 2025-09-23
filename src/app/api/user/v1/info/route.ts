@@ -9,10 +9,8 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ取得")
 
   return await api.execute("GetUserInfo", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
-    const userService = UserService.createByPrisma(prisma)
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
@@ -43,7 +41,7 @@ export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("ユーザ情報編集")
 
   return await api.execute("PatchUserInfo", async () => {
-    const { uid } = await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const body = await request.json()
 
@@ -52,7 +50,6 @@ export async function PATCH(request: NextRequest) {
 
     const userService = UserService.createByPrisma(prisma)
 
-    const user = await userService.getUserInfo(uid)
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 

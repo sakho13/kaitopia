@@ -33,12 +33,11 @@ export async function GET(request: NextRequest) {
     return {
       users: users.map((u) => ({
         id: u.userId,
-        firebaseUid: u.value.firebaseUid,
         name: u.value.name,
         email: u.value.email,
         phoneNumber: u.value.phoneNumber,
         role: u.value.role,
-        isGuest: u.value.isGuest,
+        isGuest: u.isGuestByAuthProvider,
         birthDayDate: u.birthDayString,
         createdAt: u.value.createdAt.toISOString(),
         updatedAt: u.value.updatedAt.toISOString(),

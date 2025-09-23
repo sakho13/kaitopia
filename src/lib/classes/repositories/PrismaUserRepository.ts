@@ -9,8 +9,15 @@ export class PrismaUserRepository
 {
   async findByFirebaseUid(firebaseUid: string): Promise<UserEntity | null> {
     const [user, globalSchools] = await Promise.all([
-      this.dbConnection.user.findUnique({
-        where: { firebaseUid },
+      this.dbConnection.user.findFirst({
+        where: {
+          authProviders: {
+            some: {
+              externalId: firebaseUid,
+              isActive: true,
+            },
+          },
+        },
         include: {
           ownerSchools: {
             select: {
@@ -20,7 +27,6 @@ export class PrismaUserRepository
               OR: [
                 {
                   school: { isSelfSchool: true },
-                  owner: { firebaseUid },
                 },
               ],
             },
@@ -32,16 +38,22 @@ export class PrismaUserRepository
             where: {
               OR: [
                 {
-                  member: { firebaseUid },
                   limitAt: null,
                 },
                 {
-                  member: { firebaseUid },
                   limitAt: {
                     gte: DateUtility.getNowDate(),
                   },
                 },
               ],
+            },
+          },
+          authProviders: {
+            where: {
+              isActive: true,
+            },
+            orderBy: {
+              createdAt: "asc",
             },
           },
         },
@@ -64,18 +76,17 @@ export class PrismaUserRepository
       ...user,
       memberSchools,
       ownerSchools: user.ownerSchools.map(({ school }) => school),
+      authProviders: user.authProviders || [],
     })
   }
 
   async create(user: UserEntity): Promise<UserEntity> {
     const createdUser = await this.dbConnection.user.create({
       data: {
-        firebaseUid: user.value.firebaseUid,
         name: user.value.name,
         email: user.value.email,
         phoneNumber: user.value.phoneNumber,
         role: user.value.role,
-        isGuest: user.value.isGuest,
         ownerSchools: {
           create: {
             priority: 1,
@@ -100,11 +111,11 @@ export class PrismaUserRepository
             OR: [
               { school: { isGlobal: true } },
               {
-                member: { firebaseUid: user.value.firebaseUid },
+                member: { id: user.userId },
                 limitAt: null,
               },
               {
-                member: { firebaseUid: user.value.firebaseUid },
+                member: { id: user.userId },
                 limitAt: {
                   gte: DateUtility.getNowDate(),
                 },
@@ -121,10 +132,18 @@ export class PrismaUserRepository
               {
                 school: { isSelfSchool: true },
                 owner: {
-                  firebaseUid: user.value.firebaseUid,
+                  id: user.userId,
                 },
               },
             ],
+          },
+        },
+        authProviders: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            createdAt: "asc",
           },
         },
       },
@@ -133,6 +152,7 @@ export class PrismaUserRepository
       ...createdUser,
       memberSchools: createdUser.memberSchools.map(({ school }) => school),
       ownerSchools: createdUser.ownerSchools.map(({ school }) => school),
+      authProviders: createdUser.authProviders || [],
     })
   }
 
@@ -145,14 +165,24 @@ export class PrismaUserRepository
         phoneNumber: user.value.phoneNumber,
         role: user.value.role,
         birthDayDate: user.value.birthDayDate,
-        isGuest: user.value.isGuest,
         updatedAt: DateUtility.getNowDate(),
+      },
+      include: {
+        authProviders: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
       },
     })
     return new UserEntity({
       ...updatedUser,
       memberSchools: user.memberSchools.map((s) => s.value),
       ownerSchools: user.ownSchools.map((s) => s.value),
+      authProviders: updatedUser.authProviders || [],
     })
   }
 
@@ -160,11 +190,22 @@ export class PrismaUserRepository
     const deletedUser = await this.dbConnection.user.update({
       where: { id: user.value.id },
       data: { deletedAt: DateUtility.getNowDate() },
+      include: {
+        authProviders: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
     })
     return new UserEntity({
       ...deletedUser,
       memberSchools: [],
       ownerSchools: [],
+      authProviders: deletedUser.authProviders || [],
     })
   }
 
@@ -175,11 +216,22 @@ export class PrismaUserRepository
         deletedAt: null,
         updatedAt: DateUtility.getNowDate(),
       },
+      include: {
+        authProviders: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
     })
     return new UserEntity({
       ...reRegisteredUser,
       memberSchools: user.memberSchools.map((s) => s.value),
       ownerSchools: user.ownSchools.map((s) => s.value),
+      authProviders: reRegisteredUser.authProviders || [],
     })
   }
 }

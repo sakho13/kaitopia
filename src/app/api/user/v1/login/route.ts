@@ -5,7 +5,6 @@ import { UserEntity } from "@/lib/classes/entities/UserEntity"
 import { PrismaSchoolRepository } from "@/lib/classes/repositories/PrismaSchoolRepository"
 import { PrismaUserRepository } from "@/lib/classes/repositories/PrismaUserRepository"
 import { UserService } from "@/lib/classes/services/UserService"
-import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 
 export async function POST(request: NextRequest) {
@@ -16,15 +15,13 @@ export async function POST(request: NextRequest) {
   // ケース３：再ログイン
 
   return await api.execute("PostUserLogin", async () => {
-    const { email, phoneNumber, uid, isGuest } = await api.authorize(request)
+    const { user, authProvider } = await api.authorize(request)
 
     const userService = new UserService(
       prisma,
       new PrismaUserRepository(prisma),
       new PrismaSchoolRepository(prisma),
     )
-
-    const user = await userService.getUserInfo(uid)
 
     if (user && !user.isDeleted) {
       return {
@@ -37,7 +34,7 @@ export async function POST(request: NextRequest) {
           birthDayDate: user.birthDayString,
           role: user.userRole,
         },
-        isGuest: user.isGuest,
+        isGuest: user.isGuestByAuthProvider,
       }
     }
 
@@ -63,39 +60,27 @@ export async function POST(request: NextRequest) {
         state: "re-register",
         user: {
           id: reRegisteredUser.userId,
-          name: reRegisteredUser.value.name,
+          name: reRegisteredUser.username,
           email: reRegisteredUser.value.email,
           phoneNumber: reRegisteredUser.value.phoneNumber,
-          birthDayDate: reRegisteredUser.value.birthDayDate
-            ? reRegisteredUser.value.birthDayDate.toISOString()
-            : null,
+          birthDayDate: reRegisteredUser.birthDayString,
           role: reRegisteredUser.value.role,
         },
-        isGuest: reRegisteredUser.isGuest,
+        isGuest: reRegisteredUser.isGuestByAuthProvider,
       }
     }
 
     // ユーザ登録
 
-    // ユーザ名はランダムで生成する(今後、ログイン時に登録するようにする)
-    const userName = `user-${Math.floor(Math.random() * 10000)}`
-
     const newUser = await userService.registerUserInfo(
-      new UserEntity({
-        firebaseUid: uid,
-        id: "", // IDは自動生成されるため空文字
-        name: userName,
-        email: email ?? null,
-        phoneNumber: phoneNumber ?? null,
+      UserEntity.createNew({
+        name: "",
+        email: authProvider.authProperty.email,
+        phoneNumber: authProvider.authProperty.phoneNumber ?? null,
         role: "USER",
         birthDayDate: null, // 初期値はnull
-        createdAt: DateUtility.getNowDate(),
-        updatedAt: DateUtility.getNowDate(),
-        deletedAt: null,
-        isGuest,
-        memberSchools: [],
-        ownerSchools: [],
       }),
+      authProvider,
     )
 
     return {
@@ -108,7 +93,7 @@ export async function POST(request: NextRequest) {
         birthDayDate: newUser.birthDayString,
         role: newUser.userRole,
       },
-      isGuest: newUser.isGuest,
+      isGuest: newUser.isGuestByAuthProvider,
     }
   })
 }
