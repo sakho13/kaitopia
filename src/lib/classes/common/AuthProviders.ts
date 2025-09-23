@@ -29,7 +29,7 @@ export class FirebaseAuthProvider implements IAuthProvider {
       return "FIREBASE_EMAIL"
     }
 
-    throw new Error("Unsupported provider type")
+    throw new Error("非対応の認証プロバイダです")
   }
 
   get externalId(): string {

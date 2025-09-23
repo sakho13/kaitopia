@@ -67,6 +67,7 @@ export class PrismaUserAuthRepository
             ],
           },
         },
+        authProviders: true,
       },
     })
 
@@ -88,6 +89,7 @@ export class PrismaUserAuthRepository
       ...user,
       memberSchools,
       ownerSchools: user.ownerSchools.map(({ school }) => school),
+      authProviders: user.authProviders,
     })
   }
 

@@ -74,7 +74,6 @@ export async function POST(request: NextRequest) {
 
     const newUser = await userService.registerUserInfo(
       UserEntity.createNew({
-        firebaseUid: authProvider.externalId,
         name: "",
         email: authProvider.authProperty.email,
         phoneNumber: authProvider.authProperty.phoneNumber ?? null,
