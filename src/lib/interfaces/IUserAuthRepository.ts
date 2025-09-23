@@ -4,6 +4,7 @@ import {
   ProviderTypeType,
 } from "@/lib/types/base/authProviderTypes"
 import { AuthProviderEntity } from "../classes/entities/AuthProviderEntity"
+import { IAuthProvider } from "./IAuthProvider"
 
 /**
  * 認証プロバイダデータ
@@ -30,7 +31,10 @@ export interface IUserAuthRepository {
   /**
    * 認証プロバイダを作成
    */
-  createAuthProvider(data: AuthProviderData): Promise<AuthProviderEntity>
+  createAuthProvider(
+    user: UserEntity,
+    data: IAuthProvider,
+  ): Promise<AuthProviderEntity>
 
   /**
    * 認証プロバイダを非アクティブ化

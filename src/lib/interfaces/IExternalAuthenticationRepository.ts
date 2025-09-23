@@ -1,12 +1,7 @@
+import { IAuthProvider } from "./IAuthProvider"
+
 export interface IExternalAuthenticationRepository {
-  verifyIdToken(
-    idToken: string,
-  ): Promise<{
-    uid: string
-    isGuest: boolean
-    email: string | null
-    phoneNumber: string | null
-  }>
+  verifyIdTokenV2(idToken: string): Promise<IAuthProvider>
 
   deleteUsers(ids: string[]): Promise<{
     successCount: number

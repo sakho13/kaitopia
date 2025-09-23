@@ -83,19 +83,10 @@ export class PrismaUserRepository
   async create(user: UserEntity): Promise<UserEntity> {
     const createdUser = await this.dbConnection.user.create({
       data: {
-        firebaseUid: user.value.firebaseUid,
         name: user.value.name,
         email: user.value.email,
         phoneNumber: user.value.phoneNumber,
         role: user.value.role,
-        isGuest: user.value.isGuest,
-        authProviders: {
-          create: {
-            providerType: user.value.isGuest ? "FIREBASE_GUEST" : "FIREBASE_EMAIL",
-            externalId: user.value.firebaseUid,
-            isActive: true,
-          },
-        },
         ownerSchools: {
           create: {
             priority: 1,
@@ -120,11 +111,11 @@ export class PrismaUserRepository
             OR: [
               { school: { isGlobal: true } },
               {
-                member: { firebaseUid: user.value.firebaseUid },
+                member: { id: user.userId },
                 limitAt: null,
               },
               {
-                member: { firebaseUid: user.value.firebaseUid },
+                member: { id: user.userId },
                 limitAt: {
                   gte: DateUtility.getNowDate(),
                 },
@@ -141,7 +132,7 @@ export class PrismaUserRepository
               {
                 school: { isSelfSchool: true },
                 owner: {
-                  firebaseUid: user.value.firebaseUid,
+                  id: user.userId,
                 },
               },
             ],
@@ -174,7 +165,6 @@ export class PrismaUserRepository
         phoneNumber: user.value.phoneNumber,
         role: user.value.role,
         birthDayDate: user.value.birthDayDate,
-        isGuest: user.value.isGuest,
         updatedAt: DateUtility.getNowDate(),
       },
       include: {

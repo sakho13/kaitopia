@@ -1,12 +1,10 @@
 import { UserEntity } from "@/lib/classes/entities/UserEntity"
-import {
-  IUserAuthRepository,
-  AuthProviderData,
-} from "@/lib/interfaces/IUserAuthRepository"
+import { IUserAuthRepository } from "@/lib/interfaces/IUserAuthRepository"
 import { ProviderTypeType } from "@/lib/types/base/authProviderTypes"
 import { RepositoryBase } from "../common/RepositoryBase"
 import { AuthProviderEntity } from "../entities/AuthProviderEntity"
 import { DateUtility } from "../common/DateUtility"
+import { IAuthProvider } from "@/lib/interfaces/IAuthProvider"
 
 /**
  * Prismaを使用した認証プロバイダリポジトリの実装
@@ -126,15 +124,16 @@ export class PrismaUserAuthRepository
    * 認証プロバイダを作成
    */
   async createAuthProvider(
-    data: AuthProviderData,
+    user: UserEntity,
+    data: IAuthProvider,
   ): Promise<AuthProviderEntity> {
     const authProvider = await this.dbConnection.authProvider.create({
       data: {
-        userId: data.userId,
+        userId: user.userId,
         providerType: data.providerType,
         externalId: data.externalId,
-        metadata: data.metadata ?? undefined,
-        isActive: data.isActive ?? true,
+        metadata: undefined,
+        isActive: true,
       },
     })
 
