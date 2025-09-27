@@ -16,7 +16,7 @@ import {
 
 export function UserRecommendExerciseSection() {
   const router = useRouter()
-  const { dataTooGetRecommendExercises } = useGetRecommendExercises()
+  const { dataToGetRecommendExercises } = useGetRecommendExercises()
 
   return (
     <UserLayoutSection
@@ -33,8 +33,8 @@ export function UserRecommendExerciseSection() {
       <div className='w-full'>
         <Carousel className='w-full '>
           <CarouselContent>
-            {dataTooGetRecommendExercises?.success
-              ? dataTooGetRecommendExercises.data.recommendExercises.map(
+            {dataToGetRecommendExercises?.success
+              ? dataToGetRecommendExercises.data.recommendExercises.map(
                   (exercise) => (
                     <CarouselItem
                       key={encodeBase64ForUrl(exercise.id)}

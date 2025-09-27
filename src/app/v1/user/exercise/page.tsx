@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState } from "react"
 export default function Page() {
   const {
     dataToGetUserExercise,
-    dataTooGetRecommendExercises,
+    dataToGetRecommendExercises,
     startExercise,
     openExerciseInfoDialog,
     onOpenExerciseInfoDialog,
@@ -33,8 +33,8 @@ export default function Page() {
         <SectionTitle title='おすすめの問題集' />
 
         <section className='mb-6 flex md:flex-row flex-col gap-x-3 gap-y-3'>
-          {dataTooGetRecommendExercises && dataTooGetRecommendExercises.success
-            ? dataTooGetRecommendExercises.data.recommendExercises.map(
+          {dataToGetRecommendExercises && dataToGetRecommendExercises.success
+            ? dataToGetRecommendExercises.data.recommendExercises.map(
                 (exercise) => (
                   <InfoArea
                     key={encodeBase64ForUrl(exercise.id)}
@@ -108,7 +108,7 @@ function usePage() {
 
   const [exerciseId, setExerciseId] = useState<string | null>(null)
 
-  const { dataTooGetRecommendExercises } = useGetRecommendExercises()
+  const { dataToGetRecommendExercises } = useGetRecommendExercises()
   const { dataToGetUserExercise } = useGetUserExercise(exerciseId || "")
 
   useEffect(() => {
@@ -146,7 +146,7 @@ function usePage() {
 
   return {
     dataToGetUserExercise,
-    dataTooGetRecommendExercises,
+    dataToGetRecommendExercises,
     startExercise,
     openExerciseInfoDialog,
     onOpenExerciseInfoDialog,
