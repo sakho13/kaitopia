@@ -1,0 +1,53 @@
+model Certification {
+  id String @id @default(cuid(2))
+
+  name        String @unique @map("name")
+  description String @map("description")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  requests CertificationRequest[]
+}
+
+model CertificationRequest {
+  id String @id @default(cuid(2))
+
+  certificationId String? @map("certification_id")
+  certification   Certification? @relation(fields: [certificationId], references: [id])
+
+  requestedName        String @map("requested_name")
+  requestedDescription String @map("requested_description")
+
+  requestedByUserId String @map("requested_by_user_id")
+  requestedByUser   User   @relation(fields: [requestedByUserId], references: [id])
+
+  status CertificationRequestStatus @default(PENDING) @map("status")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  votes CertificationRequestVote[]
+}
+
+model CertificationRequestVote {
+  id String @id @default(cuid(2))
+
+  requestId String               @map("request_id")
+  request   CertificationRequest @relation(fields: [requestId], references: [id])
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([requestId, userId])
+}
+
+enum CertificationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
