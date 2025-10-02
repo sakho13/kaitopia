@@ -86,9 +86,14 @@ export const ApiV1ErrorMapObj = {
     status: 403,
   },
   NotFoundError: {
-    message:
-      "リソースが見つかりません。再読み込みしても解決しない場合は、お問い合わせください。",
+    message: "{key}が見つかりません",
+    params: ["key"],
     status: 404,
+  },
+  AlreadyExistsError: {
+    message: "{key}は既に存在します",
+    params: ["key"],
+    status: 409,
   },
   SystemError: {
     // ユーザに表示してはならない
