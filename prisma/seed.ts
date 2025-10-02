@@ -66,6 +66,14 @@ async function transferUsers(db: Prisma.TransactionClient) {
         isGuest: false,
         role: "ADMIN",
       },
+      {
+        id: "kaitopia-moderator+001",
+        firebaseUid: "ModeratorUid123456789",
+        name: "Kaitopia Moderator 001",
+        email: "kaitopia-moderator+001@kaitopia.com",
+        isGuest: false,
+        role: "MODERATOR",
+      },
     ],
   })
 }
