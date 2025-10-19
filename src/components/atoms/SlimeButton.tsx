@@ -1,4 +1,4 @@
-import React from "react"
+import { ReactNode, MouseEventHandler } from "react"
 import { joincn } from "@/lib/functions/joincn"
 
 /**
@@ -6,9 +6,9 @@ import { joincn } from "@/lib/functions/joincn"
  */
 type SlimeButtonProps = {
   /** ボタンの内容 */
-  children: React.ReactNode
+  children: ReactNode
   /** クリックイベントハンドラー */
-  onClick?: () => void
+  onClick?: MouseEventHandler<HTMLButtonElement>
   /** ボタンのタイプ */
   type?: "button" | "submit" | "reset"
   /** ボタンの無効化 */
