@@ -1,12 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
 const globalSetup = async () => {
-  try {
-    await prisma.$connect()
-  } catch (error) {
-    console.error("テスト初期化時のDB接続エラー:", error)
-    throw error
-  }
+  await prisma.$connect()
 }
 
 export default globalSetup

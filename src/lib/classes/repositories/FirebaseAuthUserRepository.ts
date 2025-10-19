@@ -2,17 +2,25 @@ import { FirebaseAuthError } from "firebase-admin/auth"
 import { firebaseAuth } from "@/lib/functions/firebaseAdmin"
 import { IExternalAuthenticationRepository } from "@/lib/interfaces/IExternalAuthenticationRepository"
 import { ApiV1Error } from "../common/ApiV1Error"
-import { FirebaseAuthProvider } from "../common/AuthProviders"
-import { IAuthProvider } from "@/lib/interfaces/IAuthProvider"
 
 export class FirebaseAuthUserRepository
   implements IExternalAuthenticationRepository
 {
-  async verifyIdTokenV2(idToken: string): Promise<IAuthProvider> {
+  async verifyIdToken(idToken: string): Promise<{
+    uid: string
+    isGuest: boolean
+    email: string | null
+    phoneNumber: string | null
+  }> {
     try {
       const result = await firebaseAuth().verifyIdToken(idToken)
 
-      return new FirebaseAuthProvider(result)
+      return {
+        uid: result.uid,
+        isGuest: result.firebase.sign_in_provider === "anonymous",
+        email: result.email ?? null,
+        phoneNumber: result.phone_number ?? null,
+      }
     } catch (error) {
       if (error instanceof FirebaseAuthError) {
         if (error.code === "auth/id-token-expired")

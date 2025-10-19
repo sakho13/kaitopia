@@ -1,6 +1,9 @@
 model User {
   id String @id @default(cuid(2))
 
+  firebaseUid String  @unique @map("firebase_uid")
+  isGuest     Boolean @default(false) @map("is_guest")
+
   role Role @default(USER) @map("role")
 
   name         String    @map("name")
@@ -14,8 +17,7 @@ model User {
 
   ownerSchools  SchoolOwner[]
   memberSchools SchoolMember[]
-  userHistories UserHistory[]
-  authProviders AuthProvider[]
+  // userAuthProviders UserAuthProvider[]
 
   certificationRequests CertificationRequest[]
   certificationVotes    CertificationRequestVote[]

@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
 import { ExerciseService } from "@/lib/classes/services/ExerciseService"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用問題集の取得")
 
   return await api.execute("GetManageExercises", async () => {
-    const { user } = await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const schoolId = request.nextUrl.searchParams.get("schoolId") ?? undefined
     if (!schoolId)
@@ -25,8 +25,9 @@ export async function GET(request: NextRequest) {
     )
 
     const exerciseService = new ExerciseService(prisma)
+    exerciseService.setUserController(userService.userController)
     const { exercises, totalCount, nextPage } =
-      await exerciseService.getExercisesForManage(user, schoolId, count, page)
+      await exerciseService.getExercisesForManage(schoolId, count, page)
 
     return {
       exercises: exercises.map((exercise) => ({

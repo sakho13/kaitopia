@@ -2,7 +2,6 @@ import Link from "next/link"
 import { RoundedFrame } from "@/components/atoms/RoundedFrame"
 import { UserProfileFrame } from "@/components/organisms/UserProfileFrame"
 import { STATICS } from "@/lib/statics"
-import { UserQuitDialog } from "@/components/molecules/UserQuitDialog"
 
 export default function Page() {
   return (
@@ -15,10 +14,6 @@ export default function Page() {
         </h1>
 
         <div className='select-none'>
-          <p>
-            <UserQuitDialog />
-          </p>
-
           <p>
             <span className='font-bold'>問い合わせ</span>:&nbsp;
             <Link

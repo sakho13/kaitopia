@@ -12,12 +12,7 @@ export class PrismaManageUserRepository
   async findGuestUsersOver5Days(): Promise<UserEntity[]> {
     const users = await this.dbConnection.user.findMany({
       where: {
-        authProviders: {
-          some: {
-            providerType: "FIREBASE_GUEST",
-            isActive: true,
-          },
-        },
+        isGuest: true,
         deletedAt: null,
         createdAt: {
           lt: DateUtility.getBeforeDaysDate(GUEST_USER_DAYS),
@@ -33,41 +28,6 @@ export class PrismaManageUserRepository
           ownerSchools: [],
         }),
     )
-  }
-
-  async findAll(limit?: number, offset?: number): Promise<UserEntity[]> {
-    const users = await this.dbConnection.user.findMany({
-      select: {
-        id: true,
-
-        name: true,
-        email: true,
-        phoneNumber: true,
-        birthDayDate: true,
-
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        authProviders: true,
-      },
-      take: limit,
-      skip: offset,
-      orderBy: [{ createdAt: "desc" }],
-    })
-    return users.map(
-      (user) =>
-        new UserEntity({
-          ...user,
-          ownerSchools: [],
-          memberSchools: [],
-          authProviders: user.authProviders,
-        }),
-    )
-  }
-
-  public async countAllUsers() {
-    return await this.dbConnection.user.count()
   }
 
   async deleteUsers(userIds: string[]): Promise<void> {

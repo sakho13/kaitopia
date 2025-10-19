@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格リクエスト投票API")
 
   return await api.execute("PostManageCertificationRequestsVote", async () => {
-    const { user } = await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const body = await request.json()
 
@@ -27,18 +27,18 @@ export async function POST(request: NextRequest) {
     }
 
     const manageCertificationService = new ManageCertificationService(
+      userService.userController,
       prisma,
-      user,
     )
 
     // userControllerからuserIdを取得
-    if (!user.userId) {
+    if (!userService.userController.userId) {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
     }
 
     const vote = await manageCertificationService.voteForCertificationRequest(
       body.requestId,
-      user.userId,
+      userService.userController.userId,
     )
 
     return {

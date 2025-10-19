@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
 import {
@@ -17,8 +17,6 @@ import { FirebaseError } from "firebase/app"
 import { joincn } from "@/lib/functions/joincn"
 import { useAnalytics } from "@/hooks/useAnalytics"
 import { Skeleton } from "@/components/ui/skeleton"
-import { usePhaseState } from "@/hooks/common/usePhaseState"
-import { hasErrorCodeInApiResponse } from "@/lib/functions/hasErrorCodeInApiResponse"
 
 export const dynamic = "force-dynamic"
 
@@ -28,13 +26,11 @@ export default function LoginPage() {
     emailError,
     password,
     passwordError,
-    currentPhase,
+    loading,
     onChangeEmail,
     onChangePassword,
     login,
   } = useLoginPage()
-
-  const isLoading = useMemo(() => currentPhase === "loading", [currentPhase])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,7 +61,7 @@ export default function LoginPage() {
             )}
             value={email}
             onChange={(e) => onChangeEmail(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
           {emailError && (
             <p className='text-red-500 text-sm mt-1'>{emailError}</p>
@@ -89,30 +85,30 @@ export default function LoginPage() {
             )}
             value={password}
             onChange={(e) => onChangePassword(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
           {passwordError && (
             <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
           )}
         </div>
 
-        {isLoading ? (
+        {loading ? (
           <Skeleton className='w-full h-10 rounded-xl' />
         ) : (
           <ButtonBase
             type='submit'
             sizeMode='full'
             className='font-semibold'
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? "ログイン中..." : "ログイン"}
+            {loading ? "ログイン中..." : "ログイン"}
           </ButtonBase>
         )}
       </form>
 
       <div className='mt-6 text-center text-sm text-gray-500'>または</div>
 
-      {isLoading ? (
+      {loading ? (
         <Skeleton className='w-full h-10 rounded-xl' />
       ) : (
         <ButtonBase
@@ -120,9 +116,9 @@ export default function LoginPage() {
           sizeMode='full'
           className='mt-4'
           onClick={() => login("GUEST")}
-          disabled={isLoading}
+          disabled={loading}
         >
-          {isLoading ? "ログイン中..." : "ゲストでログイン"}
+          {loading ? "ログイン中..." : "ゲストでログイン"}
         </ButtonBase>
       )}
 
@@ -145,42 +141,13 @@ export default function LoginPage() {
           サインアップ
         </a>
       </p>
-
-      {/* ToDo 退会コード入力処理はあとで実装 */}
-      {/* <Dialog open={currentPhase === "input-quit-code"}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>退会コードを入力してください</DialogTitle>
-          </DialogHeader>
-
-          <div>
-            <input
-              type='text'
-              placeholder='退会コード'
-              className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary mb-4'
-              value={quitCode || ""}
-              onChange={(e) => onChangeQuitCode(e.target.value)}
-            />
-          </div>
-
-          <DialogFooter>
-            <ButtonBase
-              sizeMode='full'
-              className='font-semibold'
-              onClick={() => login("EMAIL")}
-            >
-              再登録
-            </ButtonBase>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
     </div>
   )
 }
 
 function useLoginPage() {
   const router = useRouter()
-  const { signOut: handleSignOut } = useAuth()
+  const { idToken, signOut: handleSignOut } = useAuth()
   const { sendAnalyticsEvent } = useAnalytics()
   const { showInfo, showSuccessShort, showError } = useToast()
 
@@ -189,19 +156,14 @@ function useLoginPage() {
   const [password, setPassword] = useState("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
-  const [quitCode, setQuitCode] = useState<string | null>(null)
-
-  const { currentPhase, onChangePhase } = usePhaseState(
-    ["input", "loading", "input-quit-code"] as const,
-    "input",
-  )
+  const [loading, setLoading] = useState(false)
 
   const { requestPostLogin } = usePostUserLogin()
 
   const login = async (mode: LoginMode) => {
-    if (currentPhase === "loading") return
+    if (loading) return
 
-    onChangePhase("loading")
+    setLoading(true)
 
     try {
       if (mode === "GUEST") {
@@ -245,17 +207,8 @@ function useLoginPage() {
         const credential = await handleLoginByFirebase(email, password)
         const result = await requestPostLogin(
           await credential.user.getIdToken(),
-          quitCode ? quitCode : undefined,
         )
-
         if (!result.success) {
-          if (hasErrorCodeInApiResponse(result, "DeletedUserError")) {
-            onChangePhase("input-quit-code")
-            showInfo(result.errors[0].message)
-            setQuitCode("")
-            return
-          }
-
           sendAnalyticsEvent("emailLoginError", {
             error_message: JSON.stringify(result.errors),
           })
@@ -305,24 +258,22 @@ function useLoginPage() {
         "認証システムに問題が発生しました。公式アナウンスを確認してください。",
       )
     } finally {
-      onChangePhase("input")
+      setLoading(false)
     }
   }
 
   const onChangeEmail = (value: string) => setEmail(value)
   const onChangePassword = (value: string) => setPassword(value)
-  const onChangeQuitCode = (value: string) => setQuitCode(value)
 
   return {
-    currentPhase,
+    idToken,
+    loading,
     email,
     emailError,
     password,
     passwordError,
-    quitCode,
     login,
     onChangeEmail,
     onChangePassword,
-    onChangeQuitCode,
   }
 }

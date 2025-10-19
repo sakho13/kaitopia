@@ -1,29 +1,34 @@
-import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "../common/ApiV1Error"
+import { ServiceBase } from "../common/ServiceBase"
+import { UserController } from "../controller/UserController"
 import { CertificationRepository } from "../repositories/CertificationRepository"
-import { UserEntity } from "../entities/UserEntity"
 
 /**
  * 管理用資格操作サービスクラス
  */
-export class ManageCertificationService {
+export class ManageCertificationService extends ServiceBase {
+  private userController: UserController
+
   constructor(
-    private readonly _dbConnection: typeof prisma,
-    private readonly _user: UserEntity,
-  ) {}
+    userController: UserController,
+    ...args: ConstructorParameters<typeof ServiceBase>
+  ) {
+    super(...args)
+    this.userController = userController
+  }
 
   /**
    * 資格一覧を取得
    * 管理画面アクセス可能なユーザーのみ実行可能
    */
   public async getCertifications(limit: number = 10, page: number = 1) {
-    if (!this._user.canAccessManagePage)
+    if (!this.userController.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const offset = page ? (page - 1) * limit : undefined
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     const certifications =
@@ -40,11 +45,11 @@ export class ManageCertificationService {
    * ADMINユーザーのみ実行可能
    */
   public async createCertification(name: string, description: string) {
-    if (!this._user.isAdmin)
+    if (!this.userController.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     // 同じ名前の資格が存在しないかチェック
@@ -66,11 +71,11 @@ export class ManageCertificationService {
     id: string,
     data: { name?: string; description?: string },
   ) {
-    if (!this._user.isAdmin)
+    if (!this.userController.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     // 資格が存在するかチェック
@@ -99,11 +104,11 @@ export class ManageCertificationService {
    * ADMINユーザーのみ実行可能
    */
   public async deleteCertification(id: string) {
-    if (!this._user.isAdmin)
+    if (!this.userController.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     // 資格が存在するかチェック
@@ -125,13 +130,13 @@ export class ManageCertificationService {
     page: number = 1,
     status?: string,
   ) {
-    if (!this._user.canAccessManagePage)
+    if (!this.userController.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const offset = page ? (page - 1) * limit : undefined
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     const requests =
@@ -156,11 +161,11 @@ export class ManageCertificationService {
     name: string,
     description: string,
   ) {
-    if (!this._user.canAccessManagePage)
+    if (!this.userController.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     // 同じ名前の資格が既に存在しないかチェック
@@ -183,11 +188,11 @@ export class ManageCertificationService {
    * 管理画面アクセス可能なユーザーのみ実行可能
    */
   public async voteForCertificationRequest(requestId: string, userId: string) {
-    if (!this._user.canAccessManagePage)
+    if (!this.userController.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this._dbConnection,
+      this.dbConnection,
     )
 
     // リクエストが存在するかチェック

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ApiV1Error } from "./ApiV1Error"
 import { ApiV1OutBase, ApiV1OutTypeMap } from "@/lib/types/apiV1Types"
+import { UserService } from "../services/UserService"
 import { prisma } from "@/lib/prisma"
 import { FirebaseAuthUserRepository } from "../repositories/FirebaseAuthUserRepository"
-import { UserService } from "../services/UserService"
-import { UserEntity } from "../entities/UserEntity"
 
 export class ApiV1Wrapper {
-  private _user: UserEntity | null = null
+  private _firebaseUid = ""
+  private _isGuest = false
 
   constructor(private apiName: string) {}
 
@@ -54,13 +54,10 @@ export class ApiV1Wrapper {
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
     const firebaseBaseRepo = new FirebaseAuthUserRepository()
-    const firebaseResult = await firebaseBaseRepo.verifyIdTokenV2(token)
-
-    // 認証プロバイダ経由でユーザーを取得
-    const userService = UserService.createByPrisma(prisma)
-    this._user = await userService.getUserInfo(firebaseResult.externalId)
-
-    return { user: this._user, authProvider: firebaseResult }
+    const result = await firebaseBaseRepo.verifyIdToken(token)
+    this._firebaseUid = result.uid
+    this._isGuest = result.isGuest
+    return result
   }
 
   /**
@@ -69,31 +66,25 @@ export class ApiV1Wrapper {
    * @returns
    */
   public async checkAccessManagePage(request: NextRequest) {
-    const { user } = await this.authorize(request)
+    await this.authorize(request)
+
+    const userService = new UserService(prisma)
+    const user = await userService.getUserInfo(this.getFirebaseUid())
 
     if (!user)
       throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    if (!user.canAccessManagePage)
+    if (!userService.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
-    return { user }
+    return { userService }
   }
 
-  /**
-   * 認証されたユーザーを取得
-   */
-  public getAuthenticatedUser(): UserEntity | null {
-    return this._user
+  public async isGuest() {
+    return this._isGuest
   }
 
-  /**
-   * 認証されたユーザーを取得（必須）
-   */
-  public getRequiredAuthenticatedUser(): UserEntity {
-    if (!this._user) {
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
-    }
-    return this._user
+  public getFirebaseUid() {
+    return this._firebaseUid
   }
 }

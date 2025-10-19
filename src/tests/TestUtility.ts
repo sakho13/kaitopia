@@ -1,11 +1,9 @@
 import { POST } from "@/app/api/user/v1/login/route"
-import { DateUtility } from "@/lib/classes/common/DateUtility"
 import {
   handleGuestLoginByFirebase,
   handleLoginByFirebase,
   handleRegisterByFirebase,
 } from "@/lib/functions/firebaseActions"
-import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
 import { NextRequest, NextResponse } from "next/server"
 
 export class TestUtility {
@@ -49,11 +47,5 @@ export class TestUtility {
     return await TestUtility.runApi(POST, "POST", "/api/user/v1/user/login", {
       Authorization: `Bearer ${token}`,
     })
-  }
-
-  public static getRandomEmail() {
-    const now = DateUtility.generateDateStringNow()
-    const randomNum = generateRandomLenNumber(8)
-    return `test-kaitopia+${now}${randomNum}@kaitopia.net`
   }
 }

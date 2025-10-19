@@ -1,15 +1,15 @@
 import { NextRequest } from "next/server"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserResultService } from "@/lib/classes/services/UserResultService"
-import { PrismaUserLogRepository } from "@/lib/classes/repositories/PrismaUserLogRepository"
+import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
+import { UserService } from "@/lib/classes/services/UserService"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題回答シート取得")
 
   return await api.execute("GetUserResultLogSheet", async () => {
-    const { user } = await api.authorize(request)
+    await api.authorize(request)
 
     const answerLogSheetId =
       request.nextUrl.searchParams.get("answerLogSheetId")
@@ -17,21 +17,15 @@ export async function GET(request: NextRequest) {
     if (!answerLogSheetId)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-    if (!user)
-      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
+    const userService = new UserService(prisma)
+    await userService.getUserInfo(api.getFirebaseUid())
 
-    if (user.isDeleted) {
-      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
-    }
-
-    const userResultService = new UserResultService(
-      new PrismaUserLogRepository(prisma),
+    const userQuestionService = new UserQuestionService(
+      userService.userController,
+      prisma,
     )
 
-    const sheet = await userResultService.getAnswerLogSheetDetail(
-      user,
-      answerLogSheetId,
-    )
+    const sheet = await userQuestionService.getAnswerLogSheet(answerLogSheetId)
 
     return {
       answerLogSheetId,

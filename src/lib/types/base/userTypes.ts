@@ -23,8 +23,14 @@ export type UserBaseInfoOption = {
   birthDayDate: Date | null
 }
 
+export type UserBaseManageOption = {
+  isGuest: boolean
+}
+
 export type UserBaseIdentity = {
   id: string
+
+  firebaseUid: string
 }
 
 export type UserBaseDate = {
@@ -47,19 +53,6 @@ export type UserRelationSchools = {
   memberSchools: School[]
 }
 
-export const UserAccessSchoolMethodMap = {
-  /** 読み取り */
-  READ: "read",
-  /** 作成 */
-  CREATE: "create",
-  /** 編集 */
-  EDIT: "edit",
-  /** 公開設定変更 */
-  PUBLISH: "publish",
-  /** 削除 */
-  DELETE: "delete",
-} as const
-
 /**
  * read: 読み取り
  * create: 作成
@@ -68,17 +61,8 @@ export const UserAccessSchoolMethodMap = {
  * delete: 削除
  */
 export type UserAccessSchoolMethod =
-  (typeof UserAccessSchoolMethodMap)[keyof typeof UserAccessSchoolMethodMap]
-
-/**
- * ユーザ履歴のアクション
- */
-export const UserHistoryActionMap = {
-  /** ユーザがアプリを退会した */
-  QUIT: "QUIT",
-  /** ユーザがアプリを再度利用開始した */
-  RE_JOIN: "RE_JOIN",
-} as const
-
-export type UserHistoryActionType =
-  (typeof UserHistoryActionMap)[keyof typeof UserHistoryActionMap]
+  | "read"
+  | "create"
+  | "edit"
+  | "publish"
+  | "delete"

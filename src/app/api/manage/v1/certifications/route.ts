@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格取得API")
 
   return await api.execute("GetManageCertifications", async () => {
-    const { user } = await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const page = parseInt(request.nextUrl.searchParams.get("page") || "1") ?? 1
     const count = parseInt(
@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
     )
 
     const manageCertificationService = new ManageCertificationService(
+      userService.userController,
       prisma,
-      user,
     )
 
     const { certifications, totalCount, nextPage } =
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格作成API")
 
   return await api.execute("PostManageCertifications", async () => {
-    const { user } = await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const body = await request.json()
 
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格更新API")
 
   return await api.execute("PatchManageCertifications", async () => {
-    const { user } = await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const body = await request.json()
 
@@ -172,7 +172,7 @@ export async function DELETE(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格削除API")
 
   return await api.execute("DeleteManageCertifications", async () => {
-    const { user } = await api.checkAccessManagePage(request)
+    const { userService } = await api.checkAccessManagePage(request)
 
     const id = request.nextUrl.searchParams.get("id")
 
