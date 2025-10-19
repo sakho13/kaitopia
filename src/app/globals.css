@@ -182,6 +182,40 @@
   }
 }
 
+/* SlimeButton animations */
+@keyframes drop-drift-1 {
+  0% {
+    transform: translate(-4px, 0);
+  }
+  50% {
+    transform: translate(2px, 2px);
+  }
+  100% {
+    transform: translate(-4px, 0);
+  }
+}
+
+@keyframes drop-drift-2 {
+  0% {
+    transform: translate(4px, -1px);
+  }
+  50% {
+    transform: translate(-2px, 1px);
+  }
+  100% {
+    transform: translate(4px, -1px);
+  }
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
