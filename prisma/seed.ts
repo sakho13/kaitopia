@@ -52,18 +52,14 @@ async function transferUsers(db: Prisma.TransactionClient) {
     data: [
       {
         id: "kaitopia-user+001",
-        firebaseUid: "3na1wqgfg7Jj71amJifrwGrCtkCg",
         name: "Kaitopia User 001",
         email: "kaitopia-user+001@kaitopia.com",
-        isGuest: false,
         role: "USER",
       },
       {
         id: "kaitopia-admin+001",
-        firebaseUid: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
         name: "Kaitopia Admin 001",
         email: "kaitopia-admin+001@kaitopia.com",
-        isGuest: false,
         role: "ADMIN",
       },
       {
@@ -73,6 +69,26 @@ async function transferUsers(db: Prisma.TransactionClient) {
         email: "kaitopia-moderator+001@kaitopia.com",
         isGuest: false,
         role: "MODERATOR",
+      },
+    ],
+  })
+
+  await db.authProvider.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        id: "auth_kaitopia-user+001_email",
+        userId: "kaitopia-user+001",
+        externalId: "3na1wqgfg7Jj71amJifrwGrCtkCg",
+        providerType: "FIREBASE_EMAIL",
+        isActive: true,
+      },
+      {
+        id: "auth_kaitopia-admin+001_email",
+        userId: "kaitopia-admin+001",
+        externalId: "SgOxbbAadPt2Ii0hwjsuVPLrnPH3",
+        providerType: "FIREBASE_EMAIL",
+        isActive: true,
       },
     ],
   })

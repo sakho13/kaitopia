@@ -18,6 +18,22 @@ export class SchoolEntity extends EntityMutable<SchoolEntityType> {
     return this.value.id
   }
 
+  get schoolName(): string {
+    return this.value.name
+  }
+
+  get schoolDescription(): string {
+    return this.value.description
+  }
+
+  get createdAtString(): string {
+    return this.value.createdAt.toISOString()
+  }
+
+  get updatedAtString(): string {
+    return this.value.updatedAt.toISOString()
+  }
+
   get isSelfSchool(): boolean {
     return this.value.isSelfSchool
   }

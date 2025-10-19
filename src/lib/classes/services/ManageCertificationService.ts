@@ -1,34 +1,29 @@
+import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "../common/ApiV1Error"
-import { ServiceBase } from "../common/ServiceBase"
-import { UserController } from "../controller/UserController"
 import { CertificationRepository } from "../repositories/CertificationRepository"
+import { UserEntity } from "../entities/UserEntity"
 
 /**
  * 管理用資格操作サービスクラス
  */
-export class ManageCertificationService extends ServiceBase {
-  private userController: UserController
-
+export class ManageCertificationService {
   constructor(
-    userController: UserController,
-    ...args: ConstructorParameters<typeof ServiceBase>
-  ) {
-    super(...args)
-    this.userController = userController
-  }
+    private readonly _dbConnection: typeof prisma,
+    private readonly _user: UserEntity,
+  ) {}
 
   /**
    * 資格一覧を取得
    * 管理画面アクセス可能なユーザーのみ実行可能
    */
   public async getCertifications(limit: number = 10, page: number = 1) {
-    if (!this.userController.canAccessManagePage)
+    if (!this._user.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const offset = page ? (page - 1) * limit : undefined
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     const certifications =
@@ -45,11 +40,11 @@ export class ManageCertificationService extends ServiceBase {
    * ADMINユーザーのみ実行可能
    */
   public async createCertification(name: string, description: string) {
-    if (!this.userController.isAdmin)
+    if (!this._user.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     // 同じ名前の資格が存在しないかチェック
@@ -71,11 +66,11 @@ export class ManageCertificationService extends ServiceBase {
     id: string,
     data: { name?: string; description?: string },
   ) {
-    if (!this.userController.isAdmin)
+    if (!this._user.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     // 資格が存在するかチェック
@@ -104,11 +99,11 @@ export class ManageCertificationService extends ServiceBase {
    * ADMINユーザーのみ実行可能
    */
   public async deleteCertification(id: string) {
-    if (!this.userController.isAdmin)
+    if (!this._user.isAdmin)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     // 資格が存在するかチェック
@@ -130,13 +125,13 @@ export class ManageCertificationService extends ServiceBase {
     page: number = 1,
     status?: string,
   ) {
-    if (!this.userController.canAccessManagePage)
+    if (!this._user.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const offset = page ? (page - 1) * limit : undefined
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     const requests =
@@ -161,11 +156,11 @@ export class ManageCertificationService extends ServiceBase {
     name: string,
     description: string,
   ) {
-    if (!this.userController.canAccessManagePage)
+    if (!this._user.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     // 同じ名前の資格が既に存在しないかチェック
@@ -188,11 +183,11 @@ export class ManageCertificationService extends ServiceBase {
    * 管理画面アクセス可能なユーザーのみ実行可能
    */
   public async voteForCertificationRequest(requestId: string, userId: string) {
-    if (!this.userController.canAccessManagePage)
+    if (!this._user.canAccessManagePage)
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     const certificationRepository = new CertificationRepository(
-      this.dbConnection,
+      this._dbConnection,
     )
 
     // リクエストが存在するかチェック

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm run test:*)", "Bash(npm run lint:*)"],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Read(.env:*)",
+      "Read(id_rsa)",
+      "Read(id_ed25519)",
+      "Read(**/*token*)",
+      "Read(**/*key*)",
+      "Write(.env:*)",
+      "Write(**/secrets/**)",
+      "Bash(wget:*)"
+    ]
+  }
+}

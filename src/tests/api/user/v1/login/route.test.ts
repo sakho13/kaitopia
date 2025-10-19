@@ -4,10 +4,10 @@
 
 import { POST } from "@/app/api/user/v1/login/route"
 import { GET as UserConfigGET } from "@/app/api/user/v1/user-config/route"
+import { GET as UserInfoGET } from "@/app/api/user/v1/info/route"
 import { DateUtility } from "@/lib/classes/common/DateUtility"
 import { generateRandomLenNumber } from "@/lib/functions/generateRandomLenNumber"
 import { TestUtility } from "@/tests/TestUtility"
-import { NextRequest } from "next/server"
 
 describe("API /api/user/v1/login/", () => {
   beforeEach(() => {
@@ -19,14 +19,14 @@ describe("API /api/user/v1/login/", () => {
       "kaitopia-user+001@kaitopia.com",
       "password",
     )
-    const request = new NextRequest("http://localhost:3000/api/user/v1/login", {
-      method: "POST",
-      body: JSON.stringify({}),
-      headers: {
+    const result = await TestUtility.runApi(
+      POST,
+      "POST",
+      "/api/user/v1/login",
+      {
         Authorization: `Bearer ${token}`,
       },
-    })
-    const result = await POST(request)
+    )
 
     expect(result.ok).toBe(true)
     expect(result.status).toBe(200)
@@ -38,6 +38,35 @@ describe("API /api/user/v1/login/", () => {
         isGuest: false,
       }),
     })
+
+    const resultUserInfo = await TestUtility.runApi(
+      UserInfoGET,
+      "GET",
+      "/api/user/v1/info",
+      {
+        Authorization: `Bearer ${token}`,
+      },
+    )
+
+    expect(resultUserInfo.ok).toBe(true)
+    expect(resultUserInfo.status).toBe(200)
+    const jsonUserInfo = await resultUserInfo.json()
+
+    expect(jsonUserInfo.success).toBe(true)
+    expect(jsonUserInfo.data).toBeDefined()
+    expect(jsonUserInfo.data.schools).toHaveLength(2)
+    expect(jsonUserInfo.data.schools).toEqual(
+      expect.arrayContaining([
+        {
+          schoolId: expect.any(String),
+          schoolName: expect.any(String),
+        },
+        {
+          schoolId: "kaitopia_1",
+          schoolName: "Kaitopia",
+        },
+      ])
+    )
   })
 
   test("新規ユーザでサインアップ", async () => {
@@ -100,13 +129,15 @@ describe("API /api/user/v1/login/", () => {
 
   test("ゲストユーザでログイン", async () => {
     const token = await TestUtility.getGuestToken()
-    const request = new NextRequest("http://localhost:3000/api/user/v1/login", {
-      method: "POST",
-      headers: {
+
+    const result = await TestUtility.runApi(
+      POST,
+      "POST",
+      "/api/user/v1/login",
+      {
         Authorization: `Bearer ${token}`,
       },
-    })
-    const result = await POST(request)
+    )
 
     expect(result.ok).toBe(true)
     expect(result.status).toBe(200)

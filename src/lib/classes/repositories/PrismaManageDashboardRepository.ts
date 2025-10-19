@@ -75,7 +75,12 @@ export class PrismaManageDashboardRepository
     return await this.dbConnection.user.count({
       where: {
         deletedAt: null,
-        isGuest: true,
+        authProviders: {
+          some: {
+            providerType: "FIREBASE_GUEST",
+            isActive: true,
+          },
+        },
       },
     })
   }
@@ -86,7 +91,12 @@ export class PrismaManageDashboardRepository
         AND: [
           {
             deletedAt: null,
-            isGuest: true,
+            authProviders: {
+              some: {
+                providerType: "FIREBASE_GUEST",
+                isActive: true,
+              },
+            },
           },
           {
             OR: [

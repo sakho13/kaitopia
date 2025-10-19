@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格リクエスト取得API")
 
   return await api.execute("GetManageCertificationRequests", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    const { user } = await api.checkAccessManagePage(request)
 
     const page = parseInt(request.nextUrl.searchParams.get("page") || "1") ?? 1
     const count = parseInt(
@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
     const status = request.nextUrl.searchParams.get("status") || undefined
 
     const manageCertificationService = new ManageCertificationService(
-      userService.userController,
       prisma,
+      user,
     )
 
     const { requests, totalCount, nextPage } =
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
   const api = new ApiV1Wrapper("管理用資格リクエスト作成API")
 
   return await api.execute("PostManageCertificationRequests", async () => {
-    const { userService } = await api.checkAccessManagePage(request)
+    const { user } = await api.checkAccessManagePage(request)
 
     const body = await request.json()
 
@@ -97,12 +97,12 @@ export async function POST(request: NextRequest) {
     }
 
     const manageCertificationService = new ManageCertificationService(
-      userService.userController,
       prisma,
+      user,
     )
 
     // userControllerからuserIdを取得する必要がある
-    if (!userService.userController.userId) {
+    if (!user.userId) {
       throw new ApiV1Error([
         { key: "AuthenticationError", params: null },
       ])
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     const certificationRequest =
       await manageCertificationService.createCertificationRequest(
-        userService.userController.userId,
+        user.userId,
         body.name,
         body.description,
       )

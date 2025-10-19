@@ -1,3 +1,4 @@
+import { DateUtility } from "../common/DateUtility"
 import { RepositoryBase } from "../common/RepositoryBase"
 
 export class ExerciseRepository extends RepositoryBase {
@@ -160,7 +161,7 @@ export class ExerciseRepository extends RepositoryBase {
         id: exerciseId,
       },
       data: {
-        deletedAt: new Date(),
+        deletedAt: DateUtility.getNowDate(),
       },
     })
   }
