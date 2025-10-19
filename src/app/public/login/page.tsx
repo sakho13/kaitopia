@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ButtonBase } from "@/components/atoms/ButtonBase"
+import { LogIn, UserX } from "lucide-react"
+import { SlimeButton } from "@/components/atoms/SlimeButton"
 import {
   handleGoogleLoginByFirebase,
   handleGuestLoginByFirebase,
@@ -42,91 +43,118 @@ export default function LoginPage() {
   }
 
   return (
-    <div className='w-full max-w-md bg-white shadow-xl rounded-2xl p-8'>
-      <h1 className='text-3xl font-bold text-center text-primary mb-6'>
-        ログイン
-      </h1>
+    <>
+      {/* SVG defs for gooey effects & custom keyframes */}
+      <svg width='0' height='0' className='absolute' aria-hidden>
+        <defs>
+          <filter id='goo'>
+            <feGaussianBlur in='SourceGraphic' stdDeviation='6' result='blur' />
+            <feColorMatrix
+              in='blur'
+              mode='matrix'
+              values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7'
+              result='goo'
+            />
+            <feBlend in='SourceGraphic' in2='goo' />
+          </filter>
+        </defs>
+      </svg>
+      <style>{`
+        @keyframes drop-drift-1 { 0% { transform: translate(-4px,0) } 50% { transform: translate(2px,2px) } 100% { transform: translate(-4px,0) } }
+        @keyframes drop-drift-2 { 0% { transform: translate(4px,-1px) } 50% { transform: translate(-2px,1px) } 100% { transform: translate(4px,-1px) } }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+        }
+      `}</style>
 
-      <form onSubmit={onSubmit} className='space-y-4'>
-        <div>
-          <label
-            htmlFor='email'
-            className='block text-sm font-medium text-text mb-1'
-          >
-            メールアドレス
-          </label>
-          <input
-            type='email'
-            id='email'
-            required
-            className={joincn(
-              "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
-              emailError ? "border-red-500" : "",
+      <div className='w-full max-w-md bg-white shadow-xl rounded-2xl p-8'>
+        <h1 className='text-3xl font-bold text-center text-primary mb-6'>
+          ログイン
+        </h1>
+
+        <form onSubmit={onSubmit} className='space-y-4'>
+          <div>
+            <label
+              htmlFor='email'
+              className='block text-sm font-medium text-text mb-1'
+            >
+              メールアドレス
+            </label>
+            <input
+              type='email'
+              id='email'
+              required
+              className={joincn(
+                "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
+                emailError ? "border-red-500" : "",
+              )}
+              value={email}
+              onChange={(e) => onChangeEmail(e.target.value)}
+              disabled={isLoading}
+            />
+            {emailError && (
+              <p className='text-red-500 text-sm mt-1'>{emailError}</p>
             )}
-            value={email}
-            onChange={(e) => onChangeEmail(e.target.value)}
-            disabled={isLoading}
-          />
-          {emailError && (
-            <p className='text-red-500 text-sm mt-1'>{emailError}</p>
+          </div>
+
+          <div>
+            <label
+              htmlFor='password'
+              className='block text-sm font-medium text-text mb-1'
+            >
+              パスワード
+            </label>
+            <input
+              type='password'
+              id='password'
+              required
+              className={joincn(
+                "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
+                passwordError ? "border-red-500" : "",
+              )}
+              value={password}
+              onChange={(e) => onChangePassword(e.target.value)}
+              disabled={isLoading}
+            />
+            {passwordError && (
+              <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
+            )}
+          </div>
+
+          {isLoading ? (
+            <Skeleton className='w-full h-10 rounded-xl' />
+          ) : (
+            <SlimeButton
+              type='submit'
+              colorMode='primary'
+              sizeMode='full'
+              disabled={isLoading}
+            >
+              <LogIn className='size-4' aria-hidden />
+              {isLoading ? "ログイン中..." : "ログイン"}
+            </SlimeButton>
+          )}
+        </form>
+
+        <div className='mt-6 text-center text-sm text-gray-500'>または</div>
+
+        <div className='mt-4'>
+          {isLoading ? (
+            <Skeleton className='w-full h-10 rounded-xl' />
+          ) : (
+            <SlimeButton
+              colorMode='ghost'
+              sizeMode='full'
+              onClick={() => login("GUEST")}
+              disabled={isLoading}
+            >
+              <UserX className='size-4' aria-hidden />
+              {isLoading ? "ログイン中..." : "ゲストでログイン"}
+            </SlimeButton>
           )}
         </div>
 
-        <div>
-          <label
-            htmlFor='password'
-            className='block text-sm font-medium text-text mb-1'
-          >
-            パスワード
-          </label>
-          <input
-            type='password'
-            id='password'
-            required
-            className={joincn(
-              "w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary",
-              passwordError ? "border-red-500" : "",
-            )}
-            value={password}
-            onChange={(e) => onChangePassword(e.target.value)}
-            disabled={isLoading}
-          />
-          {passwordError && (
-            <p className='text-red-500 text-sm mt-1'>{passwordError}</p>
-          )}
-        </div>
-
-        {isLoading ? (
-          <Skeleton className='w-full h-10 rounded-xl' />
-        ) : (
-          <ButtonBase
-            type='submit'
-            sizeMode='full'
-            className='font-semibold'
-            disabled={isLoading}
-          >
-            {isLoading ? "ログイン中..." : "ログイン"}
-          </ButtonBase>
-        )}
-      </form>
-
-      <div className='mt-6 text-center text-sm text-gray-500'>または</div>
-
-      {isLoading ? (
-        <Skeleton className='w-full h-10 rounded-xl' />
-      ) : (
-        <ButtonBase
-          colorMode='ghost'
-          sizeMode='full'
-          className='mt-4'
-          onClick={() => login("GUEST")}
-          disabled={isLoading}
-        >
-          {isLoading ? "ログイン中..." : "ゲストでログイン"}
-        </ButtonBase>
-      )}
-
-      {/* <ButtonBase
+        {/* <ButtonBase
         colorMode='outline'
         sizeMode='full'
         className='mt-4'
@@ -136,45 +164,46 @@ export default function LoginPage() {
         Googleでログイン
       </ButtonBase> */}
 
-      <p className='mt-6 text-center text-sm text-gray-500'>
-        アカウントをお持ちでない方は{" "}
-        <a
-          href='/public/signup'
-          className='text-primary font-medium hover:underline'
-        >
-          サインアップ
-        </a>
-      </p>
+        <p className='mt-6 text-center text-sm text-gray-500'>
+          アカウントをお持ちでない方は{" "}
+          <a
+            href='/public/signup'
+            className='text-primary font-medium hover:underline'
+          >
+            サインアップ
+          </a>
+        </p>
 
-      {/* ToDo 退会コード入力処理はあとで実装 */}
-      {/* <Dialog open={currentPhase === "input-quit-code"}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>退会コードを入力してください</DialogTitle>
-          </DialogHeader>
+        {/* ToDo 退会コード入力処理はあとで実装 */}
+        {/* <Dialog open={currentPhase === "input-quit-code"}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>退会コードを入力してください</DialogTitle>
+            </DialogHeader>
 
-          <div>
-            <input
-              type='text'
-              placeholder='退会コード'
-              className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary mb-4'
-              value={quitCode || ""}
-              onChange={(e) => onChangeQuitCode(e.target.value)}
-            />
-          </div>
+            <div>
+              <input
+                type='text'
+                placeholder='退会コード'
+                className='w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary mb-4'
+                value={quitCode || ""}
+                onChange={(e) => onChangeQuitCode(e.target.value)}
+              />
+            </div>
 
-          <DialogFooter>
-            <ButtonBase
-              sizeMode='full'
-              className='font-semibold'
-              onClick={() => login("EMAIL")}
-            >
-              再登録
-            </ButtonBase>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
-    </div>
+            <DialogFooter>
+              <ButtonBase
+                sizeMode='full'
+                className='font-semibold'
+                onClick={() => login("EMAIL")}
+              >
+                再登録
+              </ButtonBase>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog> */}
+      </div>
+    </>
   )
 }
 
