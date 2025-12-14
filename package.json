@@ -14,7 +14,7 @@
     "dev:ini": "npx prisma migrate deploy & npx prisma db seed & next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "prisma:generate": "npx prisma generate",
     "prisma:dev": "npx prisma migrate dev",
     "prisma:deploy": "npx prisma migrate deploy",
@@ -64,7 +64,6 @@
     "zustand": "5.0.6"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "3",
     "@microsoft/tsdoc": "0.15.1",
     "@playwright/test": "1.53.1",
     "@testing-library/dom": "10.4.0",
