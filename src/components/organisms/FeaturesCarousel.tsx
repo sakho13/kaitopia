@@ -11,6 +11,7 @@ import {
 } from "../ui/carousel"
 import { useRef } from "react"
 import { useRouter } from "next/navigation"
+import { PopCard } from "../atoms/PopCard"
 
 type FeatureItem = {
   title: string
@@ -73,58 +74,47 @@ export function FeaturesCarousel() {
             key={`feature-${index}`}
             className='md:basis-1/3 h-[170px] relative'
           >
-            {feature.status === "coming-soon" && (
-              <div
-                className={joincn(
-                  "absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold py-1 px-2 rounded-full",
-                  "transition cursor-default select-none",
-                )}
-              >
-                Coming Soon
-              </div>
-            )}
-
-            {feature.status === "in-development" && (
-              <div
-                className={joincn(
-                  "w-full h-full",
-                  "absolute flex justify-center items-center",
-                  "text-gray-800 text-4xl font-bold",
-                  "transition cursor-default select-none",
-                )}
-              >
-                <span>In Development</span>
-              </div>
-            )}
-
-            <div
-              className={joincn(
-                feature.status === "in-development"
-                  ? "bg-background-subtle opacity-50"
-                  : "bg-background-subtle",
-                "p-6 rounded-2xl shadow hover:shadow-lg",
-                "transition cursor-default select-none",
-                "h-full",
-                feature.descriptionLink ? "hover:cursor-pointer" : "",
-              )}
+            <PopCard
+              disableAnimate={!feature.descriptionLink}
               onClick={() =>
                 feature.descriptionLink
                   ? router.push(feature.descriptionLink)
                   : undefined
               }
             >
-              <h3 className='text-xl font-semibold mb-2'>{feature.title}</h3>
-              <p>{feature.description}</p>
-            </div>
+              {feature.status === "coming-soon" && (
+                <div
+                  className={joincn(
+                    "absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold py-1 px-2 rounded-full",
+                    "transition cursor-default select-none",
+                  )}
+                >
+                  Coming Soon
+                </div>
+              )}
 
-            {feature.descriptionLink && (
-              <a
-                href={feature.descriptionLink}
-                className='absolute bottom-2 right-2 text-blue-500 hover:underline text-sm'
+              {feature.status === "in-development" && (
+                <div
+                  className={joincn(
+                    "w-full h-full",
+                    "absolute flex justify-center items-center",
+                    "text-gray-800 text-4xl font-bold",
+                    "transition cursor-default select-none",
+                  )}
+                >
+                  <span>In Development</span>
+                </div>
+              )}
+
+              <div
+                className={joincn(
+                  feature.status === "in-development" ? "opacity-50" : "",
+                )}
               >
-                詳細を見る
-              </a>
-            )}
+                <h3 className='text-xl font-semibold mb-2'>{feature.title}</h3>
+                <p>{feature.description}</p>
+              </div>
+            </PopCard>
           </CarouselItem>
         ))}
       </CarouselContent>

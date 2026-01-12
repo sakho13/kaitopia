@@ -1,11 +1,11 @@
 "use client"
 
-import { UserLayoutSection } from "../molecules/UserLayoutSection"
+import { useRouter } from "next/navigation"
+import { PopCard } from "@/components/atoms/PopCard"
+import { UserLayoutSection } from "@/components/molecules/UserLayoutSection"
 import { encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
-import { useRouter } from "next/navigation"
 import { useGetRecommendExercises } from "@/hooks/useApiV1"
-import { InfoArea } from "../atoms/InfoArea"
 import {
   Carousel,
   CarouselContent,
@@ -16,7 +16,7 @@ import {
 
 export function UserRecommendExerciseSection() {
   const router = useRouter()
-  const { dataTooGetRecommendExercises } = useGetRecommendExercises()
+  const { dataToGetRecommendExercises } = useGetRecommendExercises()
 
   return (
     <UserLayoutSection
@@ -33,14 +33,14 @@ export function UserRecommendExerciseSection() {
       <div className='w-full'>
         <Carousel className='w-full '>
           <CarouselContent>
-            {dataTooGetRecommendExercises?.success
-              ? dataTooGetRecommendExercises.data.recommendExercises.map(
+            {dataToGetRecommendExercises?.success
+              ? dataToGetRecommendExercises.data.recommendExercises.map(
                   (exercise) => (
                     <CarouselItem
                       key={encodeBase64ForUrl(exercise.id)}
                       className='md:basis-1/3'
                     >
-                      <InfoArea
+                      <PopCard
                         className={joincn(
                           `bg-background-subtle p-4 rounded-2xl shadow h-[160px]`,
                           `hover:shadow-lg transition`,
@@ -58,7 +58,7 @@ export function UserRecommendExerciseSection() {
                           {exercise.title}
                         </h3>
                         <p className='text-sm'>{exercise.description}</p>
-                      </InfoArea>
+                      </PopCard>
                     </CarouselItem>
                   ),
                 )

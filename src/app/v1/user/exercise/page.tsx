@@ -1,7 +1,9 @@
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { ButtonBase } from "@/components/atoms/ButtonBase"
-import { InfoArea } from "@/components/atoms/InfoArea"
+import { PopCard } from "@/components/atoms/PopCard"
 import { SectionTitle } from "@/components/atoms/SectionTitle"
 import { BackButton } from "@/components/molecules/BackButton"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
@@ -10,13 +12,11 @@ import { decodeBase64ForUrl } from "@/lib/functions/decodeBase64"
 import { encodeBase64ForUrl } from "@/lib/functions/encodeBase64"
 import { joincn } from "@/lib/functions/joincn"
 import { DialogTitle } from "@radix-ui/react-dialog"
-import { useSearchParams, useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
 
 export default function Page() {
   const {
     dataToGetUserExercise,
-    dataTooGetRecommendExercises,
+    dataToGetRecommendExercises,
     startExercise,
     openExerciseInfoDialog,
     onOpenExerciseInfoDialog,
@@ -33,24 +33,19 @@ export default function Page() {
         <SectionTitle title='おすすめの問題集' />
 
         <section className='mb-6 flex md:flex-row flex-col gap-x-3 gap-y-3'>
-          {dataTooGetRecommendExercises && dataTooGetRecommendExercises.success
-            ? dataTooGetRecommendExercises.data.recommendExercises.map(
+          {dataToGetRecommendExercises && dataToGetRecommendExercises.success
+            ? dataToGetRecommendExercises.data.recommendExercises.map(
                 (exercise) => (
-                  <InfoArea
+                  <PopCard
                     key={encodeBase64ForUrl(exercise.id)}
-                    className={joincn(
-                      `bg-background-subtle rounded-2xl shadow h-[160px]`,
-                      `hover:shadow-lg transition`,
-                      `cursor-pointer`,
-                      "md:basis-1/3  sm:w-full",
-                    )}
+                    className={joincn(`h-[160px]`)}
                     onClick={() => {
                       onOpenExerciseInfoDialog(exercise.id)
                     }}
                   >
                     <h3 className='text-lg font-bold mb-2'>{exercise.title}</h3>
                     <p className='text-sm'>{exercise.description}</p>
-                  </InfoArea>
+                  </PopCard>
                 ),
               )
             : null}
@@ -108,7 +103,7 @@ function usePage() {
 
   const [exerciseId, setExerciseId] = useState<string | null>(null)
 
-  const { dataTooGetRecommendExercises } = useGetRecommendExercises()
+  const { dataToGetRecommendExercises } = useGetRecommendExercises()
   const { dataToGetUserExercise } = useGetUserExercise(exerciseId || "")
 
   useEffect(() => {
@@ -146,7 +141,7 @@ function usePage() {
 
   return {
     dataToGetUserExercise,
-    dataTooGetRecommendExercises,
+    dataToGetRecommendExercises,
     startExercise,
     openExerciseInfoDialog,
     onOpenExerciseInfoDialog,

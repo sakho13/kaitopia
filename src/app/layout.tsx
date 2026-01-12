@@ -44,6 +44,26 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-mono`}
       >
+        {/* SVG defs for gooey effects (SlimeButton) */}
+        <svg width='0' height='0' className='absolute' aria-hidden>
+          <defs>
+            <filter id='goo'>
+              <feGaussianBlur
+                in='SourceGraphic'
+                stdDeviation='6'
+                result='blur'
+              />
+              <feColorMatrix
+                in='blur'
+                mode='matrix'
+                values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7'
+                result='goo'
+              />
+              <feBlend in='SourceGraphic' in2='goo' />
+            </filter>
+          </defs>
+        </svg>
+
         <Suspense fallback={null}>
           <FirebaseAnalytics />
         </Suspense>

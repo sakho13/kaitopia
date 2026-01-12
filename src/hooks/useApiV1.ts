@@ -65,7 +65,7 @@ export function useGetRecommendExercises() {
   )
 
   return {
-    dataTooGetRecommendExercises: data,
+    dataToGetRecommendExercises: data,
     isLoadingToGetRecommendExercises: isLoading,
   } as const
 }
