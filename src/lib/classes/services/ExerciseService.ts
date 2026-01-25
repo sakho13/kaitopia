@@ -1,19 +1,14 @@
+import { prisma } from "@/lib/prisma"
 import { ExerciseBase } from "@/lib/types/base/exerciseTypes"
-import { ServiceBase } from "../common/ServiceBase"
 import { ApiV1Error } from "../common/ApiV1Error"
 import { ExerciseRepository } from "../repositories/ExerciseRepository"
-import { UserController } from "../controller/UserController"
+import { UserEntity } from "../entities/UserEntity"
 
-export class ExerciseService extends ServiceBase {
-  private userController: UserController
-
-  constructor(...args: ConstructorParameters<typeof ServiceBase>) {
-    super(...args)
-    this.userController = new UserController(this.dbConnection)
-  }
+export class ExerciseService {
+  constructor(private readonly _dbConnection: typeof prisma = prisma) {}
 
   public async getRecommendExercises() {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
 
     const recommendExercises =
       await exerciseRepository.findExerciseInGlobalSchool(10, true)
@@ -30,15 +25,15 @@ export class ExerciseService extends ServiceBase {
    * 管理用問題集取得
    */
   public async getExercisesForManage(
+    user: UserEntity,
     schoolId: string,
     limit: number = 10,
     page?: number,
   ) {
-    const canAccess = await this.userController.accessSchoolMethod(schoolId)
-    if (!canAccess.includes("read"))
+    if (!user.checkAccessSchoolMethod(schoolId).includes("read"))
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
 
     const offset = page ? (page - 1) * limit : undefined
     const exercises = await exerciseRepository.findExerciseBySchoolId(
@@ -77,17 +72,14 @@ export class ExerciseService extends ServiceBase {
    *
    * @category manage
    */
-  public async getExerciseById(exerciseId: string) {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+  public async getExerciseById(user: UserEntity, exerciseId: string) {
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
 
     const exercise = await exerciseRepository.findExerciseById(exerciseId)
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-    const accessResult = await this.userController.accessSchoolMethod(
-      exercise.schoolId,
-    )
-    if (!accessResult.includes("read"))
+    if (!user.checkAccessSchoolMethod(exercise.schoolId).includes("read"))
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     return exercise
@@ -98,11 +90,14 @@ export class ExerciseService extends ServiceBase {
    *
    * @description スキップ無効、一括採点有効で作成する
    */
-  public async createExercise(schoolId: string, property: ExerciseBase) {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+  public async createExercise(
+    user: UserEntity,
+    schoolId: string,
+    property: ExerciseBase,
+  ) {
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
 
-    const accessResult = await this.userController.accessSchoolMethod(schoolId)
-    if (!accessResult.includes("create"))
+    if (!user.checkAccessSchoolMethod(schoolId).includes("create"))
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     return await exerciseRepository.createExercise(schoolId, {
@@ -121,18 +116,16 @@ export class ExerciseService extends ServiceBase {
    * @returns
    */
   public async updateExercise(
+    user: UserEntity,
     exerciseId: string,
     property: Partial<ExerciseBase & { isPublished: boolean }>,
   ) {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
     const exercise = await exerciseRepository.findExerciseById(exerciseId)
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-    const accessResult = await this.userController.accessSchoolMethod(
-      exercise.schoolId,
-    )
-    if (!accessResult.includes("edit"))
+    if (!user.checkAccessSchoolMethod(exercise.schoolId).includes("edit"))
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     return await exerciseRepository.updateExercise(exerciseId, property)
@@ -143,27 +136,16 @@ export class ExerciseService extends ServiceBase {
    * @param exerciseId
    * @returns
    */
-  public async deleteExercise(exerciseId: string) {
-    const exerciseRepository = new ExerciseRepository(this.dbConnection)
+  public async deleteExercise(user: UserEntity, exerciseId: string) {
+    const exerciseRepository = new ExerciseRepository(this._dbConnection)
 
     const exercise = await exerciseRepository.findExerciseById(exerciseId)
     if (!exercise)
       throw new ApiV1Error([{ key: "NotFoundError", params: null }])
 
-    const accessResult = await this.userController.accessSchoolMethod(
-      exercise.schoolId,
-    )
-    if (!accessResult.includes("delete"))
+    if (!user.checkAccessSchoolMethod(exercise.schoolId).includes("delete"))
       throw new ApiV1Error([{ key: "RoleTypeError", params: null }])
 
     return await exerciseRepository.deleteExercise(exerciseId)
   }
-
-  public setUserController(userController: UserController) {
-    this.userController = userController
-  }
-
-  // ************************
-  //       validate
-  // ************************
 }

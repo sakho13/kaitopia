@@ -1,15 +1,15 @@
 import { NextRequest } from "next/server"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { UserQuestionService } from "@/lib/classes/services/UserQuestionService"
-import { UserService } from "@/lib/classes/services/UserService"
+import { UserResultService } from "@/lib/classes/services/UserResultService"
+import { PrismaUserLogRepository } from "@/lib/classes/repositories/PrismaUserLogRepository"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集結果の取得")
 
   return await api.execute("GetUserExerciseResults", async () => {
-    await api.authorize(request)
+    const { user } = await api.authorize(request)
 
     const ignoreInProgress =
       request.nextUrl.searchParams.get("ignoreInProgress") || "false"
@@ -22,21 +22,29 @@ export async function GET(request: NextRequest) {
       ])
 
     const page = parseInt(request.nextUrl.searchParams.get("page") || "1") ?? 1
-
     const count = parseInt(
       request.nextUrl.searchParams.get("count") ?? "10",
       10,
     )
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    const userQuestionService = new UserQuestionService(
-      userService.userController,
-      prisma,
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
+    const userResultService = new UserResultService(
+      new PrismaUserLogRepository(prisma),
     )
+
     const { answerLogSheets, totalCount, nextPage } =
-      await userQuestionService.getAnswerLogSheets(count, page)
+      await userResultService.getExerciseResults(
+        user,
+        count,
+        page,
+        ignoreInProgress === "true",
+      )
 
     return {
       answerLogSheets: answerLogSheets.map((r) => ({
@@ -48,7 +56,7 @@ export async function GET(request: NextRequest) {
         totalUnansweredCount: r.totalUnansweredCount,
         createdAt: r.createdAt.toISOString(),
         updatedAt: r.updatedAt.toISOString(),
-        totalQuestionCount: r._count.questionUserLogs,
+        totalQuestionCount: r.totalQuestionCount,
       })),
       nextPage,
       totalCount,

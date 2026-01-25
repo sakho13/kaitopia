@@ -243,39 +243,35 @@ describe("API /api/user/v1/result/log-sheet", () => {
       )
       const answerLogSheetId = jsonGetExerciseQuestion.data.answerLogSheetId
 
-      await Promise.all(
-        jsonGetExerciseQuestion.data.questions.map(
-          async (q: { questionUserLogId: string; answerType: string }) => {
-            expect(q.questionUserLogId).toBeDefined()
+      for (const q of jsonGetExerciseQuestion.data.questions) {
+        expect(q.questionUserLogId).toBeDefined()
 
-            const resultPatchExerciseQuestion = await TestUtility.runApi(
-              PatchUserV1ExerciseQuestion,
-              "PATCH",
-              "/api/user/v1/exercise/question",
-              {
-                Authorization: `Bearer ${token}`,
-              },
-              {
-                answerLogSheetId,
-                questionUserLogId: q.questionUserLogId,
-                exerciseId,
-                answer:
-                  q.answerType === "SELECT"
-                    ? {
-                        type: "SELECT",
-                        answerId: "1",
-                      }
-                    : {
-                        type: "MULTI_SELECT",
-                        answerIds: ["1", "2"],
-                      },
-              },
-            )
-            expect(resultPatchExerciseQuestion.ok).toBe(true)
-            expect(resultPatchExerciseQuestion.status).toBe(200)
+        const resultPatchExerciseQuestion = await TestUtility.runApi(
+          PatchUserV1ExerciseQuestion,
+          "PATCH",
+          "/api/user/v1/exercise/question",
+          {
+            Authorization: `Bearer ${token}`,
           },
-        ),
-      )
+          {
+            answerLogSheetId,
+            questionUserLogId: q.questionUserLogId,
+            exerciseId,
+            answer:
+              q.answerType === "SELECT"
+                ? {
+                    type: "SELECT",
+                    answerId: "1",
+                  }
+                : {
+                    type: "MULTI_SELECT",
+                    answerIds: ["1", "2"],
+                  },
+          },
+        )
+        expect(resultPatchExerciseQuestion.ok).toBe(true)
+        expect(resultPatchExerciseQuestion.status).toBe(200)
+      }
       const resultPostExerciseQuestion = await TestUtility.runApi(
         PostUserV1ExerciseQuestion,
         "POST",
@@ -373,47 +369,39 @@ describe("API /api/user/v1/result/log-sheet", () => {
       expect(resultGetExerciseQuestion.status).toBe(200)
       const answerLogSheetId = jsonGetExerciseQuestion.data.answerLogSheetId
 
-      await Promise.all(
-        jsonGetExerciseQuestion.data.questions.map(
-          async (q: {
-            questionUserLogId: string
-            answerType: string
-            questionId: string
-          }) => {
-            expect(q.questionUserLogId).toBeDefined()
+      for (const q of jsonGetExerciseQuestion.data.questions) {
+        expect(q.questionUserLogId).toBeDefined()
 
-            const answer = correctIntroProgramming1.find(
-              ({ questionId }) => questionId === q.questionId,
-            )!
+        const answer = correctIntroProgramming1.find(
+          ({ questionId }) => questionId === q.questionId,
+        )!
 
-            const resultPatchExerciseQuestion = await TestUtility.runApi(
-              PatchUserV1ExerciseQuestion,
-              "PATCH",
-              "/api/user/v1/exercise/question",
-              {
-                Authorization: `Bearer ${token}`,
-              },
-              {
-                answerLogSheetId,
-                questionUserLogId: q.questionUserLogId,
-                exerciseId,
-                answer:
-                  q.answerType === "SELECT"
-                    ? {
-                        type: "SELECT",
-                        answerId: answer.answerIds[0],
-                      }
-                    : {
-                        type: "MULTI_SELECT",
-                        answerIds: answer.answerIds,
-                      },
-              },
-            )
-            expect(resultPatchExerciseQuestion.ok).toBe(true)
-            expect(resultPatchExerciseQuestion.status).toBe(200)
+        const resultPatchExerciseQuestion = await TestUtility.runApi(
+          PatchUserV1ExerciseQuestion,
+          "PATCH",
+          "/api/user/v1/exercise/question",
+          {
+            Authorization: `Bearer ${token}`,
           },
-        ),
-      )
+          {
+            answerLogSheetId,
+            questionUserLogId: q.questionUserLogId,
+            exerciseId,
+            answer:
+              q.answerType === "SELECT"
+                ? {
+                    type: "SELECT",
+                    answerId: answer.answerIds[0],
+                  }
+                : {
+                    type: "MULTI_SELECT",
+                    answerIds: answer.answerIds,
+                  },
+          },
+        )
+        expect(resultPatchExerciseQuestion.ok).toBe(true)
+        expect(resultPatchExerciseQuestion.status).toBe(200)
+      }
       const resultPostExerciseQuestion = await TestUtility.runApi(
         PostUserV1ExerciseQuestion,
         "POST",

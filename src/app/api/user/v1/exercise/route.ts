@@ -1,15 +1,14 @@
+import { NextRequest } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { ApiV1Error } from "@/lib/classes/common/ApiV1Error"
 import { ApiV1Wrapper } from "@/lib/classes/common/ApiV1Wrapper"
-import { ExerciseService } from "@/lib/classes/services/ExerciseService"
-import { UserService } from "@/lib/classes/services/UserService"
-import { prisma } from "@/lib/prisma"
-import { NextRequest } from "next/server"
+import { UserExerciseService } from "@/lib/classes/services/UserExerciseService"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const api = new ApiV1Wrapper("問題集の取得")
 
-  return api.execute("GetUserExerciseInfo", async () => {
-    await api.authorize(request)
+  return await api.execute("GetUserExerciseInfo", async () => {
+    const { user } = await api.authorize(request)
 
     const exerciseId = request.nextUrl.searchParams.get("exerciseId")
     if (!exerciseId || exerciseId.length === 0)
@@ -20,12 +19,15 @@ export function GET(request: NextRequest) {
         },
       ])
 
-    const userService = new UserService(prisma)
-    await userService.getUserInfo(api.getFirebaseUid())
-    const exerciseService = new ExerciseService(prisma)
-    exerciseService.setUserController(userService.userController)
+    if (!user)
+      throw new ApiV1Error([{ key: "AuthenticationError", params: null }])
 
-    const exercise = await exerciseService.getExerciseById(exerciseId)
+    if (user.isDeleted) {
+      throw new ApiV1Error([{ key: "DeletedUserError", params: null }])
+    }
+
+    const userExerciseService = new UserExerciseService(prisma)
+    const exercise = await userExerciseService.getExerciseInfo(user, exerciseId)
 
     return {
       exercise: {

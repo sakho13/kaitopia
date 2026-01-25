@@ -6,4 +6,6 @@ export interface IUserRepository {
   create(user: UserEntity): Promise<UserEntity>
 
   save(user: UserEntity): Promise<UserEntity>
+
+  reRegister(user: UserEntity): Promise<UserEntity>
 }

@@ -487,19 +487,41 @@ export function usePatchUserInfo() {
  * POST: `/api/user/v1/login`
  */
 export function usePostUserLogin() {
-  const requestPostLogin = async (token: string) => {
+  const requestPostLogin = async (token: string, quitCode?: string) => {
     return await requestHttp(
       "PostUserLogin",
       "PostUserLogin",
       "/api/user/v1/login",
       token,
-      null,
+      { quitCode },
       "POST",
     )
   }
 
   return {
     requestPostLogin,
+  }
+}
+
+/**
+ * POST: `/api/user/v1/quit`
+ */
+export function usePostUserQuit() {
+  const { idToken } = useAuth()
+
+  const requestPostUserQuit = async (input: ApiV1InTypeMap["PostUserQuit"]) => {
+    return await requestHttp(
+      "PostUserQuit",
+      "PostUserQuit",
+      "/api/user/v1/quit",
+      idToken ?? "",
+      input,
+      "POST",
+    )
+  }
+
+  return {
+    requestPostUserQuit,
   }
 }
 
