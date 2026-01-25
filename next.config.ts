@@ -3,9 +3,6 @@ import type { NextConfig } from "next"
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: { tsconfigPath: "./tsconfig.build.json" },
   env: {
     NEXT_PUBLIC_APP_TITLE: "Kaitopia",

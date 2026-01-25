@@ -64,7 +64,6 @@
     "zustand": "5.0.6"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "3",
     "@microsoft/tsdoc": "0.15.1",
     "@playwright/test": "1.53.1",
     "@testing-library/dom": "10.4.1",
