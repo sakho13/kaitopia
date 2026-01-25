@@ -14,7 +14,7 @@
     "dev:ini": "npx prisma migrate deploy & npx prisma db seed & next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint --max-warnings 0",
     "prisma:generate": "npx prisma generate",
     "prisma:dev": "npx prisma migrate dev",
     "prisma:deploy": "npx prisma migrate deploy",
@@ -81,5 +81,6 @@
     "tailwindcss": "4",
     "ts-node": "10.9.2",
     "typescript": "5"
-  }
+  },
+  "packageManager": "npm@11.4.2"
 }
